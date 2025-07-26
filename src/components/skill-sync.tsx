@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, type ChangeEvent } from "react";
-import { generateCoverLetter } from "@/ai/flows/cover-letter-generator";
+import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,9 @@ import {
   AlertCircle,
   UploadCloud,
   User,
-  PlusCircle
+  PlusCircle,
+  BrainCircuit,
+  ListChecks,
 } from "lucide-react";
 
 type AppState = "idle" | "loading" | "success" | "error";
@@ -37,6 +39,7 @@ export function SkillSync() {
   const [email, setEmail] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
 
+  const [aiResult, setAiResult] = useState<GenerateCoverLetterOutput | null>(null);
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
@@ -104,6 +107,7 @@ export function SkillSync() {
     }
     
     setAppState("loading");
+    setAiResult(null);
     setGeneratedCoverLetter("");
     setError(null);
 
@@ -127,6 +131,7 @@ export function SkillSync() {
         portfolioUrls: finalPortfolioUrls,
       });
 
+      setAiResult(result);
       setGeneratedCoverLetter(result.coverLetter);
       setAppState("success");
       toast({
@@ -305,7 +310,7 @@ export function SkillSync() {
             </Button>
           </div>
           
-          <div className="lg:sticky top-28">
+          <div className="lg:sticky top-28 space-y-4">
             <Card className="min-h-[60vh] flex flex-col">
               <CardHeader>
                 <CardTitle>Your Generated Cover Letter</CardTitle>
@@ -350,6 +355,39 @@ export function SkillSync() {
                 )}
               </CardContent>
             </Card>
+            
+            {appState === 'success' && aiResult && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BrainCircuit className="h-6 w-6" />
+                    AI Analysis
+                  </CardTitle>
+                  <CardDescription>Here's what the AI understood from the job posting.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold">Job Title</h3>
+                      <p className="text-muted-foreground">{aiResult.jobTitle}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Company Name</h3>
+                      <p className="text-muted-foreground">{aiResult.companyName}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <ListChecks className="h-5 w-5" />
+                        Key Focus Points
+                      </h3>
+                      <ul className="list-disc pl-5 mt-2 space-y-1 text-muted-foreground">
+                        {aiResult.keyFocusPoints.map((point, index) => (
+                          <li key={index}>{point}</li>
+                        ))}
+                      </ul>
+                    </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </form>
       </main>

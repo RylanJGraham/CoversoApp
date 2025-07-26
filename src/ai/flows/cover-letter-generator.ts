@@ -31,6 +31,9 @@ export type GenerateCoverLetterInput = z.infer<typeof GenerateCoverLetterInputSc
 
 const GenerateCoverLetterOutputSchema = z.object({
   coverLetter: z.string().describe('The generated cover letter for the specified job posting.'),
+  jobTitle: z.string().describe('The job title extracted from the job posting.'),
+  companyName: z.string().describe('The company name extracted from the job posting.'),
+  keyFocusPoints: z.array(z.string()).describe('A list of key skills and qualifications the AI focused on from the job description.'),
 });
 
 export type GenerateCoverLetterOutput = z.infer<typeof GenerateCoverLetterOutputSchema>;
@@ -43,24 +46,27 @@ const prompt = ai.definePrompt({
   name: 'generateCoverLetterPrompt',
   input: {schema: GenerateCoverLetterInputSchema},
   output: {schema: GenerateCoverLetterOutputSchema},
-  prompt: `You are an expert career assistant. Your task is to write a compelling and professionally formatted cover letter for a job application.
+  prompt: `You are an expert career assistant. Your task is to write a compelling and professionally formatted cover letter for a job application. You will also provide analysis of the job posting.
 
 You will be provided with the applicant's personal information, their CV, a link to the job posting, and optional supporting documents and portfolio URLs.
 
-1.  **Format the Header:** Start the cover letter with the applicant's contact information, formatted as follows:
+1.  **Analyze the Job Posting:** **Strictly use the provided job posting URL** to extract the Job Title, Company Name, and Company Location. Do not use any other sources.
+    - Populate the \`jobTitle\` and \`companyName\` fields in the output with your findings.
+    - Identify the top 3-5 most important skills or qualifications from the job description. Populate the \`keyFocusPoints\` array in the output with these points.
+
+2.  **Format the Header:** Start the cover letter with the applicant's contact information, formatted as follows:
     - Full Name
     - Location
     - Phone Number (if provided)
     - Email Address (if provided)
     - LinkedIn URL (if provided, display as "LinkedIn")
-
-2.  **Analyze the Job Posting:** **Strictly use the provided job posting URL** to infer the Hiring Manager's title (if not available, use "Hiring Manager"), the Company Name, and the Company Location. Do not use any other sources. Format this information below the applicant's details.
+    
+    Below the applicant's details, add the Hiring Manager's title (if not available, use "Hiring Manager"), the Company Name you extracted, and the Company Location.
 
 3.  **Salutation:** Address the letter to the "Hiring Manager".
 
 4.  **Write the Body:**
-    - Analyze the job description from the provided URL to understand the requirements, company culture, and key responsibilities.
-    - Use the applicant's CV, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences. Scrape any provided portfolio URLs for additional context.
+    - Use the applicant's CV, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences that match the \`keyFocusPoints\` you identified.
     - The cover letter body should be professional, concise, and tailored specifically to the job posting found at the URL.
 
 **Applicant Information:**
