@@ -25,7 +25,7 @@ import {
 
 type AppState = "idle" | "loading" | "success" | "error";
 
-export function CVAlchemist() {
+export function SkillSync() {
   const [files, setFiles] = useState<File[]>([]);
   const [platformUrl, setPlatformUrl] = useState("");
   const [generatedCv, setGeneratedCv] = useState("");
@@ -134,7 +134,7 @@ export function CVAlchemist() {
             <div className="flex items-center gap-3">
               <FlaskConical className="h-7 w-7 text-primary" />
               <h1 className="text-2xl font-bold font-headline text-foreground">
-                Curriculum Vitae Alchemist
+                SkillSync
               </h1>
             </div>
           <ThemeToggle />

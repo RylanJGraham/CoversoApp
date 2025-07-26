@@ -1,9 +1,9 @@
-import { CVAlchemist } from '@/components/cv-alchemist';
+import { SkillSync } from '@/components/skill-sync';
 
 export default function Home() {
   return (
     <main>
-      <CVAlchemist />
+      <SkillSync />
     </main>
   );
 }
