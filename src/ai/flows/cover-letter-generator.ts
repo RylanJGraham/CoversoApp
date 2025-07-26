@@ -20,7 +20,7 @@ const GenerateCoverLetterInputSchema = z.object({
   cvDataUri: z
     .string()
     .describe(
-      'The user uploaded CV as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'
+      "The user uploaded CV as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
   jobPostingUrl: z.string().describe('The URL of the job posting.'),
   supportingDocs: z.array(z.string()).optional().describe('List of data URIs for supporting documents.'),
@@ -54,16 +54,14 @@ You will be provided with the applicant's personal information, their CV, a link
     - Email Address (if provided)
     - LinkedIn URL (if provided, display as "LinkedIn")
 
-2.  **Analyze the Job Posting:** Infer the Hiring Manager's title (if not available, use "Hiring Manager"), the Company Name, and the Company Location from the job posting URL. Format this information below the applicant's details.
+2.  **Analyze the Job Posting:** **Strictly use the provided job posting URL** to infer the Hiring Manager's title (if not available, use "Hiring Manager"), the Company Name, and the Company Location. Do not use any other sources. Format this information below the applicant's details.
 
 3.  **Salutation:** Address the letter to the "Hiring Manager".
 
 4.  **Write the Body:**
     - Analyze the job description from the provided URL to understand the requirements, company culture, and key responsibilities.
     - Use the applicant's CV, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences. Scrape any provided portfolio URLs for additional context.
-    - The cover letter body should be professional, concise, and tailored specifically to the job posting.
-
-5.  **Closing:** End with a professional closing (e.g., "Sincerely,").
+    - The cover letter body should be professional, concise, and tailored specifically to the job posting found at the URL.
 
 **Applicant Information:**
 - Full Name: {{{fullName}}}
