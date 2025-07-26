@@ -20,7 +20,9 @@ import {
   Wand2,
   Download,
   AlertCircle,
-  UploadCloud
+  UploadCloud,
+  User,
+  PlusCircle
 } from "lucide-react";
 
 type AppState = "idle" | "loading" | "success" | "error";
@@ -28,6 +30,13 @@ type AppState = "idle" | "loading" | "success" | "error";
 export function SkillSync() {
   const [files, setFiles] = useState<File[]>([]);
   const [jobPostingUrl, setJobPostingUrl] = useState("");
+  const [portfolioUrls, setPortfolioUrls] = useState<string[]>([""]);
+  const [fullName, setFullName] = useState("");
+  const [userLocation, setUserLocation] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
@@ -38,7 +47,6 @@ export function SkillSync() {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      // Simple validation: check if a CV is already uploaded
       const hasCv = files.some(f => f.name.toLowerCase().includes('cv') || f.name.toLowerCase().includes('resume'));
       if (hasCv && newFiles.some(f => f.name.toLowerCase().includes('cv') || f.name.toLowerCase().includes('resume'))) {
         toast({
@@ -55,6 +63,21 @@ export function SkillSync() {
   const handleRemoveFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
+  
+  const handlePortfolioUrlChange = (index: number, value: string) => {
+    const newUrls = [...portfolioUrls];
+    newUrls[index] = value;
+    setPortfolioUrls(newUrls);
+  };
+
+  const addPortfolioUrlInput = () => {
+    setPortfolioUrls([...portfolioUrls, ""]);
+  };
+  
+  const removePortfolioUrlInput = (index: number) => {
+    setPortfolioUrls(portfolioUrls.filter((_, i) => i !== index));
+  };
+
 
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -71,6 +94,10 @@ export function SkillSync() {
       toast({ title: "No CV Uploaded", description: "Please upload your CV to get started.", variant: "destructive" });
       return;
     }
+     if (!fullName || !userLocation) {
+      toast({ title: "Missing Personal Info", description: "Please provide your full name and location.", variant: "destructive" });
+      return;
+    }
     if (!jobPostingUrl) {
       toast({ title: "No Job Posting URL", description: "Please provide a link to the job posting.", variant: "destructive" });
       return;
@@ -81,17 +108,23 @@ export function SkillSync() {
     setError(null);
 
     try {
-      // Assuming the first file is the CV
-      const cvFile = files[0];
-      const supportingFiles = files.slice(1);
+      const cvFile = files.find(f => f.name.toLowerCase().includes('cv') || f.name.toLowerCase().includes('resume')) || files[0];
+      const supportingFiles = files.filter(f => f !== cvFile);
 
       const cvDataUri = await fileToDataUri(cvFile);
       const supportingDocs = await Promise.all(supportingFiles.map(fileToDataUri));
+      const finalPortfolioUrls = portfolioUrls.filter(url => url.trim() !== "");
 
       const result = await generateCoverLetter({
+        fullName,
+        userLocation,
+        phone,
+        email,
+        linkedinUrl,
         cvDataUri,
         jobPostingUrl,
         supportingDocs,
+        portfolioUrls: finalPortfolioUrls,
       });
 
       setGeneratedCoverLetter(result.coverLetter);
@@ -147,19 +180,51 @@ export function SkillSync() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
+                  <User className="h-6 w-6" />
+                  Personal Info Vault
+                </CardTitle>
+                <CardDescription>Enter your personal details to be included in the cover letter.</CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name*</Label>
+                  <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
+                </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="location">Location*</Label>
+                  <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
+                  <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
                   <FileUp className="h-6 w-6" />
                   Portfolio Vault
                 </CardTitle>
-                <CardDescription>Upload your current CV and any supporting documents (e.g., portfolio, certificates).</CardDescription>
+                <CardDescription>Upload your CV, supporting documents, and add links to online portfolios.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div
+                 <div
                   className="relative flex flex-col items-center justify-center w-full p-6 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <UploadCloud className="w-10 h-10 mb-2 text-muted-foreground" />
                   <p className="font-semibold text-primary">Click to upload files</p>
-                  <p className="text-xs text-muted-foreground">PDF, DOCX, TXT. First file should be your CV.</p>
+                  <p className="text-xs text-muted-foreground">PDF, DOCX, TXT. Ensure one file is your CV.</p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -178,7 +243,7 @@ export function SkillSync() {
                           <div className="flex items-center gap-2 truncate">
                             <FileText className="w-4 h-4 shrink-0" />
                             <span className="truncate">{file.name}</span>
-                            {index === 0 && <Badge variant="outline">CV</Badge>}
+                             {(file.name.toLowerCase().includes('cv') || file.name.toLowerCase().includes('resume')) && <Badge variant="outline">CV</Badge>}
                           </div>
                           <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
                             <Trash2 className="w-4 h-4" />
@@ -188,6 +253,26 @@ export function SkillSync() {
                     </ul>
                   </div>
                 )}
+                <div className="space-y-2">
+                  <Label>Portfolio / Document URLs</Label>
+                  {portfolioUrls.map((url, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Input 
+                        type="url" 
+                        placeholder="https://docs.google.com/document/d/..." 
+                        value={url} 
+                        onChange={(e) => handlePortfolioUrlChange(index, e.target.value)} 
+                      />
+                       <Button variant="ghost" size="icon" className="w-8 h-8 shrink-0" onClick={() => removePortfolioUrlInput(index)} aria-label="Remove URL">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button type="button" variant="outline" size="sm" onClick={addPortfolioUrlInput}>
+                    <PlusCircle className="w-4 h-4 mr-2" />
+                    Add URL
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
