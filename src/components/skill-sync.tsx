@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, type ChangeEvent } from "react";
-import { tailorCvToPlatform } from "@/ai/flows/cv-tailor";
+import { generateCoverLetter } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -27,8 +27,8 @@ type AppState = "idle" | "loading" | "success" | "error";
 
 export function SkillSync() {
   const [files, setFiles] = useState<File[]>([]);
-  const [platformUrl, setPlatformUrl] = useState("");
-  const [generatedCv, setGeneratedCv] = useState("");
+  const [jobPostingUrl, setJobPostingUrl] = useState("");
+  const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
 
@@ -71,13 +71,13 @@ export function SkillSync() {
       toast({ title: "No CV Uploaded", description: "Please upload your CV to get started.", variant: "destructive" });
       return;
     }
-    if (!platformUrl) {
-      toast({ title: "No Platform URL", description: "Please provide a link to the job platform.", variant: "destructive" });
+    if (!jobPostingUrl) {
+      toast({ title: "No Job Posting URL", description: "Please provide a link to the job posting.", variant: "destructive" });
       return;
     }
     
     setAppState("loading");
-    setGeneratedCv("");
+    setGeneratedCoverLetter("");
     setError(null);
 
     try {
@@ -88,17 +88,17 @@ export function SkillSync() {
       const cvDataUri = await fileToDataUri(cvFile);
       const supportingDocs = await Promise.all(supportingFiles.map(fileToDataUri));
 
-      const result = await tailorCvToPlatform({
+      const result = await generateCoverLetter({
         cvDataUri,
-        platformUrl,
+        jobPostingUrl,
         supportingDocs,
       });
 
-      setGeneratedCv(result.tailoredCv);
+      setGeneratedCoverLetter(result.coverLetter);
       setAppState("success");
       toast({
-        title: "CV Tailored Successfully!",
-        description: "Your new CV is ready for editing and download.",
+        title: "Cover Letter Generated!",
+        description: "Your new cover letter is ready for editing and download.",
       });
     } catch (err) {
       console.error(err);
@@ -114,12 +114,12 @@ export function SkillSync() {
   };
   
   const handleDownload = () => {
-    if (!generatedCv) return;
-    const blob = new Blob([generatedCv], { type: 'text/markdown;charset=utf-8' });
+    if (!generatedCoverLetter) return;
+    const blob = new Blob([generatedCoverLetter], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'tailored-cv.md';
+    link.download = 'cover-letter.md';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -195,16 +195,16 @@ export function SkillSync() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <LinkIcon className="h-6 w-6" />
-                  Target Platform
+                  Job Posting Link
                 </CardTitle>
-                <CardDescription>Provide a link to the job platform (e.g., LinkedIn, company career page).</CardDescription>
+                <CardDescription>Provide a link to the job posting (e.g., LinkedIn, company career page).</CardDescription>
               </CardHeader>
               <CardContent>
                 <Input
                   type="url"
-                  placeholder="https://www.linkedin.com/jobs/"
-                  value={platformUrl}
-                  onChange={(e) => setPlatformUrl(e.target.value)}
+                  placeholder="https://www.linkedin.com/jobs/view/..."
+                  value={jobPostingUrl}
+                  onChange={(e) => setJobPostingUrl(e.target.value)}
                   required
                 />
               </CardContent>
@@ -216,14 +216,14 @@ export function SkillSync() {
               ) : (
                 <Wand2 className="w-5 h-5 mr-2" />
               )}
-              {appState === 'loading' ? "Conjuring Your CV..." : "Tailor My CV"}
+              {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
             </Button>
           </div>
           
           <div className="lg:sticky top-28">
             <Card className="min-h-[60vh] flex flex-col">
               <CardHeader>
-                <CardTitle>Your Tailored CV</CardTitle>
+                <CardTitle>Your Generated Cover Letter</CardTitle>
                 <CardDescription>The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow flex flex-col">
@@ -231,14 +231,14 @@ export function SkillSync() {
                   <div className="flex-grow flex flex-col items-center justify-center text-center">
                     <Loader2 className="w-12 h-12 mb-4 animate-spin text-primary" />
                     <p className="font-semibold">The Alchemist is at work...</p>
-                    <p className="text-sm text-muted-foreground">Analyzing your documents and the platform.</p>
+                    <p className="text-sm text-muted-foreground">Analyzing your documents and the job posting.</p>
                   </div>
                 )}
                  {appState === 'idle' && (
                   <div className="flex-grow flex flex-col items-center justify-center text-center p-4 border-2 border-dashed rounded-lg">
                     <Wand2 className="w-12 h-12 mb-4 text-muted-foreground" />
                     <p className="font-semibold">Ready for Magic</p>
-                    <p className="text-sm text-muted-foreground">Fill in the details on the left to generate your CV.</p>
+                    <p className="text-sm text-muted-foreground">Fill in the details on the left to generate your cover letter.</p>
                   </div>
                 )}
                 {appState === 'error' && (
@@ -251,13 +251,13 @@ export function SkillSync() {
                 {appState === 'success' && (
                   <div className="flex-grow flex flex-col">
                     <Textarea
-                      value={generatedCv}
-                      onChange={(e) => setGeneratedCv(e.target.value)}
-                      placeholder="Your tailored CV will appear here..."
+                      value={generatedCoverLetter}
+                      onChange={(e) => setGeneratedCoverLetter(e.target.value)}
+                      placeholder="Your generated cover letter will appear here..."
                       className="flex-grow w-full text-sm resize-none"
                       rows={20}
                     />
-                     <Button onClick={handleDownload} className="mt-4" disabled={!generatedCv}>
+                     <Button onClick={handleDownload} className="mt-4" disabled={!generatedCoverLetter}>
                        <Download className="w-4 h-4 mr-2" />
                        Download as Markdown
                     </Button>
