@@ -1,3 +1,9 @@
+import { CVAlchemist } from '@/components/cv-alchemist';
+
 export default function Home() {
-  return <></>;
+  return (
+    <main>
+      <CVAlchemist />
+    </main>
+  );
 }
