@@ -94,6 +94,17 @@ export function Coverso() {
     setPortfolioUrls(portfolioUrls.filter((_, i) => i !== index));
   };
 
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setJobDescription(text);
+      toast({ title: "Pasted from clipboard!" });
+    } catch (err) {
+      console.error('Failed to read clipboard contents: ', err);
+      toast({ title: "Failed to paste", description: "Could not read from clipboard. Please paste manually.", variant: "destructive" });
+    }
+  };
+
 
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -183,20 +194,35 @@ export function Coverso() {
     step: number;
     title: string;
     description: string;
+    tooltipContent: React.ReactNode;
     children: React.ReactNode;
     className?: string;
-  }> = ({ step, title, description, children, className }) => (
+  }> = ({ step, title, description, tooltipContent, children, className }) => (
      <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
         <div className={cn("w-full rounded-2xl p-4 h-full flex flex-col", className)}>
             <CardHeader className="p-4">
-                <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
-                    {step}
-                </div>
-                <div>
-                    <CardTitle className="text-black">{title}</CardTitle>
-                    <CardDescription className="text-gray-700">{description}</CardDescription>
-                </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground shrink-0">
+                        {step}
+                    </div>
+                    <div>
+                        <CardTitle className="text-black">{title}</CardTitle>
+                        <CardDescription className="text-gray-700">{description}</CardDescription>
+                    </div>
+                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10">
+                          <Info className="h-5 w-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{tooltipContent}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
             </CardHeader>
             <CardContent className="p-4 pt-0 flex-grow">{children}</CardContent>
@@ -206,8 +232,9 @@ export function Coverso() {
 
 
   return (
+    <TooltipProvider>
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <div className="w-full h-16 bg-white border-b">
+      <div className="w-full h-16 bg-white">
         <div className="h-full flex items-center justify-end max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <Button variant="ghost" className="text-primary font-bold hover:bg-primary hover:text-primary-foreground">Login</Button>
         </div>
@@ -217,7 +244,17 @@ export function Coverso() {
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
                 <div className="flex flex-col items-start justify-center">
                     <Image src="/Logo2.png" alt="Coverso Logo" width={400} height={100} />
-                    <p className="text-2xl font-light text-black">Speeding Up Your Application</p>
+                    <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
+                    <div className="mt-6">
+                      <p className="text-lg font-normal text-gray-700">As Easy As</p>
+                      <div className="flex items-center gap-4 mt-2">
+                        {[1, 2, 3].map(num => (
+                          <div key={num} className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-xl">
+                            {num}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -246,7 +283,7 @@ export function Coverso() {
             <div className="w-full space-y-8">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-                    <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter.">
+                    <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter." tooltipContent="We use this information to populate the header of your cover letter.">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                           <Label htmlFor="fullName" className="text-gray-800">Full Name*</Label>
@@ -271,7 +308,7 @@ export function Coverso() {
                       </div>
                     </Step>
                   
-                    <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents.">
+                    <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents." tooltipContent="Upload your CV (PDF, DOCX) and any other relevant files. You can also link to online portfolios or documents.">
                        <div className="space-y-4">
                         <div
                         className="relative flex flex-col items-center justify-center w-full p-4 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
@@ -336,17 +373,31 @@ export function Coverso() {
                     <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
                         <div className="w-full rounded-2xl p-4 h-full flex flex-col">
                             <CardHeader className="p-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
+                               <div className="flex items-start justify-between gap-4">
+                                  <div className="flex items-start gap-4">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground shrink-0">
                                     3
                                     </div>
                                     <div>
                                     <CardTitle className="text-black">Job Description</CardTitle>
                                     <CardDescription className="text-gray-700">Paste the full text of the job description below.</CardDescription>
                                     </div>
+                                  </div>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10">
+                                          <Info className="h-5 w-5" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Simply copy the entire job listing from the webpage and paste it here.</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 </div>
                             </CardHeader>
-                            <CardContent className="p-4 pt-0 flex-grow">
+                            <CardContent className="p-4 pt-0 flex-grow relative">
                                 <Textarea
                                     placeholder="Paste job description here..."
                                     value={jobDescription}
@@ -354,6 +405,9 @@ export function Coverso() {
                                     required
                                     className="min-h-[200px] h-full"
                                 />
+                                <Button type="button" variant="default" size="icon" className="absolute bottom-3 right-3 h-8 w-8 bg-primary hover:bg-primary/90" onClick={handlePaste} aria-label="Paste job description">
+                                  <ClipboardPaste className="h-4 w-4 text-primary-foreground" />
+                                </Button>
                             </CardContent>
                         </div>
                     </TiltedCard>
@@ -484,5 +538,8 @@ export function Coverso() {
         </form>
       </main>
     </div>
+    </TooltipProvider>
   );
 }
+
+    
