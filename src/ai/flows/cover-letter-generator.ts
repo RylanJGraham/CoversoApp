@@ -50,9 +50,10 @@ const prompt = ai.definePrompt({
 
 You will be provided with the applicant's personal information, their CV, a link to the job posting, and optional supporting documents and portfolio URLs.
 
-1.  **Analyze the Job Posting:** **Strictly use the provided job posting URL** to extract the Job Title, Company Name, and Company Location. Do not use any other sources.
-    - Populate the \`jobTitle\` and \`companyName\` fields in the output with your findings.
-    - Identify the top 3-5 most important skills or qualifications from the job description. Populate the \`keyFocusPoints\` array in the output with these points.
+1.  **Analyze the Job Posting:** **It is critical that you ONLY use the provided job posting URL to extract information. Do NOT use any other sources or prior knowledge.**
+    - From the content at \`jobPostingUrl\`, you MUST extract the Job Title and the Company Name.
+    - Populate the \`jobTitle\` and \`companyName\` fields in the output with your findings from the URL.
+    - From the job description at the URL, identify the top 3-5 most important skills or qualifications. Populate the \`keyFocusPoints\` array in the output with these points.
 
 2.  **Format the Header:** Start the cover letter with the applicant's contact information, formatted as follows:
     - Full Name
@@ -61,12 +62,12 @@ You will be provided with the applicant's personal information, their CV, a link
     - Email Address (if provided)
     - LinkedIn URL (if provided, display as "LinkedIn")
     
-    Below the applicant's details, add the Hiring Manager's title (if not available, use "Hiring Manager"), the Company Name you extracted, and the Company Location.
+    Below the applicant's details, add the Hiring Manager's title (if not available, use "Hiring Manager"), the Company Name you extracted from the job posting URL, and the company location (also from the job posting).
 
 3.  **Salutation:** Address the letter to the "Hiring Manager".
 
 4.  **Write the Body:**
-    - Use the applicant's CV, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences that match the \`keyFocusPoints\` you identified.
+    - Use the applicant's CV, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences that match the \`keyFocusPoints\` you identified from the job posting.
     - The cover letter body should be professional, concise, and tailored specifically to the job posting found at the URL.
 
 **Applicant Information:**
@@ -78,7 +79,7 @@ You will be provided with the applicant's personal information, their CV, a link
 
 **Applicant's Materials:**
 - CV: {{media url=cvDataUri}}
-- Job Posting URL: {{{jobPostingUrl}}}
+- Job Posting URL (Use this as the ONLY source for job details): {{{jobPostingUrl}}}
 {{#if supportingDocs}}
 - Supporting Documents:
 {{#each supportingDocs}}
@@ -96,25 +97,32 @@ You will be provided with the applicant's personal information, their CV, a link
 
 const normalizeLinkedInUrl = (url: string): string => {
   try {
-    const urlObj = new URL(url);
-    if (urlObj.hostname.endsWith('linkedin.com')) {
-      // 1. Remove country-specific subdomains
-      urlObj.hostname = 'www.linkedin.com';
+    // Only attempt normalization if it's a linkedin URL
+    if (url.includes('linkedin.com')) {
+        const urlObj = new URL(url);
+        
+        // 1. Remove country-specific subdomains
+        urlObj.hostname = 'www.linkedin.com';
 
-      // 2. Find the job ID from the path
-      const pathMatch = urlObj.pathname.match(/\/jobs\/view\/(\d+)/);
-      if (pathMatch && pathMatch[1]) {
-        const jobId = pathMatch[1];
-        // 3. Construct canonical URL and remove query params/fragments
-        return `https://www.linkedin.com/jobs/view/${jobId}/`;
-      }
+        // 2. Find the job ID from the path
+        const pathMatch = urlObj.pathname.match(/\/jobs\/view\/(\d+)/);
+        if (pathMatch && pathMatch[1]) {
+            const jobId = pathMatch[1];
+            // 3. Construct canonical URL and remove query params/fragments
+            return `https://www.linkedin.com/jobs/view/${jobId}/`;
+        }
+        
+        // If it's a linkedin url but not a job view, just strip params
+        urlObj.search = '';
+        urlObj.hash = '';
+        return urlObj.toString();
     }
   } catch (e) {
     // Not a valid URL, return original
     return url;
   }
-  // Return original url if it's not a linkedin job url or something is wrong
-  return url.split('?')[0].split('#')[0];
+  // Return original url if it's not a linkedin url or something is wrong
+  return url;
 };
 
 
