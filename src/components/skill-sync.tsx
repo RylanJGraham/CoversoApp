@@ -197,6 +197,33 @@ export function SkillSync() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
+  
+  const Step = ({
+    step,
+    title,
+    description,
+    children,
+  }: {
+    step: number;
+    title: string;
+    description: string;
+    children: React.ReactNode;
+  }) => (
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
+            {step}
+          </div>
+          <div>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
 
 
   return (
@@ -226,47 +253,34 @@ export function SkillSync() {
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full max-w-4xl space-y-8">
-                <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                    <User className="h-6 w-6" />
-                    Personal Info Vault
-                    </CardTitle>
-                    <CardDescription>Enter your personal details to be included in the cover letter.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name*</Label>
-                    <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
-                    </div>
-                    <div className="space-y-2">
-                    <Label htmlFor="location">Location*</Label>
-                    <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
-                    </div>
-                    <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
-                    </div>
-                    <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
-                    <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
-                    </div>
-                </CardContent>
-                </Card>
                 
-                <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                    <FileUp className="h-6 w-6" />
-                    Portfolio Vault
-                    </CardTitle>
-                    <CardDescription>Upload your CV, supporting documents, and add links to online portfolios.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                <Step step={1} title="Personal Info Vault" description="Enter your personal details to be included in the cover letter.">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name*</Label>
+                      <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
+                      </div>
+                      <div className="space-y-2">
+                      <Label htmlFor="location">Location*</Label>
+                      <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
+                      </div>
+                      <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
+                      </div>
+                      <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
+                      <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
+                      </div>
+                  </div>
+                </Step>
+                
+                <Step step={2} title="Portfolio Vault" description="Upload your CV, supporting documents, and add links to online portfolios.">
+                   <div className="space-y-4">
                     <div
                     className="relative flex flex-col items-center justify-center w-full p-6 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
                     onClick={() => fileInputRef.current?.click()}
@@ -322,57 +336,63 @@ export function SkillSync() {
                         Add URL
                     </Button>
                     </div>
-                </CardContent>
-                </Card>
+                   </div>
+                </Step>
 
-                <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                    <ClipboardPaste className="h-6 w-6" />
-                    Job Description
-                    </CardTitle>
-                    <CardDescription>Paste the full text of the job description below.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Textarea
-                    placeholder="Paste job description here..."
-                    value={jobDescription}
-                    onChange={(e) => setJobDescription(e.target.value)}
-                    required
-                    className="min-h-[150px] text-sm"
-                    />
-                </CardContent>
-                </Card>
+                <Step step={3} title="Job Description" description="Paste the full text of the job description below.">
+                     <Textarea
+                        placeholder="Paste job description here..."
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        required
+                        className="min-h-[150px] text-sm"
+                        />
+                </Step>
                 
-                <div className="space-y-4">
-                <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-green-500" />
-                    <span className="font-semibold">Estimated Cost:</span>
-                    <span>${estimatedCost}</span>
-                    </div>
-                    <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                        <p className="max-w-[200px] text-xs">
-                            This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
-                        </p>
-                        </TooltipContent>
-                    </Tooltip>
-                    </TooltipProvider>
-                </div>
+                <div className="w-full max-w-4xl space-y-4">
+                  <Card>
+                    <CardHeader>
+                       <div className="flex items-start gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-2xl font-bold text-primary-foreground">
+                            4
+                          </div>
+                          <div>
+                            <CardTitle>Generate</CardTitle>
+                            <CardDescription>All set! Click the button below to generate your cover letter.</CardDescription>
+                          </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                       <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-green-500" />
+                          <span className="font-semibold">Estimated Cost:</span>
+                          <span>${estimatedCost}</span>
+                          </div>
+                          <TooltipProvider>
+                          <Tooltip>
+                              <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                              <p className="max-w-[200px] text-xs">
+                                  This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
+                              </p>
+                              </TooltipContent>
+                          </Tooltip>
+                          </TooltipProvider>
+                      </div>
 
-                <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
-                    {appState === 'loading' ? (
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    ) : (
-                    <Wand2 className="w-5 h-5 mr-2" />
-                    )}
-                    {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
-                </Button>
+                      <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
+                          {appState === 'loading' ? (
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          ) : (
+                          <Wand2 className="w-5 h-5 mr-2" />
+                          )}
+                          {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 <div className="w-full max-w-4xl space-y-4">
@@ -393,7 +413,7 @@ export function SkillSync() {
                             <div className="flex-grow flex flex-col items-center justify-center text-center p-4 border-2 border-dashed rounded-lg">
                                 <Wand2 className="w-12 h-12 mb-4 text-muted-foreground" />
                                 <p className="font-semibold">Ready for Magic</p>
-                                <p className="text-sm text-muted-foreground">Fill in the details on the left to generate your cover letter.</p>
+                                <p className="text-sm text-muted-foreground">Fill in the details above to generate your cover letter.</p>
                             </div>
                             )}
                             {appState === 'error' && (
