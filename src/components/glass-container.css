@@ -6,7 +6,6 @@
   text-align: center;
 }
 
-.glass-container__back,
 .glass-container__front {
   transition: transform 0.3s cubic-bezier(0.83, 0, 0.17, 1);
   border-radius: 1.25em;
@@ -15,13 +14,6 @@
   left: 0;
   width: 100%;
   height: 100%;
-}
-
-.glass-container__back {
-  background: linear-gradient(hsl(141, 71%, 40%), hsl(151, 71%, 40%));
-  box-shadow: 0.5em -0.5em 0.75em hsla(223, 10%, 10%, 0.15);
-  transform: rotate(5deg) translateZ(-1em);
-  transform-origin: 100% 100%;
 }
 
 .glass-container__front {

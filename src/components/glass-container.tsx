@@ -8,7 +8,6 @@ interface GlassContainerProps {
 const GlassContainer: React.FC<GlassContainerProps> = ({ children }) => {
   return (
     <div className="glass-container">
-      <div className="glass-container__back"></div>
       <div className="glass-container__front">{children}</div>
     </div>
   );
