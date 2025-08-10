@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { summarizeCvFlow, type CvSummarizerInput, type CvSummarizerOutput } from './cv-summarizer';
 
 const GenerateCoverLetterInputSchema = z.object({
   fullName: z.string().describe("The user's full name."),
@@ -44,11 +45,14 @@ export async function generateCoverLetter(input: GenerateCoverLetterInput): Prom
 
 const prompt = ai.definePrompt({
   name: 'generateCoverLetterPrompt',
-  input: {schema: GenerateCoverLetterInputSchema},
+  input: {schema: z.object({
+    ...GenerateCoverLetterInputSchema.shape,
+    cvSummary: z.string().describe("A concise summary of the applicant's CV."),
+  })},
   output: {schema: GenerateCoverLetterOutputSchema},
   prompt: `You are an expert career assistant. Your task is to write a compelling and professionally formatted cover letter for a job application. You will also provide analysis of the job posting.
 
-You will be provided with the applicant's personal information, their CV, the job description text, and optional supporting documents and portfolio URLs.
+You will be provided with the applicant's personal information, a summary of their CV, the job description text, and optional supporting documents and portfolio URLs.
 
 1.  **Analyze the Job Description:** **It is critical that you ONLY use the provided job description text to extract information. Do NOT use any other sources or prior knowledge.**
     - From the content in \`jobDescription\`, you MUST extract the Job Title and the Company Name.
@@ -67,7 +71,7 @@ You will be provided with the applicant's personal information, their CV, the jo
 3.  **Salutation:** Address the letter to the "Hiring Manager".
 
 4.  **Write the Body:**
-    - Use the applicant's CV, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences that match the \`keyFocusPoints\` you identified from the job description.
+    - Use the applicant's CV summary, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences that match the \`keyFocusPoints\` you identified from the job description.
     - The cover letter body should be professional, concise, and tailored specifically to the job description provided.
 
 **Applicant Information:**
@@ -78,7 +82,7 @@ You will be provided with the applicant's personal information, their CV, the jo
 {{#if linkedinUrl}}- LinkedIn: {{{linkedinUrl}}}{{/if}}
 
 **Applicant's Materials:**
-- CV: {{media url=cvDataUri}}
+- CV Summary: {{{cvSummary}}}
 - Job Description (Use this as the ONLY source for job details): {{{jobDescription}}}
 {{#if supportingDocs}}
 - Supporting Documents:
@@ -102,7 +106,14 @@ const generateCoverLetterFlow = ai.defineFlow(
     outputSchema: GenerateCoverLetterOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    // First, summarize the CV to reduce token count
+    const cvSummary = await summarizeCvFlow({ cvDataUri: input.cvDataUri });
+
+    // Then, generate the cover letter using the summary
+    const {output} = await prompt({
+      ...input,
+      cvSummary: cvSummary.summary,
+    });
     return output!;
   }
 );
