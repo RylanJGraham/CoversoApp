@@ -215,15 +215,15 @@ export function Coverso() {
     className?: string;
   }> = ({ step, title, description, children, className }) => (
      <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-        <div className={cn("w-full bg-white rounded-2xl p-6", className)}>
+        <div className={cn("w-full rounded-2xl p-6", className)}>
             <CardHeader>
                 <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
                     {step}
                 </div>
                 <div>
-                    <CardTitle>{title}</CardTitle>
-                    <CardDescription>{description}</CardDescription>
+                    <CardTitle className="text-black">{title}</CardTitle>
+                    <CardDescription className="text-gray-600">{description}</CardDescription>
                 </div>
                 </div>
             </CardHeader>
@@ -272,23 +272,23 @@ export function Coverso() {
                     <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter.">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                          <Label htmlFor="fullName">Full Name*</Label>
+                          <Label htmlFor="fullName" className="text-gray-700">Full Name*</Label>
                           <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
                           </div>
                           <div className="space-y-2">
-                          <Label htmlFor="location">Location*</Label>
+                          <Label htmlFor="location" className="text-gray-700">Location*</Label>
                           <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
                           </div>
                           <div className="space-y-2">
-                          <Label htmlFor="phone">Phone Number</Label>
+                          <Label htmlFor="phone" className="text-gray-700">Phone Number</Label>
                           <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
                           </div>
                           <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
+                          <Label htmlFor="email" className="text-gray-700">Email</Label>
                           <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
                           </div>
                           <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
+                          <Label htmlFor="linkedin" className="text-gray-700">LinkedIn Profile URL</Label>
                           <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
                           </div>
                       </div>
@@ -314,7 +314,7 @@ export function Coverso() {
                         </div>
                         {files.length > 0 && (
                         <div className="space-y-2">
-                            <Label>Uploaded Files:</Label>
+                            <Label className="text-gray-700">Uploaded Files:</Label>
                             <ul className="space-y-2">
                             {files.map((file, index) => (
                                 <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-secondary">
@@ -332,7 +332,7 @@ export function Coverso() {
                         </div>
                         )}
                         <div className="space-y-2">
-                        <Label>Portfolio / Document URLs</Label>
+                        <Label className="text-gray-700">Portfolio / Document URLs</Label>
                         {portfolioUrls.map((url, index) => (
                             <div key={index} className="flex items-center gap-2">
                             <Input 
@@ -356,15 +356,15 @@ export function Coverso() {
                 </div>
 
                 <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                    <div className="w-full bg-white rounded-2xl p-6">
+                    <div className="w-full rounded-2xl p-6">
                         <CardHeader>
                             <div className="flex items-start gap-4">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
                                 3
                                 </div>
                                 <div>
-                                <CardTitle>Job Description</CardTitle>
-                                <CardDescription>Paste the full text of the job description below.</CardDescription>
+                                <CardTitle className="text-black">Job Description</CardTitle>
+                                <CardDescription className="text-gray-600">Paste the full text of the job description below.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
@@ -381,33 +381,33 @@ export function Coverso() {
                 </TiltedCard>
 
                  <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                     <div className="w-full bg-white rounded-2xl p-6">
+                     <div className="w-full rounded-2xl p-6">
                         <CardHeader>
                             <div className="flex items-start gap-4">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
                                 4
                                 </div>
                                 <div>
-                                <CardTitle>Tone & Style</CardTitle>
-                                <CardDescription>Guide the AI's writing style and include key information.</CardDescription>
+                                <CardTitle className="text-black">Tone & Style</CardTitle>
+                                <CardDescription className="text-gray-600">Guide the AI's writing style and include key information.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-3">
-                                <Label>Choose a Tone</Label>
+                                <Label className="text-gray-700">Choose a Tone</Label>
                                 <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
                                     {["Professional", "Enthusiastic", "Formal", "Creative"].map((t) => (
                                         <div key={t} className="flex items-center space-x-2">
                                             <RadioGroupItem value={t} id={`r-${t}`} />
-                                            <Label htmlFor={`r-${t}`}>{t}</Label>
+                                            <Label htmlFor={`r-${t}`} className="text-gray-700">{t}</Label>
                                         </div>
                                     ))}
                                 </RadioGroup>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="mustHaveInfo">Must-Have Information</Label>
+                                    <Label htmlFor="mustHaveInfo" className="text-gray-700">Must-Have Information</Label>
                                     <Textarea
                                     id="mustHaveInfo"
                                     placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
@@ -424,15 +424,15 @@ export function Coverso() {
 
                 <div className="w-full space-y-4">
                   <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                    <div className="w-full bg-white rounded-2xl p-6">
+                    <div className="w-full rounded-2xl p-6">
                         <CardHeader>
                         <div className="flex items-start gap-4">
                             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-2xl font-bold text-primary-foreground">
                                 5
                             </div>
                             <div>
-                                <CardTitle>Generate</CardTitle>
-                                <CardDescription>All set! Click the button below to generate your cover letter.</CardDescription>
+                                <CardTitle className="text-black">Generate</CardTitle>
+                                <CardDescription className="text-gray-600">All set! Click the button below to generate your cover letter.</CardDescription>
                             </div>
                             </div>
                         </CardHeader>
@@ -472,24 +472,24 @@ export function Coverso() {
 
                 <div className="w-full space-y-4">
                     <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2} >
-                        <div className="min-h-[60vh] flex flex-col w-full bg-white rounded-2xl p-6">
+                        <div className="min-h-[60vh] flex flex-col w-full rounded-2xl p-6">
                             <CardHeader>
-                                <CardTitle>Your Generated Cover Letter</CardTitle>
-                                <CardDescription>The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
+                                <CardTitle className="text-black">Your Generated Cover Letter</CardTitle>
+                                <CardDescription className="text-gray-600">The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow flex flex-col">
                                 {appState === 'loading' && (
                                 <div className="flex-grow flex flex-col items-center justify-center text-center">
                                     <Loader2 className="w-12 h-12 mb-4 animate-spin text-primary" />
-                                    <p className="font-semibold">The Alchemist is at work...</p>
-                                    <p className="text-sm text-muted-foreground">Analyzing your documents and the job posting.</p>
+                                    <p className="font-semibold text-black">The Alchemist is at work...</p>
+                                    <p className="text-sm text-gray-600">Analyzing your documents and the job posting.</p>
                                 </div>
                                 )}
                                 {appState === 'idle' && (
                                 <div className="flex-grow flex flex-col items-center justify-center text-center p-4 border-2 border-dashed rounded-lg">
                                     <Wand2 className="w-12 h-12 mb-4 text-muted-foreground" />
-                                    <p className="font-semibold">Ready for Magic</p>
-                                    <p className="text-sm text-muted-foreground">Fill in the details above to generate your cover letter.</p>
+                                    <p className="font-semibold text-black">Ready for Magic</p>
+                                    <p className="text-sm text-gray-600">Fill in the details above to generate your cover letter.</p>
                                 </div>
                                 )}
                                 {appState === 'error' && (
@@ -520,25 +520,25 @@ export function Coverso() {
                     
                     {appState === 'success' && aiResult && (
                      <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                        <div className="w-full bg-white rounded-2xl p-6">
+                        <div className="w-full rounded-2xl p-6">
                             <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
+                            <CardTitle className="flex items-center gap-2 text-black">
                                 <BrainCircuit className="h-6 w-6" />
                                 AI Analysis
                             </CardTitle>
-                            <CardDescription>Here's what the AI understood from the job posting.</CardDescription>
+                            <CardDescription className="text-gray-600">Here's what the AI understood from the job posting.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
-                                <h3 className="font-semibold">Job Title</h3>
+                                <h3 className="font-semibold text-black">Job Title</h3>
                                 <p className="text-muted-foreground">{aiResult.jobTitle}</p>
                                 </div>
                                 <div>
-                                <h3 className="font-semibold">Company Name</h3>
+                                <h3 className="font-semibold text-black">Company Name</h3>
                                 <p className="text-muted-foreground">{aiResult.companyName}</p>
                                 </div>
                                 <div>
-                                <h3 className="font-semibold flex items-center gap-2">
+                                <h3 className="font-semibold flex items-center gap-2 text-black">
                                     <ListChecks className="h-5 w-5" />
                                     Key Focus Points
                                 </h3>
