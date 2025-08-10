@@ -34,6 +34,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils";
 import Hyperspeed from "./hyperspeed";
 import GlassSurface from "./glass-surface";
+import SpotlightCard from "./spotlight-card";
 
 
 type AppState = "idle" | "loading" | "success" | "error";
@@ -213,7 +214,7 @@ export function Coverso() {
     children: React.ReactNode;
     className?: string;
   }> = ({ step, title, description, children, className }) => (
-    <Card className={cn("w-full", className)}>
+    <SpotlightCard className={cn("w-full", className)} spotlightColor="rgba(16, 185, 129, 0.2)">
       <CardHeader>
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
@@ -226,27 +227,29 @@ export function Coverso() {
         </div>
       </CardHeader>
       <CardContent>{children}</CardContent>
-    </Card>
+    </SpotlightCard>
   );
 
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <header className="h-[500px] w-full relative grid grid-cols-3 bg-white">
-        <div className="col-span-1 flex items-center justify-center p-8">
-            <GlassSurface
-                backgroundOpacity={0.2}
-                blur={5}
-                borderRadius={24}
-                className="p-8"
-            >
-                <div className="flex flex-col items-center justify-center text-center">
-                    <h1 className="text-6xl font-bold text-foreground">Coverso</h1>
-                    <p className="text-2xl font-light text-foreground/80">Speeding Up Your Application</p>
-                </div>
-            </GlassSurface>
+      <header className="h-[500px] w-full relative bg-white">
+        <div className="absolute inset-0 z-10 grid grid-cols-3">
+            <div className="col-span-1 flex items-center justify-center p-8">
+                <GlassSurface
+                    backgroundOpacity={0.2}
+                    blur={5}
+                    borderRadius={24}
+                    className="p-8"
+                >
+                    <div className="flex flex-col items-center justify-center text-center">
+                        <h1 className="text-6xl font-bold text-primary">Coverso</h1>
+                        <p className="text-2xl font-light text-foreground/80">Speeding Up Your Application</p>
+                    </div>
+                </GlassSurface>
+            </div>
         </div>
-        <div className="col-span-2 h-full w-full relative">
+        <div className="absolute inset-0 h-full w-full">
             <Hyperspeed
             effectOptions={{
                 colors: {
@@ -394,7 +397,7 @@ export function Coverso() {
 
 
                 <div className="w-full space-y-4">
-                  <Card>
+                  <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.2)">
                     <CardHeader>
                        <div className="flex items-start gap-4">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-2xl font-bold text-primary-foreground">
@@ -436,11 +439,11 @@ export function Coverso() {
                           {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
                       </Button>
                     </CardContent>
-                  </Card>
+                  </SpotlightCard>
                 </div>
 
                 <div className="w-full space-y-4">
-                    <Card className="min-h-[60vh] flex flex-col">
+                    <SpotlightCard className="min-h-[60vh] flex flex-col" spotlightColor="rgba(16, 185, 129, 0.2)">
                         <CardHeader>
                             <CardTitle>Your Generated Cover Letter</CardTitle>
                             <CardDescription>The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
@@ -483,10 +486,10 @@ export function Coverso() {
                             </div>
                             )}
                         </CardContent>
-                    </Card>
+                    </SpotlightCard>
                     
                     {appState === 'success' && aiResult && (
-                    <Card>
+                    <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.2)">
                         <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <BrainCircuit className="h-6 w-6" />
@@ -515,7 +518,7 @@ export function Coverso() {
                             </ul>
                             </div>
                         </CardContent>
-                    </Card>
+                    </SpotlightCard>
                     )}
                 </div>
             </div>
