@@ -237,7 +237,7 @@ export function Coverso() {
 
 
       <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full pb-12">
             <div className="w-full space-y-8">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
@@ -347,12 +347,12 @@ export function Coverso() {
                                     value={jobDescription}
                                     onChange={(e) => setJobDescription(e.target.value)}
                                     required
-                                    className="min-h-[300px] h-full"
+                                    className="min-h-[240px] h-full"
                                 />
                             </CardContent>
                         </div>
                     </TiltedCard>
-                     <div className="w-full rounded-2xl p-4 space-y-8 flex flex-col">
+                     <div className="w-full rounded-2xl p-4 space-y-6 flex flex-col">
                         <CardHeader className="p-0">
                             <div className="flex items-start gap-4">
                                 <div>
@@ -361,8 +361,8 @@ export function Coverso() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-0 flex-grow flex flex-col gap-6">
-                            <div className="grid grid-cols-1 gap-6">
+                        <CardContent className="p-0 flex-grow flex flex-col gap-4">
+                            <div className="grid grid-cols-1 gap-4">
                                 <div className="space-y-3">
                                 <Label className="text-gray-800">Choose a Tone</Label>
                                 <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
