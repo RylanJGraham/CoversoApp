@@ -26,6 +26,8 @@ const GenerateCoverLetterInputSchema = z.object({
   jobDescription: z.string().describe('The full text of the job description.'),
   supportingDocs: z.array(z.string()).optional().describe('List of data URIs for supporting documents.'),
   portfolioUrls: z.array(z.string()).optional().describe('List of URLs to online portfolios or documents.'),
+  tone: z.string().optional().describe("The desired tone for the cover letter (e.g., 'Professional', 'Enthusiastic')."),
+  mustHaveInfo: z.string().optional().describe("Specific information or points that must be included in the cover letter."),
 });
 
 export type GenerateCoverLetterInput = z.infer<typeof GenerateCoverLetterInputSchema>;
@@ -71,8 +73,16 @@ You will be provided with the applicant's personal information, a summary of the
 3.  **Salutation:** Address the letter to the "Hiring Manager".
 
 4.  **Write the Body:**
+    {{#if tone}}
+    - Adopt a **{{{tone}}}** tone throughout the letter.
+    {{else}}
+    - Use a professional and confident tone.
+    {{/if}}
     - Use the applicant's CV summary, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences that match the \`keyFocusPoints\` you identified from the job description.
-    - The cover letter body should be professional, concise, and tailored specifically to the job description provided.
+    {{#if mustHaveInfo}}
+    - **Crucially, you MUST incorporate the following information:** {{{mustHaveInfo}}}
+    {{/if}}
+    - The cover letter body should be concise and tailored specifically to the job description provided.
 
 **Applicant Information:**
 - Full Name: {{{fullName}}}

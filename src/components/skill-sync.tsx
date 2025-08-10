@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, type ChangeEvent, useMemo } from "react";
-import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,9 +27,12 @@ import {
   ClipboardPaste,
   Info,
   DollarSign,
+  PenLine,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils";
+import DarkVeil from "./dark-veil";
 
 
 type AppState = "idle" | "loading" | "success" | "error";
@@ -52,6 +54,8 @@ export function SkillSync() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [tone, setTone] = useState("Professional");
+  const [mustHaveInfo, setMustHaveInfo] = useState("");
 
   const [aiResult, setAiResult] = useState<GenerateCoverLetterOutput | null>(null);
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
@@ -65,11 +69,12 @@ export function SkillSync() {
     const personalInfoChars = fullName.length + userLocation.length + phone.length + email.length + linkedinUrl.length;
     const jobDescChars = jobDescription.length;
     const portfolioUrlChars = portfolioUrls.join('').length;
+    const mustHaveChars = mustHaveInfo.length;
     // We can't know the file content length without reading them, so we'll add a rough estimate per file.
     const avgFileChars = 5000; // Estimate 5k characters per document
     const fileChars = files.length * avgFileChars;
     
-    const totalInputChars = personalInfoChars + jobDescChars + portfolioUrlChars + fileChars + BASE_PROMPT_CHARS;
+    const totalInputChars = personalInfoChars + jobDescChars + portfolioUrlChars + fileChars + BASE_PROMPT_CHARS + mustHaveChars;
     
     const inputCost = (totalInputChars / 1000) * INPUT_PRICE_PER_1K_CHARS;
     const outputCost = (AVG_COVER_LETTER_CHARS / 1000) * OUTPUT_PRICE_PER_1K_CHARS;
@@ -78,7 +83,7 @@ export function SkillSync() {
     
     // Format to 6 decimal places for small costs
     return totalCost.toFixed(6);
-  }, [fullName, userLocation, phone, email, linkedinUrl, jobDescription, portfolioUrls, files]);
+  }, [fullName, userLocation, phone, email, linkedinUrl, jobDescription, portfolioUrls, files, mustHaveInfo]);
 
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -163,6 +168,8 @@ export function SkillSync() {
         jobDescription,
         supportingDocs,
         portfolioUrls: finalPortfolioUrls,
+        tone,
+        mustHaveInfo,
       });
 
       setAiResult(result);
@@ -230,35 +237,27 @@ export function SkillSync() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
-      <header className="p-4 border-b bg-card shadow-sm sticky top-0 z-10">
-          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3">
-              <FlaskConical className="h-7 w-7 text-primary" />
-              <h1 className="text-2xl font-bold font-headline text-foreground">
-                SkillSync
-              </h1>
-            </div>
-          </div>
-      </header>
-      
-      <div className="w-full mb-8">
-          <Image 
-            src="https://placehold.co/1200x400.png"
-            alt="Hero image showing a professional work environment"
-            width={1200}
-            height={400}
-            className="w-full h-auto object-cover"
-            data-ai-hint="professional workspace"
-          />
+      <div style={{ width: '100%', height: '400px', position: 'relative' }}>
+        <DarkVeil />
       </div>
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 -mt-48">
+        <div className="mb-8 p-6 bg-card/80 backdrop-blur-sm rounded-lg shadow-2xl">
+          <div className="flex items-center gap-3">
+              <FlaskConical className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold font-headline text-foreground">
+                Curriculum Vitae Alchemist
+              </h1>
+          </div>
+          <p className="text-muted-foreground mt-2">Transform your standard CV into a document perfectly tailored for any job application, powered by AI.</p>
+        </div>
+
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                  {/* Left Column */}
-                  <div className="w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  <div className="w-full space-y-8">
                     <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter.">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
@@ -285,8 +284,7 @@ export function SkillSync() {
                     </Step>
                   </div>
                   
-                  {/* Right Column */}
-                  <div className="w-full">
+                  <div className="w-full space-y-8">
                     <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents.">
                        <div className="space-y-4">
                         <div
@@ -355,16 +353,43 @@ export function SkillSync() {
                         value={jobDescription}
                         onChange={(e) => setJobDescription(e.target.value)}
                         required
-                        className="min-h-[150px] text-sm"
+                        className="min-h-[200px] text-sm"
                     />
                 </Step>
+
+                <Step step={4} title="Tone & Style" description="Guide the AI's writing style and include key information.">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                       <Label>Choose a Tone</Label>
+                       <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
+                          {["Professional", "Enthusiastic", "Formal", "Creative"].map((t) => (
+                             <div key={t} className="flex items-center space-x-2">
+                                <RadioGroupItem value={t} id={`r-${t}`} />
+                                <Label htmlFor={`r-${t}`}>{t}</Label>
+                              </div>
+                          ))}
+                       </RadioGroup>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="mustHaveInfo">Must-Have Information</Label>
+                        <Textarea
+                          id="mustHaveInfo"
+                          placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
+                          value={mustHaveInfo}
+                          onChange={(e) => setMustHaveInfo(e.target.value)}
+                          className="min-h-[100px] text-sm"
+                      />
+                    </div>
+                  </div>
+                </Step>
+
 
                 <div className="w-full space-y-4">
                   <Card>
                     <CardHeader>
                        <div className="flex items-start gap-4">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-2xl font-bold text-primary-foreground">
-                            4
+                            5
                           </div>
                           <div>
                             <CardTitle>Generate</CardTitle>
