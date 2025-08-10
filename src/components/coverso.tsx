@@ -214,11 +214,11 @@ export function Coverso() {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10 relative z-10">
                           <Info className="h-5 w-5" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent className="bg-primary text-primary-foreground">
                         <p>{tooltipContent}</p>
                       </TooltipContent>
                     </Tooltip>
@@ -258,7 +258,7 @@ export function Coverso() {
                 </div>
             </div>
              <div className="col-span-1 hidden md:flex items-center justify-end p-8">
-                <div className="bg-primary/20 rounded-2xl p-8 text-center text-primary-foreground w-full max-w-sm shadow-lg">
+                <div className="bg-primary/70 rounded-2xl p-8 text-center text-primary-foreground w-full max-w-sm shadow-lg">
                     <h3 className="text-2xl font-bold">Resumes Created Today</h3>
                     <p className="text-6xl font-mono font-bold mt-4">100</p>
                 </div>
@@ -392,11 +392,11 @@ export function Coverso() {
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10 relative z-10">
                                           <Info className="h-5 w-5" />
                                         </Button>
                                       </TooltipTrigger>
-                                      <TooltipContent>
+                                      <TooltipContent className="bg-primary text-primary-foreground">
                                         <p>Simply copy the entire job listing from the webpage and paste it here.</p>
                                       </TooltipContent>
                                     </Tooltip>
