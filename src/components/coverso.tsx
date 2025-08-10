@@ -207,6 +207,7 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
+      <div className="w-full h-16 bg-primary"></div>
       <header className="h-[400px] w-full relative">
         <div className="absolute inset-0 z-10 grid grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
@@ -237,7 +238,7 @@ export function Coverso() {
 
 
       <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full pb-12">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
