@@ -187,7 +187,7 @@ export function Coverso() {
     className?: string;
   }> = ({ step, title, description, children, className }) => (
      <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-        <div className={cn("w-full rounded-2xl p-6", className)}>
+        <div className={cn("w-full rounded-2xl p-4 h-full", className)}>
             <CardHeader>
                 <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
@@ -211,7 +211,7 @@ export function Coverso() {
         <div className="absolute inset-0 z-10 grid grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
                 <div className="flex flex-col items-start justify-center">
-                    <Image src="/Logo.png" alt="Coverso Logo" width={400} height={100} />
+                    <Image src="/Logo2.png" alt="Coverso Logo" width={400} height={100} />
                     <p className="text-2xl font-light text-black">Speeding Up Your Application</p>
                 </div>
             </div>
@@ -240,7 +240,7 @@ export function Coverso() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
                     <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter.">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
@@ -269,7 +269,7 @@ export function Coverso() {
                     <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents.">
                        <div className="space-y-4">
                         <div
-                        className="relative flex flex-col items-center justify-center w-full p-6 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
+                        className="relative flex flex-col items-center justify-center w-full p-4 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
                         onClick={() => fileInputRef.current?.click()}
                         >
                         <UploadCloud className="w-10 h-10 text-muted-foreground" />
@@ -327,9 +327,9 @@ export function Coverso() {
                     </Step>
                 </div>
 
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
                     <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                        <div className="w-full rounded-2xl p-6 h-full flex flex-col">
+                        <div className="w-full rounded-2xl p-4 h-full flex flex-col">
                             <CardHeader>
                                 <div className="flex items-start gap-4">
                                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
@@ -352,7 +352,7 @@ export function Coverso() {
                             </CardContent>
                         </div>
                     </TiltedCard>
-                     <div className="w-full rounded-2xl p-6 space-y-8">
+                     <div className="w-full rounded-2xl p-4 space-y-8 flex flex-col">
                         <CardHeader className="p-0">
                             <div className="flex items-start gap-4">
                                 <div>
@@ -361,7 +361,7 @@ export function Coverso() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-0">
+                        <CardContent className="p-0 flex-grow flex flex-col gap-6">
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-3">
                                 <Label className="text-gray-800">Choose a Tone</Label>
@@ -384,8 +384,8 @@ export function Coverso() {
                                     className="min-h-[100px]"
                                 />
                                 </div>
-                                
-
+                            </div>
+                             <div className="mt-auto">
                                 <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
                                     {appState === 'loading' ? (
                                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -394,7 +394,7 @@ export function Coverso() {
                                     )}
                                     {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
                                 </Button>
-                            </div>
+                             </div>
                         </CardContent>
                     </div>
                 </div>
@@ -402,7 +402,7 @@ export function Coverso() {
                 {appState !== 'idle' && (
                 <div className="w-full space-y-4">
                     <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2} >
-                        <div className="min-h-[60vh] flex flex-col w-full rounded-2xl p-6">
+                        <div className="min-h-[60vh] flex flex-col w-full rounded-2xl p-4">
                             <CardHeader>
                                 <CardTitle className="text-black">Your Generated Cover Letter</CardTitle>
                                 <CardDescription className="text-gray-700">The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
@@ -443,7 +443,7 @@ export function Coverso() {
                     
                     {appState === 'success' && aiResult && (
                      <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                        <div className="w-full rounded-2xl p-6">
+                        <div className="w-full rounded-2xl p-4">
                             <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-black">
                                 <BrainCircuit className="h-6 w-6" />
