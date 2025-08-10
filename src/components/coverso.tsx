@@ -207,7 +207,7 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <div className="w-full h-16 bg-background border-b">
+      <div className="w-full h-16 bg-white border-b">
         <div className="h-full flex items-center justify-between max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <span className="font-bold text-primary">Coverso</span>
             <Button variant="ghost" className="text-primary hover:bg-primary/10">Login</Button>
@@ -487,5 +487,3 @@ export function Coverso() {
     </div>
   );
 }
-
-    
