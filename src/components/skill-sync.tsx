@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent, useMemo } from "react";
+import { useState, useRef, type ChangeEvent, useMemo, type FC } from "react";
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,8 +32,8 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils";
-import DarkVeil from "./dark-veil";
-
+import Hyperspeed from "./hyperspeed";
+import GlassContainer from "./glass-container";
 
 type AppState = "idle" | "loading" | "success" | "error";
 
@@ -205,19 +205,13 @@ export function SkillSync() {
     URL.revokeObjectURL(url);
   };
   
-  const Step = ({
-    step,
-    title,
-    description,
-    children,
-    className,
-  }: {
+  const Step: FC<{
     step: number;
     title: string;
     description: string;
     children: React.ReactNode;
     className?: string;
-  }) => (
+  }> = ({ step, title, description, children, className }) => (
     <Card className={cn("w-full", className)}>
       <CardHeader>
         <div className="flex items-start gap-4">
@@ -238,33 +232,33 @@ export function SkillSync() {
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
       <div style={{ width: '100%', height: '400px', position: 'relative' }}>
-        <DarkVeil 
-          speed={0.5}
-          hueShift={73}
-          noiseIntensity={0.03}
-          scanlineFrequency={0}
-          scanlineIntensity={0}
-          warpAmount={0}
+         <Hyperspeed
+          effectOptions={{
+            colors: {
+              roadColor: 0x080808,
+              islandColor: 0x0a0a0a,
+              background: 0x000000,
+              shoulderLines: 0x131318,
+              brokenLines: 0x131318,
+              leftCars: [0x10B981, 0x10B981, 0x10B981],
+              rightCars: [0x10B981, 0x10B981, 0x10B981],
+              sticks: 0x10B981,
+            }
+          }}
         />
+        <div className="absolute inset-0 flex items-center justify-center">
+            <GlassContainer>
+                <h1 className="text-6xl font-bold text-white">SkillSync</h1>
+                <p className="text-2xl font-light text-white">Speeding Up Your Application</p>
+            </GlassContainer>
+        </div>
       </div>
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 -mt-48 z-10">
-        <div className="mb-8 p-6 bg-card/80 backdrop-blur-sm rounded-lg shadow-2xl">
-          <div className="flex items-center gap-3">
-              <FlaskConical className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold font-headline text-foreground">
-                Curriculum Vitae Alchemist
-              </h1>
-          </div>
-          <p className="text-muted-foreground mt-2">Transform your standard CV into a document perfectly tailored for any job application, powered by AI.</p>
-        </div>
-
-
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                  <div className="w-full space-y-8">
                     <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter.">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
@@ -289,16 +283,14 @@ export function SkillSync() {
                           </div>
                       </div>
                     </Step>
-                  </div>
                   
-                  <div className="w-full space-y-8">
                     <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents.">
                        <div className="space-y-4">
                         <div
                         className="relative flex flex-col items-center justify-center w-full p-6 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
                         onClick={() => fileInputRef.current?.click()}
                         >
-                        <UploadCloud className="w-10 h-10 mb-2 text-muted-foreground" />
+                        <UploadCloud className="w-10 h-10 text-muted-foreground" />
                         <p className="font-semibold text-primary">Click to upload files</p>
                         <p className="text-xs text-muted-foreground">PDF, DOCX, TXT. Ensure one file is your CV.</p>
                         <input
@@ -351,7 +343,6 @@ export function SkillSync() {
                         </div>
                        </div>
                     </Step>
-                  </div>
                 </div>
 
                 <Step step={3} title="Job Description" description="Paste the full text of the job description below.">
