@@ -238,7 +238,14 @@ export function SkillSync() {
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
       <div style={{ width: '100%', height: '400px', position: 'relative' }}>
-        <DarkVeil hueShift={-180} />
+        <DarkVeil 
+          speed={0.5}
+          hueShift={73}
+          noiseIntensity={0.03}
+          scanlineFrequency={0}
+          scanlineIntensity={0}
+          warpAmount={0}
+        />
       </div>
 
       <main className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 -mt-48 z-10">
