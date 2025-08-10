@@ -355,46 +355,45 @@ export function Coverso() {
                     </Step>
                 </div>
 
-                <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                    <div className="w-full rounded-2xl p-6">
-                        <CardHeader>
-                            <div className="flex items-start gap-4">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
-                                3
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+                        <div className="w-full rounded-2xl p-6 h-full flex flex-col">
+                            <CardHeader>
+                                <div className="flex items-start gap-4">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
+                                    3
+                                    </div>
+                                    <div>
+                                    <CardTitle className="text-black">Job Description</CardTitle>
+                                    <CardDescription className="text-gray-600">Paste the full text of the job description below.</CardDescription>
+                                    </div>
                                 </div>
-                                <div>
-                                <CardTitle className="text-black">Job Description</CardTitle>
-                                <CardDescription className="text-gray-600">Paste the full text of the job description below.</CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <Textarea
-                                placeholder="Paste job description here..."
-                                value={jobDescription}
-                                onChange={(e) => setJobDescription(e.target.value)}
-                                required
-                                className="min-h-[200px] text-sm"
-                            />
-                        </CardContent>
-                    </div>
-                </TiltedCard>
-
-                 <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                     <div className="w-full rounded-2xl p-6">
-                        <CardHeader>
+                            </CardHeader>
+                            <CardContent className="flex-grow">
+                                <Textarea
+                                    placeholder="Paste job description here..."
+                                    value={jobDescription}
+                                    onChange={(e) => setJobDescription(e.target.value)}
+                                    required
+                                    className="min-h-[300px] text-sm h-full"
+                                />
+                            </CardContent>
+                        </div>
+                    </TiltedCard>
+                     <div className="w-full rounded-2xl p-6 space-y-8">
+                        <CardHeader className="p-0">
                             <div className="flex items-start gap-4">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
                                 4
                                 </div>
                                 <div>
-                                <CardTitle className="text-black">Tone & Style</CardTitle>
+                                <CardTitle className="text-black">Tone &amp; Style</CardTitle>
                                 <CardDescription className="text-gray-600">Guide the AI's writing style and include key information.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <CardContent className="p-0">
+                            <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-3">
                                 <Label className="text-gray-700">Choose a Tone</Label>
                                 <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
@@ -419,8 +418,7 @@ export function Coverso() {
                             </div>
                         </CardContent>
                     </div>
-                </TiltedCard>
-
+                </div>
 
                 <div className="w-full space-y-4">
                   <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
@@ -559,3 +557,5 @@ export function Coverso() {
     </div>
   );
 }
+
+    
