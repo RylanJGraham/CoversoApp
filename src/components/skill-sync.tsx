@@ -260,7 +260,7 @@ export function SkillSync() {
                   {/* Left Column */}
                   <div className="w-full">
                     <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter.">
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                           <Label htmlFor="fullName">Full Name*</Label>
                           <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
@@ -277,7 +277,7 @@ export function SkillSync() {
                           <Label htmlFor="email">Email</Label>
                           <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-2 md:col-span-2">
                           <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
                           <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
                           </div>
@@ -490,5 +490,3 @@ export function SkillSync() {
     </div>
   );
 }
-
-    
