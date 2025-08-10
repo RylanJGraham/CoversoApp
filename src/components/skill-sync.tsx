@@ -230,15 +230,13 @@ export function SkillSync() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
-      <header className="p-4 border-b bg-card shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <FlaskConical className="h-7 w-7 text-primary" />
-              <h1 className="text-2xl font-bold font-headline text-foreground">
-                SkillSync
-              </h1>
-            </div>
-        </div>
+      <header className="p-4 border-b bg-card shadow-sm sticky top-0 z-10 px-4 md:px-8">
+          <div className="flex items-center gap-3">
+            <FlaskConical className="h-7 w-7 text-primary" />
+            <h1 className="text-2xl font-bold font-headline text-foreground">
+              SkillSync
+            </h1>
+          </div>
       </header>
       
       <div className="w-full mb-8">
@@ -252,9 +250,9 @@ export function SkillSync() {
           />
       </div>
 
-      <main className="flex-grow container mx-auto p-4 md:p-8">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
-            <div className="w-full max-w-4xl space-y-8">
+            <div className="w-full space-y-8">
                 
                 <div className="flex flex-col md:flex-row gap-8">
                   <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter." className="flex-1">
@@ -354,7 +352,7 @@ export function SkillSync() {
                         />
                 </Step>
                 
-                <div className="w-full max-w-4xl space-y-4">
+                <div className="w-full space-y-4">
                   <Card>
                     <CardHeader>
                        <div className="flex items-start gap-4">
@@ -400,7 +398,7 @@ export function SkillSync() {
                   </Card>
                 </div>
 
-                <div className="w-full max-w-4xl space-y-4">
+                <div className="w-full space-y-4">
                     <Card className="min-h-[60vh] flex flex-col">
                         <CardHeader>
                             <CardTitle>Your Generated Cover Letter</CardTitle>
@@ -485,3 +483,5 @@ export function SkillSync() {
     </div>
   );
 }
+
+    
