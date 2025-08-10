@@ -235,16 +235,16 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <header className="h-[400px] w-full relative bg-white">
-        <div className="absolute inset-0 z-10 grid grid-cols-3 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="col-span-1 flex items-center justify-start p-8">
-                <div className="flex flex-col items-start justify-center text-left">
+      <header className="h-[300px] w-full relative bg-white">
+        <div className="absolute inset-0 z-10 grid grid-cols-3 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="col-span-1 flex items-center justify-start p-8 text-left">
+                <div className="flex flex-col items-start justify-center">
                     <h1 className="text-6xl font-bold text-primary">Coverso</h1>
                     <p className="text-2xl font-light text-black">Speeding Up Your Application</p>
                 </div>
             </div>
         </div>
-        <div className="absolute inset-0 h-full w-full z-0">
+        <div className="absolute inset-0 h-full w-full z-0 col-start-2 col-span-2">
             <Hyperspeed
             effectOptions={{
                 colors: {
@@ -264,7 +264,7 @@ export function Coverso() {
       </header>
 
 
-      <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
@@ -272,23 +272,23 @@ export function Coverso() {
                     <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter.">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                          <Label htmlFor="fullName" className="text-gray-700">Full Name*</Label>
+                          <Label htmlFor="fullName" className="text-gray-600">Full Name*</Label>
                           <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
                           </div>
                           <div className="space-y-2">
-                          <Label htmlFor="location" className="text-gray-700">Location*</Label>
+                          <Label htmlFor="location" className="text-gray-600">Location*</Label>
                           <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
                           </div>
                           <div className="space-y-2">
-                          <Label htmlFor="phone" className="text-gray-700">Phone Number</Label>
+                          <Label htmlFor="phone" className="text-gray-600">Phone Number</Label>
                           <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
                           </div>
                           <div className="space-y-2">
-                          <Label htmlFor="email" className="text-gray-700">Email</Label>
+                          <Label htmlFor="email" className="text-gray-600">Email</Label>
                           <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
                           </div>
                           <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="linkedin" className="text-gray-700">LinkedIn Profile URL</Label>
+                          <Label htmlFor="linkedin" className="text-gray-600">LinkedIn Profile URL</Label>
                           <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
                           </div>
                       </div>
@@ -314,7 +314,7 @@ export function Coverso() {
                         </div>
                         {files.length > 0 && (
                         <div className="space-y-2">
-                            <Label className="text-gray-700">Uploaded Files:</Label>
+                            <Label className="text-gray-600">Uploaded Files:</Label>
                             <ul className="space-y-2">
                             {files.map((file, index) => (
                                 <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-secondary">
@@ -332,7 +332,7 @@ export function Coverso() {
                         </div>
                         )}
                         <div className="space-y-2">
-                        <Label className="text-gray-700">Portfolio / Document URLs</Label>
+                        <Label className="text-gray-600">Portfolio / Document URLs</Label>
                         {portfolioUrls.map((url, index) => (
                             <div key={index} className="flex items-center gap-2">
                             <Input 
@@ -383,11 +383,8 @@ export function Coverso() {
                      <div className="w-full rounded-2xl p-6 space-y-8">
                         <CardHeader className="p-0">
                             <div className="flex items-start gap-4">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
-                                4
-                                </div>
                                 <div>
-                                <CardTitle className="text-black">Tone &amp; Style</CardTitle>
+                                <CardTitle className="text-black">Customize</CardTitle>
                                 <CardDescription className="text-gray-600">Guide the AI's writing style and include key information.</CardDescription>
                                 </div>
                             </div>
@@ -395,18 +392,18 @@ export function Coverso() {
                         <CardContent className="p-0">
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-3">
-                                <Label className="text-gray-700">Choose a Tone</Label>
+                                <Label className="text-gray-600">Choose a Tone</Label>
                                 <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
                                     {["Professional", "Enthusiastic", "Formal", "Creative"].map((t) => (
                                         <div key={t} className="flex items-center space-x-2">
                                             <RadioGroupItem value={t} id={`r-${t}`} />
-                                            <Label htmlFor={`r-${t}`} className="text-gray-700">{t}</Label>
+                                            <Label htmlFor={`r-${t}`} className="text-gray-600">{t}</Label>
                                         </div>
                                     ))}
                                 </RadioGroup>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="mustHaveInfo" className="text-gray-700">Must-Have Information</Label>
+                                    <Label htmlFor="mustHaveInfo" className="text-gray-600">Must-Have Information</Label>
                                     <Textarea
                                     id="mustHaveInfo"
                                     placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
@@ -415,57 +412,37 @@ export function Coverso() {
                                     className="min-h-[100px] text-sm"
                                 />
                                 </div>
+                                <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground pt-4">
+                                    <div className="flex items-center gap-2">
+                                    <DollarSign className="h-5 w-5 text-green-500" />
+                                    <span className="font-semibold">Estimated Cost:</span>
+                                    <span>${estimatedCost}</span>
+                                    </div>
+                                    <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 cursor-help" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                        <p className="max-w-[200px] text-xs">
+                                            This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
+                                        </p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+
+                                <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
+                                    {appState === 'loading' ? (
+                                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                    ) : (
+                                    <Wand2 className="w-5 h-5 mr-2" />
+                                    )}
+                                    {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
+                                </Button>
                             </div>
                         </CardContent>
                     </div>
-                </div>
-
-                <div className="w-full space-y-4">
-                  <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                    <div className="w-full rounded-2xl p-6">
-                        <CardHeader>
-                        <div className="flex items-start gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-2xl font-bold text-primary-foreground">
-                                5
-                            </div>
-                            <div>
-                                <CardTitle className="text-black">Generate</CardTitle>
-                                <CardDescription className="text-gray-600">All set! Click the button below to generate your cover letter.</CardDescription>
-                            </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                        <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground mb-4">
-                            <div className="flex items-center gap-2">
-                            <DollarSign className="h-5 w-5 text-green-500" />
-                            <span className="font-semibold">Estimated Cost:</span>
-                            <span>${estimatedCost}</span>
-                            </div>
-                            <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                <Info className="h-4 w-4 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                <p className="max-w-[200px] text-xs">
-                                    This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
-                                </p>
-                                </TooltipContent>
-                            </Tooltip>
-                            </TooltipProvider>
-                        </div>
-
-                        <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
-                            {appState === 'loading' ? (
-                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                            ) : (
-                            <Wand2 className="w-5 h-5 mr-2" />
-                            )}
-                            {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
-                        </Button>
-                        </CardContent>
-                    </div>
-                  </TiltedCard>
                 </div>
 
                 <div className="w-full space-y-4">
