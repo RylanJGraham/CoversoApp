@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   FileUp,
   FlaskConical,
@@ -239,21 +238,21 @@ export function SkillSync() {
                 SkillSync
               </h1>
             </div>
-          <ThemeToggle />
         </div>
       </header>
+      
+      <div className="w-full mb-8">
+          <Image 
+            src="https://placehold.co/1200x400.png"
+            alt="Hero image showing a professional work environment"
+            width={1200}
+            height={400}
+            className="w-full h-auto object-cover"
+            data-ai-hint="professional workspace"
+          />
+      </div>
 
       <main className="flex-grow container mx-auto p-4 md:p-8">
-        <div className="w-full mb-8">
-            <Image 
-              src="https://placehold.co/1200x400.png"
-              alt="Hero image showing a professional work environment"
-              width={1200}
-              height={400}
-              className="w-full h-auto rounded-lg object-cover"
-              data-ai-hint="professional workspace"
-            />
-        </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full max-w-4xl space-y-8">
                 
