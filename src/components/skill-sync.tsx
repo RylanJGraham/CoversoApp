@@ -25,13 +25,14 @@ import {
   PlusCircle,
   BrainCircuit,
   ListChecks,
+  ClipboardPaste,
 } from "lucide-react";
 
 type AppState = "idle" | "loading" | "success" | "error";
 
 export function SkillSync() {
   const [files, setFiles] = useState<File[]>([]);
-  const [jobPostingUrl, setJobPostingUrl] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
   const [portfolioUrls, setPortfolioUrls] = useState<string[]>([""]);
   const [fullName, setFullName] = useState("");
   const [userLocation, setUserLocation] = useState("");
@@ -101,8 +102,8 @@ export function SkillSync() {
       toast({ title: "Missing Personal Info", description: "Please provide your full name and location.", variant: "destructive" });
       return;
     }
-    if (!jobPostingUrl) {
-      toast({ title: "No Job Posting URL", description: "Please provide a link to the job posting.", variant: "destructive" });
+    if (!jobDescription) {
+      toast({ title: "No Job Description", description: "Please paste the job description.", variant: "destructive" });
       return;
     }
     
@@ -126,7 +127,7 @@ export function SkillSync() {
         email,
         linkedinUrl,
         cvDataUri,
-        jobPostingUrl,
+        jobDescription,
         supportingDocs,
         portfolioUrls: finalPortfolioUrls,
       });
@@ -284,18 +285,18 @@ export function SkillSync() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <LinkIcon className="h-6 w-6" />
-                  Job Posting Link
+                  <ClipboardPaste className="h-6 w-6" />
+                  Job Description
                 </CardTitle>
-                <CardDescription>Provide a link to the job posting (e.g., LinkedIn, company career page).</CardDescription>
+                <CardDescription>Paste the full text of the job description below.</CardDescription>
               </CardHeader>
               <CardContent>
-                <Input
-                  type="url"
-                  placeholder="https://www.linkedin.com/jobs/view/..."
-                  value={jobPostingUrl}
-                  onChange={(e) => setJobPostingUrl(e.target.value)}
+                 <Textarea
+                  placeholder="Paste job description here..."
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
                   required
+                  className="min-h-[150px] text-sm"
                 />
               </CardContent>
             </Card>

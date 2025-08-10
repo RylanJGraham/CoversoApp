@@ -22,7 +22,7 @@ const GenerateCoverLetterInputSchema = z.object({
     .describe(
       "The user uploaded CV as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
-  jobPostingUrl: z.string().describe('The URL of the job posting.'),
+  jobDescription: z.string().describe('The full text of the job description.'),
   supportingDocs: z.array(z.string()).optional().describe('List of data URIs for supporting documents.'),
   portfolioUrls: z.array(z.string()).optional().describe('List of URLs to online portfolios or documents.'),
 });
@@ -48,12 +48,12 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateCoverLetterOutputSchema},
   prompt: `You are an expert career assistant. Your task is to write a compelling and professionally formatted cover letter for a job application. You will also provide analysis of the job posting.
 
-You will be provided with the applicant's personal information, their CV, a link to the job posting, and optional supporting documents and portfolio URLs.
+You will be provided with the applicant's personal information, their CV, the job description text, and optional supporting documents and portfolio URLs.
 
-1.  **Analyze the Job Posting:** **It is critical that you ONLY use the provided job posting URL to extract information. Do NOT use any other sources or prior knowledge.**
-    - From the content at \`jobPostingUrl\`, you MUST extract the Job Title and the Company Name.
-    - Populate the \`jobTitle\` and \`companyName\` fields in the output with your findings from the URL.
-    - From the job description at the URL, identify the top 3-5 most important skills or qualifications. Populate the \`keyFocusPoints\` array in the output with these points.
+1.  **Analyze the Job Description:** **It is critical that you ONLY use the provided job description text to extract information. Do NOT use any other sources or prior knowledge.**
+    - From the content in \`jobDescription\`, you MUST extract the Job Title and the Company Name.
+    - Populate the \`jobTitle\` and \`companyName\` fields in the output with your findings from the text.
+    - From the job description text, identify the top 3-5 most important skills or qualifications. Populate the \`keyFocusPoints\` array in the output with these points.
 
 2.  **Format the Header:** Start the cover letter with the applicant's contact information, formatted as follows:
     - Full Name
@@ -62,13 +62,13 @@ You will be provided with the applicant's personal information, their CV, a link
     - Email Address (if provided)
     - LinkedIn URL (if provided, display as "LinkedIn")
     
-    Below the applicant's details, add the Hiring Manager's title (if not available, use "Hiring Manager"), the Company Name you extracted from the job posting URL, and the company location (also from the job posting).
+    Below the applicant's details, add the Hiring Manager's title (if not available, use "Hiring Manager"), the Company Name you extracted from the job description, and the company location (also from the job description if available).
 
 3.  **Salutation:** Address the letter to the "Hiring Manager".
 
 4.  **Write the Body:**
-    - Use the applicant's CV, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences that match the \`keyFocusPoints\` you identified from the job posting.
-    - The cover letter body should be professional, concise, and tailored specifically to the job posting found at the URL.
+    - Use the applicant's CV, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences that match the \`keyFocusPoints\` you identified from the job description.
+    - The cover letter body should be professional, concise, and tailored specifically to the job description provided.
 
 **Applicant Information:**
 - Full Name: {{{fullName}}}
@@ -79,7 +79,7 @@ You will be provided with the applicant's personal information, their CV, a link
 
 **Applicant's Materials:**
 - CV: {{media url=cvDataUri}}
-- Job Posting URL (Use this as the ONLY source for job details): {{{jobPostingUrl}}}
+- Job Description (Use this as the ONLY source for job details): {{{jobDescription}}}
 {{#if supportingDocs}}
 - Supporting Documents:
 {{#each supportingDocs}}
@@ -95,37 +95,6 @@ You will be provided with the applicant's personal information, their CV, a link
 `,
 });
 
-const normalizeLinkedInUrl = (url: string): string => {
-  try {
-    // Only attempt normalization if it's a linkedin URL
-    if (url.includes('linkedin.com')) {
-        const urlObj = new URL(url);
-        
-        // 1. Remove country-specific subdomains
-        urlObj.hostname = 'www.linkedin.com';
-
-        // 2. Find the job ID from the path
-        const pathMatch = urlObj.pathname.match(/\/jobs\/view\/(\d+)/);
-        if (pathMatch && pathMatch[1]) {
-            const jobId = pathMatch[1];
-            // 3. Construct canonical URL and remove query params/fragments
-            return `https://www.linkedin.com/jobs/view/${jobId}/`;
-        }
-        
-        // If it's a linkedin url but not a job view, just strip params
-        urlObj.search = '';
-        urlObj.hash = '';
-        return urlObj.toString();
-    }
-  } catch (e) {
-    // Not a valid URL, return original
-    return url;
-  }
-  // Return original url if it's not a linkedin url or something is wrong
-  return url;
-};
-
-
 const generateCoverLetterFlow = ai.defineFlow(
   {
     name: 'generateCoverLetterFlow',
@@ -133,9 +102,7 @@ const generateCoverLetterFlow = ai.defineFlow(
     outputSchema: GenerateCoverLetterOutputSchema,
   },
   async input => {
-    const normalizedUrl = normalizeLinkedInUrl(input.jobPostingUrl);
-    const updatedInput = { ...input, jobPostingUrl: normalizedUrl };
-    const {output} = await prompt(updatedInput);
+    const {output} = await prompt(input);
     return output!;
   }
 );
