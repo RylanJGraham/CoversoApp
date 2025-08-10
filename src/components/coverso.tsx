@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, useMemo, type FC } from "react";
@@ -251,6 +252,12 @@ export function Coverso() {
                         <p className="text-4xl font-mono font-bold mt-1">
                           <AnimatedCounter to={100} />
                         </p>
+                         <div className="mt-2 text-sm text-primary-foreground/80 flex items-center gap-2">
+                            <p className="text-xl font-mono font-bold">
+                                <AnimatedCounter to={18000} />
+                            </p>
+                            <span>Minutes Saved</span>
+                        </div>
                     </div>
                 </div>
             </div>
