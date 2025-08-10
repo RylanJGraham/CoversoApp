@@ -240,7 +240,7 @@ export function Coverso() {
         </div>
       </div>
       <header className="h-[400px] w-full relative">
-        <div className="absolute inset-0 z-10 grid grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 z-10 grid grid-cols-1 md:grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
                 <div className="flex flex-col items-start justify-center">
                     <Image src="/Logo2.png" alt="Coverso Logo" width={400} height={100} />
@@ -255,6 +255,12 @@ export function Coverso() {
                         ))}
                       </div>
                     </div>
+                </div>
+            </div>
+             <div className="col-span-1 hidden md:flex items-center justify-center p-8">
+                <div className="bg-primary rounded-2xl p-8 text-center text-primary-foreground w-full max-w-sm">
+                    <h3 className="text-2xl font-bold">Resumes Created Today</h3>
+                    <p className="text-6xl font-mono font-bold mt-4">100</p>
                 </div>
             </div>
         </div>
@@ -541,5 +547,7 @@ export function Coverso() {
     </TooltipProvider>
   );
 }
+
+    
 
     
