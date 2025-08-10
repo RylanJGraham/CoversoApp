@@ -230,12 +230,14 @@ export function SkillSync() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
-      <header className="p-4 border-b bg-card shadow-sm sticky top-0 z-10 px-4 md:px-8">
-          <div className="flex items-center gap-3">
-            <FlaskConical className="h-7 w-7 text-primary" />
-            <h1 className="text-2xl font-bold font-headline text-foreground">
-              SkillSync
-            </h1>
+      <header className="p-4 border-b bg-card shadow-sm sticky top-0 z-10">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3">
+              <FlaskConical className="h-7 w-7 text-primary" />
+              <h1 className="text-2xl font-bold font-headline text-foreground">
+                SkillSync
+              </h1>
+            </div>
           </div>
       </header>
       
@@ -254,104 +256,109 @@ export function SkillSync() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
-                <div className="flex flex-col md:flex-row gap-8">
-                  <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter." className="flex-1">
-                    <div className="grid grid-cols-1 gap-4">
-                        <div className="space-y-2">
-                        <Label htmlFor="fullName">Full Name*</Label>
-                        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
-                        </div>
-                        <div className="space-y-2">
-                        <Label htmlFor="location">Location*</Label>
-                        <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
-                        </div>
-                        <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
-                        </div>
-                        <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
-                        </div>
-                        <div className="space-y-2">
-                        <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
-                        <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
-                        </div>
-                    </div>
-                  </Step>
-                  
-                  <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents." className="flex-1">
-                     <div className="space-y-4">
-                      <div
-                      className="relative flex flex-col items-center justify-center w-full p-6 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
-                      onClick={() => fileInputRef.current?.click()}
-                      >
-                      <UploadCloud className="w-10 h-10 mb-2 text-muted-foreground" />
-                      <p className="font-semibold text-primary">Click to upload files</p>
-                      <p className="text-xs text-muted-foreground">PDF, DOCX, TXT. Ensure one file is your CV.</p>
-                      <input
-                          ref={fileInputRef}
-                          type="file"
-                          className="hidden"
-                          multiple
-                          accept=".pdf,.doc,.docx,.txt"
-                          onChange={handleFileChange}
-                      />
-                      </div>
-                      {files.length > 0 && (
-                      <div className="space-y-2">
-                          <Label>Uploaded Files:</Label>
-                          <ul className="space-y-2">
-                          {files.map((file, index) => (
-                              <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-secondary">
-                              <div className="flex items-center gap-2 truncate">
-                                  <FileText className="w-4 h-4 shrink-0" />
-                                  <span className="truncate">{file.name}</span>
-                                  {(file.name.toLowerCase().includes('cv') || file.name.toLowerCase().includes('resume')) && <Badge variant="outline">CV</Badge>}
-                              </div>
-                              <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
-                                  <Trash2 className="w-4 h-4" />
-                              </Button>
-                              </li>
-                          ))}
-                          </ul>
-                      </div>
-                      )}
-                      <div className="space-y-2">
-                      <Label>Portfolio / Document URLs</Label>
-                      {portfolioUrls.map((url, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                          <Input 
-                              type="url" 
-                              placeholder="https://docs.google.com/document/d/..." 
-                              value={url} 
-                              onChange={(e) => handlePortfolioUrlChange(index, e.target.value)} 
-                          />
-                          <Button variant="ghost" size="icon" className="w-8 h-8 shrink-0" onClick={() => removePortfolioUrlInput(index)} aria-label="Remove URL">
-                              <Trash2 className="w-4 h-4" />
-                          </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                  {/* Left Column */}
+                  <div className="w-full">
+                    <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter.">
+                      <div className="grid grid-cols-1 gap-4">
+                          <div className="space-y-2">
+                          <Label htmlFor="fullName">Full Name*</Label>
+                          <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
                           </div>
-                      ))}
-                      <Button type="button" variant="outline" size="sm" onClick={addPortfolioUrlInput}>
-                          <PlusCircle className="w-4 h-4 mr-2" />
-                          Add URL
-                      </Button>
+                          <div className="space-y-2">
+                          <Label htmlFor="location">Location*</Label>
+                          <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
+                          </div>
+                          <div className="space-y-2">
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
+                          </div>
+                          <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
+                          </div>
+                          <div className="space-y-2">
+                          <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
+                          <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
+                          </div>
                       </div>
-                     </div>
-                  </Step>
+                    </Step>
+                  </div>
+                  
+                  {/* Right Column */}
+                  <div className="w-full flex flex-col gap-8">
+                    <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents.">
+                       <div className="space-y-4">
+                        <div
+                        className="relative flex flex-col items-center justify-center w-full p-6 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
+                        onClick={() => fileInputRef.current?.click()}
+                        >
+                        <UploadCloud className="w-10 h-10 mb-2 text-muted-foreground" />
+                        <p className="font-semibold text-primary">Click to upload files</p>
+                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT. Ensure one file is your CV.</p>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            className="hidden"
+                            multiple
+                            accept=".pdf,.doc,.docx,.txt"
+                            onChange={handleFileChange}
+                        />
+                        </div>
+                        {files.length > 0 && (
+                        <div className="space-y-2">
+                            <Label>Uploaded Files:</Label>
+                            <ul className="space-y-2">
+                            {files.map((file, index) => (
+                                <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-secondary">
+                                <div className="flex items-center gap-2 truncate">
+                                    <FileText className="w-4 h-4 shrink-0" />
+                                    <span className="truncate">{file.name}</span>
+                                    {(file.name.toLowerCase().includes('cv') || file.name.toLowerCase().includes('resume')) && <Badge variant="outline">CV</Badge>}
+                                </div>
+                                <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                                </li>
+                            ))}
+                            </ul>
+                        </div>
+                        )}
+                        <div className="space-y-2">
+                        <Label>Portfolio / Document URLs</Label>
+                        {portfolioUrls.map((url, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                            <Input 
+                                type="url" 
+                                placeholder="https://docs.google.com/document/d/..." 
+                                value={url} 
+                                onChange={(e) => handlePortfolioUrlChange(index, e.target.value)} 
+                            />
+                            <Button variant="ghost" size="icon" className="w-8 h-8 shrink-0" onClick={() => removePortfolioUrlInput(index)} aria-label="Remove URL">
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                            </div>
+                        ))}
+                        <Button type="button" variant="outline" size="sm" onClick={addPortfolioUrlInput}>
+                            <PlusCircle className="w-4 h-4 mr-2" />
+                            Add URL
+                        </Button>
+                        </div>
+                       </div>
+                    </Step>
+                    
+                    <Step step={3} title="Job Description" description="Paste the full text of the job description below.">
+                       <Textarea
+                          placeholder="Paste job description here..."
+                          value={jobDescription}
+                          onChange={(e) => setJobDescription(e.target.value)}
+                          required
+                          className="min-h-[150px] text-sm"
+                          />
+                    </Step>
+                  </div>
                 </div>
 
-
-                <Step step={3} title="Job Description" description="Paste the full text of the job description below.">
-                     <Textarea
-                        placeholder="Paste job description here..."
-                        value={jobDescription}
-                        onChange={(e) => setJobDescription(e.target.value)}
-                        required
-                        className="min-h-[150px] text-sm"
-                        />
-                </Step>
-                
                 <div className="w-full space-y-4">
                   <Card>
                     <CardHeader>
