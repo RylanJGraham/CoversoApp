@@ -17,7 +17,7 @@
 }
 
 .glass-container__front {
-  background-color: hsla(0, 0%, 100%, 0.15);
+  background-color: hsla(141, 71%, 47%, 0.25);
   box-shadow: 0 0 0 0.1em hsla(0, 0%, 100%, 0.3) inset;
   backdrop-filter: blur(0.75em);
   -webkit-backdrop-filter: blur(0.75em);
