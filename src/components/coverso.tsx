@@ -194,8 +194,8 @@ export function Coverso() {
                     {step}
                 </div>
                 <div>
-                    <CardTitle className="text-black">{title}</CardTitle>
-                    <CardDescription className="text-gray-600">{description}</CardDescription>
+                    <CardTitle>{title}</CardTitle>
+                    <CardDescription>{description}</CardDescription>
                 </div>
                 </div>
             </CardHeader>
@@ -207,7 +207,7 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <header className="h-[900px] w-full relative">
+      <header className="h-[600px] w-full relative">
         <div className="absolute inset-0 z-10 grid grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
                 <div className="flex flex-col items-start justify-center">
@@ -244,23 +244,23 @@ export function Coverso() {
                     <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter.">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                          <Label htmlFor="fullName" className="text-gray-600">Full Name*</Label>
+                          <Label htmlFor="fullName">Full Name*</Label>
                           <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
                           </div>
                           <div className="space-y-2">
-                          <Label htmlFor="location" className="text-gray-600">Location*</Label>
+                          <Label htmlFor="location">Location*</Label>
                           <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
                           </div>
                           <div className="space-y-2">
-                          <Label htmlFor="phone" className="text-gray-600">Phone Number</Label>
+                          <Label htmlFor="phone">Phone Number</Label>
                           <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
                           </div>
                           <div className="space-y-2">
-                          <Label htmlFor="email" className="text-gray-600">Email</Label>
+                          <Label htmlFor="email">Email</Label>
                           <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
                           </div>
                           <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="linkedin" className="text-gray-600">LinkedIn Profile URL</Label>
+                          <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
                           <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
                           </div>
                       </div>
@@ -286,7 +286,7 @@ export function Coverso() {
                         </div>
                         {files.length > 0 && (
                         <div className="space-y-2">
-                            <Label className="text-gray-600">Uploaded Files:</Label>
+                            <Label>Uploaded Files:</Label>
                             <ul className="space-y-2">
                             {files.map((file, index) => (
                                 <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-secondary">
@@ -304,7 +304,7 @@ export function Coverso() {
                         </div>
                         )}
                         <div className="space-y-2">
-                        <Label className="text-gray-600">Portfolio / Document URLs</Label>
+                        <Label>Portfolio / Document URLs</Label>
                         {portfolioUrls.map((url, index) => (
                             <div key={index} className="flex items-center gap-2">
                             <Input 
@@ -336,8 +336,8 @@ export function Coverso() {
                                     3
                                     </div>
                                     <div>
-                                    <CardTitle className="text-black">Job Description</CardTitle>
-                                    <CardDescription className="text-gray-600">Paste the full text of the job description below.</CardDescription>
+                                    <CardTitle>Job Description</CardTitle>
+                                    <CardDescription>Paste the full text of the job description below.</CardDescription>
                                     </div>
                                 </div>
                             </CardHeader>
@@ -347,7 +347,7 @@ export function Coverso() {
                                     value={jobDescription}
                                     onChange={(e) => setJobDescription(e.target.value)}
                                     required
-                                    className="min-h-[300px] text-sm h-full"
+                                    className="min-h-[300px] h-full"
                                 />
                             </CardContent>
                         </div>
@@ -356,32 +356,32 @@ export function Coverso() {
                         <CardHeader className="p-0">
                             <div className="flex items-start gap-4">
                                 <div>
-                                <CardTitle className="text-black">Customize</CardTitle>
-                                <CardDescription className="text-gray-600">Guide the AI's writing style and include key information.</CardDescription>
+                                <CardTitle>Customize</CardTitle>
+                                <CardDescription>Guide the AI's writing style and include key information.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-3">
-                                <Label className="text-gray-600">Choose a Tone</Label>
+                                <Label>Choose a Tone</Label>
                                 <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
                                     {["Professional", "Enthusiastic", "Formal", "Creative"].map((t) => (
                                         <div key={t} className="flex items-center space-x-2">
                                             <RadioGroupItem value={t} id={`r-${t}`} />
-                                            <Label htmlFor={`r-${t}`} className="text-gray-600">{t}</Label>
+                                            <Label htmlFor={`r-${t}`}>{t}</Label>
                                         </div>
                                     ))}
                                 </RadioGroup>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="mustHaveInfo" className="text-gray-600">Must-Have Information</Label>
+                                    <Label htmlFor="mustHaveInfo">Must-Have Information</Label>
                                     <Textarea
                                     id="mustHaveInfo"
                                     placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
                                     value={mustHaveInfo}
                                     onChange={(e) => setMustHaveInfo(e.target.value)}
-                                    className="min-h-[100px] text-sm"
+                                    className="min-h-[100px]"
                                 />
                                 </div>
                                 
@@ -404,8 +404,8 @@ export function Coverso() {
                     <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2} >
                         <div className="min-h-[60vh] flex flex-col w-full rounded-2xl p-6">
                             <CardHeader>
-                                <CardTitle className="text-black">Your Generated Cover Letter</CardTitle>
-                                <CardDescription className="text-gray-600">The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
+                                <CardTitle>Your Generated Cover Letter</CardTitle>
+                                <CardDescription>The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow flex flex-col">
                                 {appState === 'loading' && (
@@ -428,7 +428,7 @@ export function Coverso() {
                                     value={generatedCoverLetter}
                                     onChange={(e) => setGeneratedCoverLetter(e.target.value)}
                                     placeholder="Your generated cover letter will appear here..."
-                                    className="flex-grow w-full text-sm resize-none"
+                                    className="flex-grow w-full resize-none"
                                     rows={20}
                                     />
                                     <Button onClick={handleDownload} className="mt-4" disabled={!generatedCoverLetter}>
@@ -445,23 +445,23 @@ export function Coverso() {
                      <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
                         <div className="w-full rounded-2xl p-6">
                             <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-black">
+                            <CardTitle className="flex items-center gap-2">
                                 <BrainCircuit className="h-6 w-6" />
                                 AI Analysis
                             </CardTitle>
-                            <CardDescription className="text-gray-600">Here's what the AI understood from the job posting.</CardDescription>
+                            <CardDescription>Here's what the AI understood from the job posting.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
-                                <h3 className="font-semibold text-black">Job Title</h3>
+                                <h3 className="font-semibold">Job Title</h3>
                                 <p className="text-muted-foreground">{aiResult.jobTitle}</p>
                                 </div>
                                 <div>
-                                <h3 className="font-semibold text-black">Company Name</h3>
+                                <h3 className="font-semibold">Company Name</h3>
                                 <p className="text-muted-foreground">{aiResult.companyName}</p>
                                 </div>
                                 <div>
-                                <h3 className="font-semibold flex items-center gap-2 text-black">
+                                <h3 className="font-semibold flex items-center gap-2">
                                     <ListChecks className="h-5 w-5" />
                                     Key Focus Points
                                 </h3>
