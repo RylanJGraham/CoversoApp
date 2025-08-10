@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'SkillSync',
+  title: 'Coverso',
   description: 'Tailor your CV for any job platform with the power of AI.',
 };
 

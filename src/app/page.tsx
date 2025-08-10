@@ -1,7 +1,7 @@
-import { SkillSync } from '@/components/skill-sync';
+import { Coverso } from '@/components/coverso';
 
 export default function Home() {
   return (
-    <SkillSync />
+    <Coverso />
   );
 }

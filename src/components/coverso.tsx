@@ -46,7 +46,7 @@ const BASE_PROMPT_CHARS = 1500;
 const AVG_COVER_LETTER_CHARS = 2000;
 
 
-export function SkillSync() {
+export function Coverso() {
   const [files, setFiles] = useState<File[]>([]);
   const [jobDescription, setJobDescription] = useState("");
   const [portfolioUrls, setPortfolioUrls] = useState<string[]>([""]);
@@ -255,14 +255,14 @@ export function SkillSync() {
             className="p-8"
           >
               <div className="flex flex-col items-center justify-center">
-                <h1 className="text-6xl font-bold text-foreground">SkillSync</h1>
+                <h1 className="text-6xl font-bold text-foreground">Coverso</h1>
                 <p className="text-2xl font-light text-foreground/80">Speeding Up Your Application</p>
               </div>
           </GlassSurface>
         </div>
       </div>
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8" style={{ backgroundColor: '#ADEBB340' }}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
