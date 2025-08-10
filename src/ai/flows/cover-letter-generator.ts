@@ -94,6 +94,30 @@ You will be provided with the applicant's personal information, their CV, a link
 `,
 });
 
+const normalizeLinkedInUrl = (url: string): string => {
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.hostname.endsWith('linkedin.com')) {
+      // 1. Remove country-specific subdomains
+      urlObj.hostname = 'www.linkedin.com';
+
+      // 2. Find the job ID from the path
+      const pathMatch = urlObj.pathname.match(/\/jobs\/view\/(\d+)/);
+      if (pathMatch && pathMatch[1]) {
+        const jobId = pathMatch[1];
+        // 3. Construct canonical URL and remove query params/fragments
+        return `https://www.linkedin.com/jobs/view/${jobId}/`;
+      }
+    }
+  } catch (e) {
+    // Not a valid URL, return original
+    return url;
+  }
+  // Return original url if it's not a linkedin job url or something is wrong
+  return url.split('?')[0].split('#')[0];
+};
+
+
 const generateCoverLetterFlow = ai.defineFlow(
   {
     name: 'generateCoverLetterFlow',
@@ -101,7 +125,9 @@ const generateCoverLetterFlow = ai.defineFlow(
     outputSchema: GenerateCoverLetterOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const normalizedUrl = normalizeLinkedInUrl(input.jobPostingUrl);
+    const updatedInput = { ...input, jobPostingUrl: normalizedUrl };
+    const {output} = await prompt(updatedInput);
     return output!;
   }
 );
