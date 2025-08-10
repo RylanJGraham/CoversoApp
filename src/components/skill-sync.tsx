@@ -286,7 +286,7 @@ export function SkillSync() {
                   </div>
                   
                   {/* Right Column */}
-                  <div className="w-full flex flex-col gap-8">
+                  <div className="w-full">
                     <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents.">
                        <div className="space-y-4">
                         <div
@@ -346,18 +346,18 @@ export function SkillSync() {
                         </div>
                        </div>
                     </Step>
-                    
-                    <Step step={3} title="Job Description" description="Paste the full text of the job description below.">
-                       <Textarea
-                          placeholder="Paste job description here..."
-                          value={jobDescription}
-                          onChange={(e) => setJobDescription(e.target.value)}
-                          required
-                          className="min-h-[150px] text-sm"
-                          />
-                    </Step>
                   </div>
                 </div>
+
+                <Step step={3} title="Job Description" description="Paste the full text of the job description below.">
+                    <Textarea
+                        placeholder="Paste job description here..."
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        required
+                        className="min-h-[150px] text-sm"
+                    />
+                </Step>
 
                 <div className="w-full space-y-4">
                   <Card>
