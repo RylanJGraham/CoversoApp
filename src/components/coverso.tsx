@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, useMemo, type FC } from "react";
@@ -33,7 +34,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils";
 import Hyperspeed from "./hyperspeed";
-import GlassSurface from "./glass-surface";
 import SpotlightCard from "./spotlight-card";
 
 
@@ -234,19 +234,12 @@ export function Coverso() {
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
       <header className="h-[500px] w-full relative bg-white">
-        <div className="absolute inset-0 z-10 grid grid-cols-3">
-            <div className="col-span-1 flex items-center justify-center p-8">
-                <GlassSurface
-                    backgroundOpacity={0.2}
-                    blur={5}
-                    borderRadius={24}
-                    className="p-8"
-                >
-                    <div className="flex flex-col items-center justify-center text-center">
-                        <h1 className="text-6xl font-bold text-primary">Coverso</h1>
-                        <p className="text-2xl font-light text-foreground/80">Speeding Up Your Application</p>
-                    </div>
-                </GlassSurface>
+        <div className="absolute inset-0 z-10 grid grid-cols-3 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="col-span-1 flex items-center justify-start p-8">
+                <div className="flex flex-col items-start justify-center text-left">
+                    <h1 className="text-6xl font-bold text-primary">Coverso</h1>
+                    <p className="text-2xl font-light text-black">Speeding Up Your Application</p>
+                </div>
             </div>
         </div>
         <div className="absolute inset-0 h-full w-full">
@@ -265,10 +258,11 @@ export function Coverso() {
             }}
             />
         </div>
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
       </header>
 
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
@@ -527,3 +521,5 @@ export function Coverso() {
     </div>
   );
 }
+
+    
