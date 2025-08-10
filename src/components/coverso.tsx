@@ -235,8 +235,8 @@ export function Coverso() {
     <TooltipProvider>
     <div className="flex flex-col min-h-screen font-body bg-white">
       <div className="w-full h-16 bg-white">
-        <div className="h-full flex items-center justify-end max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Button variant="ghost" className="text-primary font-bold hover:bg-primary hover:text-primary-foreground">Login</Button>
+        <div className="h-full flex items-center justify-end px-4 sm:px-6 lg:px-8">
+            <Button variant="ghost" className="text-primary hover:bg-primary hover:text-primary-foreground text-lg">Login</Button>
         </div>
       </div>
       <header className="h-[400px] w-full relative">
