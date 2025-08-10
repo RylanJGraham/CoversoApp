@@ -39,14 +39,6 @@ import TiltedCard from "./TiltedCard";
 
 type AppState = "idle" | "loading" | "success" | "error";
 
-// Pricing for Gemini 1.5 Flash (as a reference for gemini-2.0-flash)
-const INPUT_PRICE_PER_1K_CHARS = 0.000125;
-const OUTPUT_PRICE_PER_1K_CHARS = 0.000250;
-// Rough estimate of a base prompt size + output size
-const BASE_PROMPT_CHARS = 1500;
-const AVG_COVER_LETTER_CHARS = 2000;
-
-
 export function Coverso() {
   const [files, setFiles] = useState<File[]>([]);
   const [jobDescription, setJobDescription] = useState("");
@@ -66,27 +58,6 @@ export function Coverso() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-
-  const estimatedCost = useMemo(() => {
-    const personalInfoChars = fullName.length + userLocation.length + phone.length + email.length + linkedinUrl.length;
-    const jobDescChars = jobDescription.length;
-    const portfolioUrlChars = portfolioUrls.join('').length;
-    const mustHaveChars = mustHaveInfo.length;
-    // We can't know the file content length without reading them, so we'll add a rough estimate per file.
-    const avgFileChars = 5000; // Estimate 5k characters per document
-    const fileChars = files.length * avgFileChars;
-    
-    const totalInputChars = personalInfoChars + jobDescChars + portfolioUrlChars + fileChars + BASE_PROMPT_CHARS + mustHaveChars;
-    
-    const inputCost = (totalInputChars / 1000) * INPUT_PRICE_PER_1K_CHARS;
-    const outputCost = (AVG_COVER_LETTER_CHARS / 1000) * OUTPUT_PRICE_PER_1K_CHARS;
-
-    const totalCost = inputCost + outputCost;
-    
-    // Format to 6 decimal places for small costs
-    return totalCost.toFixed(6);
-  }, [fullName, userLocation, phone, email, linkedinUrl, jobDescription, portfolioUrls, files, mustHaveInfo]);
-
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -235,8 +206,8 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <header className="h-[300px] w-full relative bg-white">
-        <div className="absolute inset-0 z-10 grid grid-cols-3 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="h-[225px] w-full relative">
+        <div className="absolute inset-0 z-10 grid grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
                 <div className="flex flex-col items-start justify-center">
                     <h1 className="text-6xl font-bold text-primary">Coverso</h1>
@@ -264,7 +235,7 @@ export function Coverso() {
       </header>
 
 
-      <main className="flex-grow w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
@@ -412,25 +383,7 @@ export function Coverso() {
                                     className="min-h-[100px] text-sm"
                                 />
                                 </div>
-                                <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground pt-4">
-                                    <div className="flex items-center gap-2">
-                                    <DollarSign className="h-5 w-5 text-green-500" />
-                                    <span className="font-semibold">Estimated Cost:</span>
-                                    <span>${estimatedCost}</span>
-                                    </div>
-                                    <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                        <Info className="h-4 w-4 cursor-help" />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                        <p className="max-w-[200px] text-xs">
-                                            This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
-                                        </p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    </TooltipProvider>
-                                </div>
+                                
 
                                 <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
                                     {appState === 'loading' ? (
@@ -445,6 +398,7 @@ export function Coverso() {
                     </div>
                 </div>
 
+                {appState !== 'idle' && (
                 <div className="w-full space-y-4">
                     <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2} >
                         <div className="min-h-[60vh] flex flex-col w-full rounded-2xl p-6">
@@ -528,6 +482,7 @@ export function Coverso() {
                     </TiltedCard>
                     )}
                 </div>
+                )}
             </div>
         </form>
       </main>
