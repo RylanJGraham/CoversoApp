@@ -257,8 +257,8 @@ export function Coverso() {
                     </div>
                 </div>
             </div>
-             <div className="col-span-1 hidden md:flex items-center justify-center p-8">
-                <div className="bg-primary rounded-2xl p-8 text-center text-primary-foreground w-full max-w-sm">
+             <div className="col-span-1 hidden md:flex items-center justify-end p-8">
+                <div className="bg-primary/20 rounded-2xl p-8 text-center text-primary-foreground w-full max-w-sm shadow-lg">
                     <h3 className="text-2xl font-bold">Resumes Created Today</h3>
                     <p className="text-6xl font-mono font-bold mt-4">100</p>
                 </div>
@@ -547,7 +547,3 @@ export function Coverso() {
     </TooltipProvider>
   );
 }
-
-    
-
-    
