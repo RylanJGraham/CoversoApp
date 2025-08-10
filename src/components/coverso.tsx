@@ -187,7 +187,7 @@ export function Coverso() {
     className?: string;
   }> = ({ step, title, description, children, className }) => (
      <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-        <div className={cn("w-full rounded-2xl p-4 h-full", className)}>
+        <div className={cn("w-full rounded-2xl p-4 h-full flex flex-col", className)}>
             <CardHeader className="p-4">
                 <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
@@ -199,7 +199,7 @@ export function Coverso() {
                 </div>
                 </div>
             </CardHeader>
-            <CardContent className="p-4 pt-0">{children}</CardContent>
+            <CardContent className="p-4 pt-0 flex-grow">{children}</CardContent>
         </div>
     </TiltedCard>
   );
@@ -207,10 +207,10 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <div className="w-full h-16 bg-primary">
+      <div className="w-full h-16 bg-background border-b">
         <div className="h-full flex items-center justify-between max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-            <span className="font-bold text-primary-foreground">Coverso</span>
-            <Button variant="outline" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">Login</Button>
+            <span className="font-bold text-primary">Coverso</span>
+            <Button variant="ghost" className="text-primary hover:bg-primary/10">Login</Button>
         </div>
       </div>
       <header className="h-[400px] w-full relative">
