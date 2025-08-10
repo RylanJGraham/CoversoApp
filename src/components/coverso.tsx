@@ -235,8 +235,8 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <header className="h-[500px] w-full relative bg-white">
-        <div className="absolute inset-0 z-10 grid grid-cols-3 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="h-[400px] w-full relative bg-white">
+        <div className="absolute inset-0 z-10 grid grid-cols-3 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8">
                 <div className="flex flex-col items-start justify-center text-left">
                     <h1 className="text-6xl font-bold text-primary">Coverso</h1>
@@ -244,7 +244,7 @@ export function Coverso() {
                 </div>
             </div>
         </div>
-        <div className="absolute inset-0 h-full w-full">
+        <div className="absolute inset-0 h-full w-full z-0">
             <Hyperspeed
             effectOptions={{
                 colors: {
@@ -264,7 +264,7 @@ export function Coverso() {
       </header>
 
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
