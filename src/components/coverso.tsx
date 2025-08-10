@@ -207,7 +207,12 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <div className="w-full h-16 bg-primary"></div>
+      <div className="w-full h-16 bg-primary">
+        <div className="h-full flex items-center justify-between max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+            <span className="font-bold text-primary-foreground">Coverso</span>
+            <Button variant="outline" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">Login</Button>
+        </div>
+      </div>
       <header className="h-[400px] w-full relative">
         <div className="absolute inset-0 z-10 grid grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
@@ -482,3 +487,5 @@ export function Coverso() {
     </div>
   );
 }
+
+    
