@@ -33,7 +33,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils";
 import Hyperspeed from "./hyperspeed";
-import GlassContainer from "./glass-container";
+import GlassSurface from "./glass-surface";
+
 
 type AppState = "idle" | "loading" | "success" | "error";
 
@@ -246,11 +247,18 @@ export function SkillSync() {
             }
           }}
         />
-        <div className="absolute inset-0 flex items-center justify-center">
-            <GlassContainer>
+        <div className="absolute inset-0 flex items-center justify-center text-center">
+          <GlassSurface
+            backgroundOpacity={0.2}
+            blur={5}
+            borderRadius={24}
+            className="p-8"
+          >
+              <div className="flex flex-col items-center justify-center">
                 <h1 className="text-6xl font-bold text-white">SkillSync</h1>
                 <p className="text-2xl font-light text-white">Speeding Up Your Application</p>
-            </GlassContainer>
+              </div>
+          </GlassSurface>
         </div>
       </div>
 
