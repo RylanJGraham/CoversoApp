@@ -34,7 +34,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils";
 import Hyperspeed from "./hyperspeed";
-import SpotlightCard from "./spotlight-card";
+import TiltedCard from "./TiltedCard";
 
 
 type AppState = "idle" | "loading" | "success" | "error";
@@ -214,20 +214,22 @@ export function Coverso() {
     children: React.ReactNode;
     className?: string;
   }> = ({ step, title, description, children, className }) => (
-    <SpotlightCard className={cn("w-full", className)} spotlightColor="rgba(16, 185, 129, 0.2)">
-      <CardHeader>
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
-            {step}
-          </div>
-          <div>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
+     <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+        <div className={cn("w-full bg-white rounded-2xl p-6", className)}>
+            <CardHeader>
+                <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
+                    {step}
+                </div>
+                <div>
+                    <CardTitle>{title}</CardTitle>
+                    <CardDescription>{description}</CardDescription>
+                </div>
+                </div>
+            </CardHeader>
+            <CardContent>{children}</CardContent>
         </div>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </SpotlightCard>
+    </TiltedCard>
   );
 
 
@@ -353,166 +355,202 @@ export function Coverso() {
                     </Step>
                 </div>
 
-                <Step step={3} title="Job Description" description="Paste the full text of the job description below.">
-                    <Textarea
-                        placeholder="Paste job description here..."
-                        value={jobDescription}
-                        onChange={(e) => setJobDescription(e.target.value)}
-                        required
-                        className="min-h-[200px] text-sm"
-                    />
-                </Step>
+                <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+                    <div className="w-full bg-white rounded-2xl p-6">
+                        <CardHeader>
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
+                                3
+                                </div>
+                                <div>
+                                <CardTitle>Job Description</CardTitle>
+                                <CardDescription>Paste the full text of the job description below.</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <Textarea
+                                placeholder="Paste job description here..."
+                                value={jobDescription}
+                                onChange={(e) => setJobDescription(e.target.value)}
+                                required
+                                className="min-h-[200px] text-sm"
+                            />
+                        </CardContent>
+                    </div>
+                </TiltedCard>
 
-                <Step step={4} title="Tone & Style" description="Guide the AI's writing style and include key information.">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                       <Label>Choose a Tone</Label>
-                       <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
-                          {["Professional", "Enthusiastic", "Formal", "Creative"].map((t) => (
-                             <div key={t} className="flex items-center space-x-2">
-                                <RadioGroupItem value={t} id={`r-${t}`} />
-                                <Label htmlFor={`r-${t}`}>{t}</Label>
-                              </div>
-                          ))}
-                       </RadioGroup>
+                 <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+                     <div className="w-full bg-white rounded-2xl p-6">
+                        <CardHeader>
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
+                                4
+                                </div>
+                                <div>
+                                <CardTitle>Tone & Style</CardTitle>
+                                <CardDescription>Guide the AI's writing style and include key information.</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                <Label>Choose a Tone</Label>
+                                <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
+                                    {["Professional", "Enthusiastic", "Formal", "Creative"].map((t) => (
+                                        <div key={t} className="flex items-center space-x-2">
+                                            <RadioGroupItem value={t} id={`r-${t}`} />
+                                            <Label htmlFor={`r-${t}`}>{t}</Label>
+                                        </div>
+                                    ))}
+                                </RadioGroup>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="mustHaveInfo">Must-Have Information</Label>
+                                    <Textarea
+                                    id="mustHaveInfo"
+                                    placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
+                                    value={mustHaveInfo}
+                                    onChange={(e) => setMustHaveInfo(e.target.value)}
+                                    className="min-h-[100px] text-sm"
+                                />
+                                </div>
+                            </div>
+                        </CardContent>
                     </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="mustHaveInfo">Must-Have Information</Label>
-                        <Textarea
-                          id="mustHaveInfo"
-                          placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
-                          value={mustHaveInfo}
-                          onChange={(e) => setMustHaveInfo(e.target.value)}
-                          className="min-h-[100px] text-sm"
-                      />
-                    </div>
-                  </div>
-                </Step>
+                </TiltedCard>
 
 
                 <div className="w-full space-y-4">
-                  <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.2)">
-                    <CardHeader>
-                       <div className="flex items-start gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-2xl font-bold text-primary-foreground">
-                            5
-                          </div>
-                          <div>
-                            <CardTitle>Generate</CardTitle>
-                            <CardDescription>All set! Click the button below to generate your cover letter.</CardDescription>
-                          </div>
+                  <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+                    <div className="w-full bg-white rounded-2xl p-6">
+                        <CardHeader>
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-2xl font-bold text-primary-foreground">
+                                5
+                            </div>
+                            <div>
+                                <CardTitle>Generate</CardTitle>
+                                <CardDescription>All set! Click the button below to generate your cover letter.</CardDescription>
+                            </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                        <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground mb-4">
+                            <div className="flex items-center gap-2">
+                            <DollarSign className="h-5 w-5 text-green-500" />
+                            <span className="font-semibold">Estimated Cost:</span>
+                            <span>${estimatedCost}</span>
+                            </div>
+                            <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                <p className="max-w-[200px] text-xs">
+                                    This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
+                                </p>
+                                </TooltipContent>
+                            </Tooltip>
+                            </TooltipProvider>
                         </div>
-                    </CardHeader>
-                    <CardContent>
-                       <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground mb-4">
-                          <div className="flex items-center gap-2">
-                          <DollarSign className="h-5 w-5 text-green-500" />
-                          <span className="font-semibold">Estimated Cost:</span>
-                          <span>${estimatedCost}</span>
-                          </div>
-                          <TooltipProvider>
-                          <Tooltip>
-                              <TooltipTrigger asChild>
-                              <Info className="h-4 w-4 cursor-help" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                              <p className="max-w-[200px] text-xs">
-                                  This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
-                              </p>
-                              </TooltipContent>
-                          </Tooltip>
-                          </TooltipProvider>
-                      </div>
 
-                      <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
-                          {appState === 'loading' ? (
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                          ) : (
-                          <Wand2 className="w-5 h-5 mr-2" />
-                          )}
-                          {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
-                      </Button>
-                    </CardContent>
-                  </SpotlightCard>
+                        <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
+                            {appState === 'loading' ? (
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            ) : (
+                            <Wand2 className="w-5 h-5 mr-2" />
+                            )}
+                            {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
+                        </Button>
+                        </CardContent>
+                    </div>
+                  </TiltedCard>
                 </div>
 
                 <div className="w-full space-y-4">
-                    <SpotlightCard className="min-h-[60vh] flex flex-col" spotlightColor="rgba(16, 185, 129, 0.2)">
-                        <CardHeader>
-                            <CardTitle>Your Generated Cover Letter</CardTitle>
-                            <CardDescription>The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-grow flex flex-col">
-                            {appState === 'loading' && (
-                            <div className="flex-grow flex flex-col items-center justify-center text-center">
-                                <Loader2 className="w-12 h-12 mb-4 animate-spin text-primary" />
-                                <p className="font-semibold">The Alchemist is at work...</p>
-                                <p className="text-sm text-muted-foreground">Analyzing your documents and the job posting.</p>
-                            </div>
-                            )}
-                            {appState === 'idle' && (
-                            <div className="flex-grow flex flex-col items-center justify-center text-center p-4 border-2 border-dashed rounded-lg">
-                                <Wand2 className="w-12 h-12 mb-4 text-muted-foreground" />
-                                <p className="font-semibold">Ready for Magic</p>
-                                <p className="text-sm text-muted-foreground">Fill in the details above to generate your cover letter.</p>
-                            </div>
-                            )}
-                            {appState === 'error' && (
-                            <div className="flex-grow flex flex-col items-center justify-center text-center text-destructive">
-                                <AlertCircle className="w-12 h-12 mb-4" />
-                                <p className="font-semibold">An Error Occurred</p>
-                                <p className="text-sm">{error}</p>
-                            </div>
-                            )}
-                            {appState === 'success' && (
-                            <div className="flex-grow flex flex-col">
-                                <Textarea
-                                value={generatedCoverLetter}
-                                onChange={(e) => setGeneratedCoverLetter(e.target.value)}
-                                placeholder="Your generated cover letter will appear here..."
-                                className="flex-grow w-full text-sm resize-none"
-                                rows={20}
-                                />
-                                <Button onClick={handleDownload} className="mt-4" disabled={!generatedCoverLetter}>
-                                <Download className="w-4 h-4 mr-2" />
-                                Download as Markdown
-                                </Button>
-                            </div>
-                            )}
-                        </CardContent>
-                    </SpotlightCard>
+                    <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2} >
+                        <div className="min-h-[60vh] flex flex-col w-full bg-white rounded-2xl p-6">
+                            <CardHeader>
+                                <CardTitle>Your Generated Cover Letter</CardTitle>
+                                <CardDescription>The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-grow flex flex-col">
+                                {appState === 'loading' && (
+                                <div className="flex-grow flex flex-col items-center justify-center text-center">
+                                    <Loader2 className="w-12 h-12 mb-4 animate-spin text-primary" />
+                                    <p className="font-semibold">The Alchemist is at work...</p>
+                                    <p className="text-sm text-muted-foreground">Analyzing your documents and the job posting.</p>
+                                </div>
+                                )}
+                                {appState === 'idle' && (
+                                <div className="flex-grow flex flex-col items-center justify-center text-center p-4 border-2 border-dashed rounded-lg">
+                                    <Wand2 className="w-12 h-12 mb-4 text-muted-foreground" />
+                                    <p className="font-semibold">Ready for Magic</p>
+                                    <p className="text-sm text-muted-foreground">Fill in the details above to generate your cover letter.</p>
+                                </div>
+                                )}
+                                {appState === 'error' && (
+                                <div className="flex-grow flex flex-col items-center justify-center text-center text-destructive">
+                                    <AlertCircle className="w-12 h-12 mb-4" />
+                                    <p className="font-semibold">An Error Occurred</p>
+                                    <p className="text-sm">{error}</p>
+                                </div>
+                                )}
+                                {appState === 'success' && (
+                                <div className="flex-grow flex flex-col">
+                                    <Textarea
+                                    value={generatedCoverLetter}
+                                    onChange={(e) => setGeneratedCoverLetter(e.target.value)}
+                                    placeholder="Your generated cover letter will appear here..."
+                                    className="flex-grow w-full text-sm resize-none"
+                                    rows={20}
+                                    />
+                                    <Button onClick={handleDownload} className="mt-4" disabled={!generatedCoverLetter}>
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Download as Markdown
+                                    </Button>
+                                </div>
+                                )}
+                            </CardContent>
+                        </div>
+                    </TiltedCard>
                     
                     {appState === 'success' && aiResult && (
-                    <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.2)">
-                        <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <BrainCircuit className="h-6 w-6" />
-                            AI Analysis
-                        </CardTitle>
-                        <CardDescription>Here's what the AI understood from the job posting.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
-                            <h3 className="font-semibold">Job Title</h3>
-                            <p className="text-muted-foreground">{aiResult.jobTitle}</p>
-                            </div>
-                            <div>
-                            <h3 className="font-semibold">Company Name</h3>
-                            <p className="text-muted-foreground">{aiResult.companyName}</p>
-                            </div>
-                            <div>
-                            <h3 className="font-semibold flex items-center gap-2">
-                                <ListChecks className="h-5 w-5" />
-                                Key Focus Points
-                            </h3>
-                            <ul className="list-disc pl-5 mt-2 space-y-1 text-muted-foreground">
-                                {aiResult.keyFocusPoints.map((point, index) => (
-                                <li key={index}>{point}</li>
-                                ))}
-                            </ul>
-                            </div>
-                        </CardContent>
-                    </SpotlightCard>
+                     <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+                        <div className="w-full bg-white rounded-2xl p-6">
+                            <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <BrainCircuit className="h-6 w-6" />
+                                AI Analysis
+                            </CardTitle>
+                            <CardDescription>Here's what the AI understood from the job posting.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                <h3 className="font-semibold">Job Title</h3>
+                                <p className="text-muted-foreground">{aiResult.jobTitle}</p>
+                                </div>
+                                <div>
+                                <h3 className="font-semibold">Company Name</h3>
+                                <p className="text-muted-foreground">{aiResult.companyName}</p>
+                                </div>
+                                <div>
+                                <h3 className="font-semibold flex items-center gap-2">
+                                    <ListChecks className="h-5 w-5" />
+                                    Key Focus Points
+                                </h3>
+                                <ul className="list-disc pl-5 mt-2 space-y-1 text-muted-foreground">
+                                    {aiResult.keyFocusPoints.map((point, index) => (
+                                    <li key={index}>{point}</li>
+                                    ))}
+                                </ul>
+                                </div>
+                            </CardContent>
+                        </div>
+                    </TiltedCard>
                     )}
                 </div>
             </div>
@@ -521,5 +559,3 @@ export function Coverso() {
     </div>
   );
 }
-
-    
