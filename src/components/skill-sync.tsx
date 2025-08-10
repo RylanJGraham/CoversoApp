@@ -238,10 +238,10 @@ export function SkillSync() {
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
       <div style={{ width: '100%', height: '400px', position: 'relative' }}>
-        <DarkVeil />
+        <DarkVeil hueShift={-180} />
       </div>
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 -mt-48">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 -mt-48 z-10">
         <div className="mb-8 p-6 bg-card/80 backdrop-blur-sm rounded-lg shadow-2xl">
           <div className="flex items-center gap-3">
               <FlaskConical className="h-8 w-8 text-primary" />

@@ -68,11 +68,15 @@ void mainImage(out vec4 fragColor,in vec2 fragCoord){
 
 void main(){
     vec4 col;mainImage(col,gl_FragCoord.xy);
-    col.rgb=hueShiftRGB(col.rgb,uHueShift);
+    vec3 shifted_col = hueShiftRGB(col.rgb,uHueShift);
+
+    // Invert the colors to make the background white and the pattern colored
+    vec3 inverted_col = 1.0 - shifted_col;
+
     float scanline_val=sin(gl_FragCoord.y*uScanFreq)*0.5+0.5;
-    col.rgb*=1.-(scanline_val*scanline_val)*uScan;
-    col.rgb+=(rand(gl_FragCoord.xy+uTime)-0.5)*uNoise;
-    gl_FragColor=vec4(clamp(col.rgb,0.0,1.0),1.0);
+    inverted_col*=1.-(scanline_val*scanline_val)*uScan;
+    inverted_col+=(rand(gl_FragCoord.xy+uTime)-0.5)*uNoise;
+    gl_FragColor=vec4(clamp(inverted_col,0.0,1.0),1.0);
 }
 `;
 
