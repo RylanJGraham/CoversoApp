@@ -36,6 +36,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils";
 import Hyperspeed from "./hyperspeed";
 import TiltedCard from "./TiltedCard";
+import AnimatedCounter from "./AnimatedCounter";
 
 
 type AppState = "idle" | "loading" | "success" | "error";
@@ -245,23 +246,15 @@ export function Coverso() {
                 <div className="flex flex-col items-start justify-center">
                     <Image src="/Logo2.png" alt="Coverso Logo" width={400} height={100} />
                     <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
-                    <div className="mt-6">
-                      <p className="text-lg font-normal text-gray-700">As Easy As</p>
-                      <div className="flex items-center gap-4 mt-2">
-                        {[1, 2, 3].map(num => (
-                          <div key={num} className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-xl">
-                            {num}
-                          </div>
-                        ))}
-                      </div>
+                    <div className="mt-6 bg-primary text-primary-foreground p-4 rounded-lg text-left">
+                        <h3 className="text-lg font-semibold">Resumes Created Today</h3>
+                        <p className="text-4xl font-mono font-bold mt-1">
+                          <AnimatedCounter to={100} />
+                        </p>
                     </div>
                 </div>
             </div>
              <div className="col-span-1 hidden md:flex items-center justify-end p-8">
-                <div className="bg-primary/70 rounded-2xl p-8 text-center text-primary-foreground w-full max-w-sm shadow-lg">
-                    <h3 className="text-2xl font-bold">Resumes Created Today</h3>
-                    <p className="text-6xl font-mono font-bold mt-4">100</p>
-                </div>
             </div>
         </div>
         <div className="absolute inset-0 h-full w-full z-0 col-start-2 col-span-2">
@@ -409,7 +402,7 @@ export function Coverso() {
                                     value={jobDescription}
                                     onChange={(e) => setJobDescription(e.target.value)}
                                     required
-                                    className="min-h-[200px] h-full"
+                                    className="min-h-[150px] h-full"
                                 />
                                 <Button type="button" variant="default" size="icon" className="absolute bottom-3 right-3 h-8 w-8 bg-primary hover:bg-primary/90" onClick={handlePaste} aria-label="Paste job description">
                                   <ClipboardPaste className="h-4 w-4 text-primary-foreground" />
@@ -426,7 +419,7 @@ export function Coverso() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-4 pt-2 flex-grow flex flex-col gap-4">
+                        <CardContent className="p-4 pt-0 flex-grow flex flex-col gap-4">
                             <div className="space-y-3">
                             <Label className="text-gray-800">Choose a Tone</Label>
                             <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
