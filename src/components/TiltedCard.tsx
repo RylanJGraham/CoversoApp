@@ -1,6 +1,6 @@
-import type { SpringOptions } from "motion";
+import type { SpringOptions } from "framer-motion";
 import { useRef, useState } from "react";
-import { motion, useMotionValue, useSpring } from "motion/react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import "./TiltedCard.css";
 
 interface TiltedCardProps {
@@ -77,6 +77,7 @@ export default function TiltedCard({
       <motion.div
         className="tilted-card-inner"
         style={{
+          // @ts-ignore
           rotateX,
           rotateY,
           scale,
