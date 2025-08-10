@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, type ChangeEvent, useMemo } from "react";
+import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -213,241 +214,249 @@ export function SkillSync() {
       </header>
 
       <main className="flex-grow container mx-auto p-4 md:p-8">
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-6 w-6" />
-                  Personal Info Vault
-                </CardTitle>
-                <CardDescription>Enter your personal details to be included in the cover letter.</CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name*</Label>
-                  <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
-                </div>
-                 <div className="space-y-2">
-                  <Label htmlFor="location">Location*</Label>
-                  <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
-                  <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileUp className="h-6 w-6" />
-                  Portfolio Vault
-                </CardTitle>
-                <CardDescription>Upload your CV, supporting documents, and add links to online portfolios.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                 <div
-                  className="relative flex flex-col items-center justify-center w-full p-6 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <UploadCloud className="w-10 h-10 mb-2 text-muted-foreground" />
-                  <p className="font-semibold text-primary">Click to upload files</p>
-                  <p className="text-xs text-muted-foreground">PDF, DOCX, TXT. Ensure one file is your CV.</p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="hidden"
-                    multiple
-                    accept=".pdf,.doc,.docx,.txt"
-                    onChange={handleFileChange}
-                  />
-                </div>
-                {files.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Uploaded Files:</Label>
-                    <ul className="space-y-2">
-                      {files.map((file, index) => (
-                        <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-secondary">
-                          <div className="flex items-center gap-2 truncate">
-                            <FileText className="w-4 h-4 shrink-0" />
-                            <span className="truncate">{file.name}</span>
-                             {(file.name.toLowerCase().includes('cv') || file.name.toLowerCase().includes('resume')) && <Badge variant="outline">CV</Badge>}
-                          </div>
-                          <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <Label>Portfolio / Document URLs</Label>
-                  {portfolioUrls.map((url, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Input 
-                        type="url" 
-                        placeholder="https://docs.google.com/document/d/..." 
-                        value={url} 
-                        onChange={(e) => handlePortfolioUrlChange(index, e.target.value)} 
-                      />
-                       <Button variant="ghost" size="icon" className="w-8 h-8 shrink-0" onClick={() => removePortfolioUrlInput(index)} aria-label="Remove URL">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  <Button type="button" variant="outline" size="sm" onClick={addPortfolioUrlInput}>
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Add URL
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ClipboardPaste className="h-6 w-6" />
-                  Job Description
-                </CardTitle>
-                <CardDescription>Paste the full text of the job description below.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                 <Textarea
-                  placeholder="Paste job description here..."
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  required
-                  className="min-h-[150px] text-sm"
-                />
-              </CardContent>
-            </Card>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-green-500" />
-                  <span className="font-semibold">Estimated Cost:</span>
-                  <span>${estimatedCost}</span>
-                </div>
-                 <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-[200px] text-xs">
-                        This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-
-              <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
-                {appState === 'loading' ? (
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                ) : (
-                  <Wand2 className="w-5 h-5 mr-2" />
-                )}
-                {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
-              </Button>
-            </div>
-          </div>
-          
-          <div className="lg:sticky top-28 space-y-4">
-            <Card className="min-h-[60vh] flex flex-col">
-              <CardHeader>
-                <CardTitle>Your Generated Cover Letter</CardTitle>
-                <CardDescription>The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow flex flex-col">
-                {appState === 'loading' && (
-                  <div className="flex-grow flex flex-col items-center justify-center text-center">
-                    <Loader2 className="w-12 h-12 mb-4 animate-spin text-primary" />
-                    <p className="font-semibold">The Alchemist is at work...</p>
-                    <p className="text-sm text-muted-foreground">Analyzing your documents and the job posting.</p>
-                  </div>
-                )}
-                 {appState === 'idle' && (
-                  <div className="flex-grow flex flex-col items-center justify-center text-center p-4 border-2 border-dashed rounded-lg">
-                    <Wand2 className="w-12 h-12 mb-4 text-muted-foreground" />
-                    <p className="font-semibold">Ready for Magic</p>
-                    <p className="text-sm text-muted-foreground">Fill in the details on the left to generate your cover letter.</p>
-                  </div>
-                )}
-                {appState === 'error' && (
-                  <div className="flex-grow flex flex-col items-center justify-center text-center text-destructive">
-                    <AlertCircle className="w-12 h-12 mb-4" />
-                    <p className="font-semibold">An Error Occurred</p>
-                    <p className="text-sm">{error}</p>
-                  </div>
-                )}
-                {appState === 'success' && (
-                  <div className="flex-grow flex flex-col">
-                    <Textarea
-                      value={generatedCoverLetter}
-                      onChange={(e) => setGeneratedCoverLetter(e.target.value)}
-                      placeholder="Your generated cover letter will appear here..."
-                      className="flex-grow w-full text-sm resize-none"
-                      rows={20}
-                    />
-                     <Button onClick={handleDownload} className="mt-4" disabled={!generatedCoverLetter}>
-                       <Download className="w-4 h-4 mr-2" />
-                       Download as Markdown
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            {appState === 'success' && aiResult && (
-              <Card>
+        <div className="w-full mb-8">
+            <Image 
+              src="https://placehold.co/1200x400.png"
+              alt="Hero image showing a professional work environment"
+              width={1200}
+              height={400}
+              className="w-full h-auto rounded-lg object-cover"
+              data-ai-hint="professional workspace"
+            />
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
+            <div className="w-full max-w-4xl space-y-8">
+                <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BrainCircuit className="h-6 w-6" />
-                    AI Analysis
-                  </CardTitle>
-                  <CardDescription>Here's what the AI understood from the job posting.</CardDescription>
+                    <CardTitle className="flex items-center gap-2">
+                    <User className="h-6 w-6" />
+                    Personal Info Vault
+                    </CardTitle>
+                    <CardDescription>Enter your personal details to be included in the cover letter.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                      <h3 className="font-semibold">Job Title</h3>
-                      <p className="text-muted-foreground">{aiResult.jobTitle}</p>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name*</Label>
+                    <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
                     </div>
-                    <div>
-                      <h3 className="font-semibold">Company Name</h3>
-                      <p className="text-muted-foreground">{aiResult.companyName}</p>
+                    <div className="space-y-2">
+                    <Label htmlFor="location">Location*</Label>
+                    <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
                     </div>
-                    <div>
-                      <h3 className="font-semibold flex items-center gap-2">
-                        <ListChecks className="h-5 w-5" />
-                        Key Focus Points
-                      </h3>
-                      <ul className="list-disc pl-5 mt-2 space-y-1 text-muted-foreground">
-                        {aiResult.keyFocusPoints.map((point, index) => (
-                          <li key={index}>{point}</li>
-                        ))}
-                      </ul>
+                    <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
+                    </div>
+                    <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
+                    <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
                     </div>
                 </CardContent>
-              </Card>
-            )}
-          </div>
+                </Card>
+                
+                <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                    <FileUp className="h-6 w-6" />
+                    Portfolio Vault
+                    </CardTitle>
+                    <CardDescription>Upload your CV, supporting documents, and add links to online portfolios.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div
+                    className="relative flex flex-col items-center justify-center w-full p-6 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
+                    onClick={() => fileInputRef.current?.click()}
+                    >
+                    <UploadCloud className="w-10 h-10 mb-2 text-muted-foreground" />
+                    <p className="font-semibold text-primary">Click to upload files</p>
+                    <p className="text-xs text-muted-foreground">PDF, DOCX, TXT. Ensure one file is your CV.</p>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        className="hidden"
+                        multiple
+                        accept=".pdf,.doc,.docx,.txt"
+                        onChange={handleFileChange}
+                    />
+                    </div>
+                    {files.length > 0 && (
+                    <div className="space-y-2">
+                        <Label>Uploaded Files:</Label>
+                        <ul className="space-y-2">
+                        {files.map((file, index) => (
+                            <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-secondary">
+                            <div className="flex items-center gap-2 truncate">
+                                <FileText className="w-4 h-4 shrink-0" />
+                                <span className="truncate">{file.name}</span>
+                                {(file.name.toLowerCase().includes('cv') || file.name.toLowerCase().includes('resume')) && <Badge variant="outline">CV</Badge>}
+                            </div>
+                            <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                            </li>
+                        ))}
+                        </ul>
+                    </div>
+                    )}
+                    <div className="space-y-2">
+                    <Label>Portfolio / Document URLs</Label>
+                    {portfolioUrls.map((url, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                        <Input 
+                            type="url" 
+                            placeholder="https://docs.google.com/document/d/..." 
+                            value={url} 
+                            onChange={(e) => handlePortfolioUrlChange(index, e.target.value)} 
+                        />
+                        <Button variant="ghost" size="icon" className="w-8 h-8 shrink-0" onClick={() => removePortfolioUrlInput(index)} aria-label="Remove URL">
+                            <Trash2 className="w-4 h-4" />
+                        </Button>
+                        </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={addPortfolioUrlInput}>
+                        <PlusCircle className="w-4 h-4 mr-2" />
+                        Add URL
+                    </Button>
+                    </div>
+                </CardContent>
+                </Card>
+
+                <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                    <ClipboardPaste className="h-6 w-6" />
+                    Job Description
+                    </CardTitle>
+                    <CardDescription>Paste the full text of the job description below.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Textarea
+                    placeholder="Paste job description here..."
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    required
+                    className="min-h-[150px] text-sm"
+                    />
+                </CardContent>
+                </Card>
+                
+                <div className="space-y-4">
+                <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-green-500" />
+                    <span className="font-semibold">Estimated Cost:</span>
+                    <span>${estimatedCost}</span>
+                    </div>
+                    <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                        <Info className="h-4 w-4 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                        <p className="max-w-[200px] text-xs">
+                            This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
+                        </p>
+                        </TooltipContent>
+                    </Tooltip>
+                    </TooltipProvider>
+                </div>
+
+                <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
+                    {appState === 'loading' ? (
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    ) : (
+                    <Wand2 className="w-5 h-5 mr-2" />
+                    )}
+                    {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
+                </Button>
+                </div>
+
+                <div className="w-full max-w-4xl space-y-4">
+                    <Card className="min-h-[60vh] flex flex-col">
+                        <CardHeader>
+                            <CardTitle>Your Generated Cover Letter</CardTitle>
+                            <CardDescription>The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-grow flex flex-col">
+                            {appState === 'loading' && (
+                            <div className="flex-grow flex flex-col items-center justify-center text-center">
+                                <Loader2 className="w-12 h-12 mb-4 animate-spin text-primary" />
+                                <p className="font-semibold">The Alchemist is at work...</p>
+                                <p className="text-sm text-muted-foreground">Analyzing your documents and the job posting.</p>
+                            </div>
+                            )}
+                            {appState === 'idle' && (
+                            <div className="flex-grow flex flex-col items-center justify-center text-center p-4 border-2 border-dashed rounded-lg">
+                                <Wand2 className="w-12 h-12 mb-4 text-muted-foreground" />
+                                <p className="font-semibold">Ready for Magic</p>
+                                <p className="text-sm text-muted-foreground">Fill in the details on the left to generate your cover letter.</p>
+                            </div>
+                            )}
+                            {appState === 'error' && (
+                            <div className="flex-grow flex flex-col items-center justify-center text-center text-destructive">
+                                <AlertCircle className="w-12 h-12 mb-4" />
+                                <p className="font-semibold">An Error Occurred</p>
+                                <p className="text-sm">{error}</p>
+                            </div>
+                            )}
+                            {appState === 'success' && (
+                            <div className="flex-grow flex flex-col">
+                                <Textarea
+                                value={generatedCoverLetter}
+                                onChange={(e) => setGeneratedCoverLetter(e.target.value)}
+                                placeholder="Your generated cover letter will appear here..."
+                                className="flex-grow w-full text-sm resize-none"
+                                rows={20}
+                                />
+                                <Button onClick={handleDownload} className="mt-4" disabled={!generatedCoverLetter}>
+                                <Download className="w-4 h-4 mr-2" />
+                                Download as Markdown
+                                </Button>
+                            </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                    
+                    {appState === 'success' && aiResult && (
+                    <Card>
+                        <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <BrainCircuit className="h-6 w-6" />
+                            AI Analysis
+                        </CardTitle>
+                        <CardDescription>Here's what the AI understood from the job posting.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div>
+                            <h3 className="font-semibold">Job Title</h3>
+                            <p className="text-muted-foreground">{aiResult.jobTitle}</p>
+                            </div>
+                            <div>
+                            <h3 className="font-semibold">Company Name</h3>
+                            <p className="text-muted-foreground">{aiResult.companyName}</p>
+                            </div>
+                            <div>
+                            <h3 className="font-semibold flex items-center gap-2">
+                                <ListChecks className="h-5 w-5" />
+                                Key Focus Points
+                            </h3>
+                            <ul className="list-disc pl-5 mt-2 space-y-1 text-muted-foreground">
+                                {aiResult.keyFocusPoints.map((point, index) => (
+                                <li key={index}>{point}</li>
+                                ))}
+                            </ul>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    )}
+                </div>
+            </div>
         </form>
       </main>
     </div>
   );
 }
-
-    
