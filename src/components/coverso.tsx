@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useRef, type ChangeEvent, useMemo, type FC } from "react";
+import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -206,11 +207,11 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <header className="h-[450px] w-full relative">
+      <header className="h-[900px] w-full relative">
         <div className="absolute inset-0 z-10 grid grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
                 <div className="flex flex-col items-start justify-center">
-                    <h1 className="text-6xl font-bold text-primary">Coverso</h1>
+                    <Image src="/Logo.png" alt="Coverso Logo" width={400} height={100} />
                     <p className="text-2xl font-light text-black">Speeding Up Your Application</p>
                 </div>
             </div>
@@ -414,13 +415,6 @@ export function Coverso() {
                                     <p className="text-sm text-gray-600">Analyzing your documents and the job posting.</p>
                                 </div>
                                 )}
-                                {appState === 'idle' && (
-                                <div className="flex-grow flex flex-col items-center justify-center text-center p-4 border-2 border-dashed rounded-lg">
-                                    <Wand2 className="w-12 h-12 mb-4 text-muted-foreground" />
-                                    <p className="font-semibold text-black">Ready for Magic</p>
-                                    <p className="text-sm text-gray-600">Fill in the details above to generate your cover letter.</p>
-                                </div>
-                                )}
                                 {appState === 'error' && (
                                 <div className="flex-grow flex flex-col items-center justify-center text-center text-destructive">
                                     <AlertCircle className="w-12 h-12 mb-4" />
@@ -489,3 +483,5 @@ export function Coverso() {
     </div>
   );
 }
+
+    
