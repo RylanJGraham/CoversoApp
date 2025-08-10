@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent } from "react";
+import { useState, useRef, type ChangeEvent, useMemo } from "react";
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,9 +26,21 @@ import {
   BrainCircuit,
   ListChecks,
   ClipboardPaste,
+  Info,
+  DollarSign,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 type AppState = "idle" | "loading" | "success" | "error";
+
+// Pricing for Gemini 1.5 Flash (as a reference for gemini-2.0-flash)
+const INPUT_PRICE_PER_1K_CHARS = 0.000125;
+const OUTPUT_PRICE_PER_1K_CHARS = 0.000250;
+// Rough estimate of a base prompt size + output size
+const BASE_PROMPT_CHARS = 1500;
+const AVG_COVER_LETTER_CHARS = 2000;
+
 
 export function SkillSync() {
   const [files, setFiles] = useState<File[]>([]);
@@ -47,6 +59,26 @@ export function SkillSync() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const estimatedCost = useMemo(() => {
+    const personalInfoChars = fullName.length + userLocation.length + phone.length + email.length + linkedinUrl.length;
+    const jobDescChars = jobDescription.length;
+    const portfolioUrlChars = portfolioUrls.join('').length;
+    // We can't know the file content length without reading them, so we'll add a rough estimate per file.
+    const avgFileChars = 5000; // Estimate 5k characters per document
+    const fileChars = files.length * avgFileChars;
+    
+    const totalInputChars = personalInfoChars + jobDescChars + portfolioUrlChars + fileChars + BASE_PROMPT_CHARS;
+    
+    const inputCost = (totalInputChars / 1000) * INPUT_PRICE_PER_1K_CHARS;
+    const outputCost = (AVG_COVER_LETTER_CHARS / 1000) * OUTPUT_PRICE_PER_1K_CHARS;
+
+    const totalCost = inputCost + outputCost;
+    
+    // Format to 6 decimal places for small costs
+    return totalCost.toFixed(6);
+  }, [fullName, userLocation, phone, email, linkedinUrl, jobDescription, portfolioUrls, files]);
+
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -300,15 +332,37 @@ export function SkillSync() {
                 />
               </CardContent>
             </Card>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-green-500" />
+                  <span className="font-semibold">Estimated Cost:</span>
+                  <span>${estimatedCost}</span>
+                </div>
+                 <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-[200px] text-xs">
+                        This is a rough estimate based on the amount of text you provide and the expected length of the generated cover letter. Actual cost may vary.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
 
-            <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
-              {appState === 'loading' ? (
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              ) : (
-                <Wand2 className="w-5 h-5 mr-2" />
-              )}
-              {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
-            </Button>
+              <Button type="submit" size="lg" className="w-full" disabled={appState === 'loading'}>
+                {appState === 'loading' ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <Wand2 className="w-5 h-5 mr-2" />
+                )}
+                {appState === 'loading' ? "Drafting Your Cover Letter..." : "Generate Cover Letter"}
+              </Button>
+            </div>
           </div>
           
           <div className="lg:sticky top-28 space-y-4">
@@ -395,3 +449,5 @@ export function SkillSync() {
     </div>
   );
 }
+
+    
