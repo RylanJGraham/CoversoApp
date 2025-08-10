@@ -255,8 +255,8 @@ export function SkillSync() {
             className="p-8"
           >
               <div className="flex flex-col items-center justify-center">
-                <h1 className="text-6xl font-bold text-emerald-50">SkillSync</h1>
-                <p className="text-2xl font-light text-emerald-100">Speeding Up Your Application</p>
+                <h1 className="text-6xl font-bold text-foreground">SkillSync</h1>
+                <p className="text-2xl font-light text-foreground/80">Speeding Up Your Application</p>
               </div>
           </GlassSurface>
         </div>
