@@ -353,7 +353,7 @@ export function Coverso() {
                         </div>
                     </TiltedCard>
                      <div className="w-full rounded-2xl p-4 space-y-6 flex flex-col">
-                        <CardHeader className="p-4">
+                        <CardHeader className="p-4 pb-2">
                             <div className="flex items-start gap-4">
                                 <div>
                                 <CardTitle className="text-black">Customize</CardTitle>
@@ -361,7 +361,7 @@ export function Coverso() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-4 pt-0 flex-grow flex flex-col gap-4">
+                        <CardContent className="p-4 pt-2 flex-grow flex flex-col gap-4">
                             <div className="space-y-3">
                             <Label className="text-gray-800">Choose a Tone</Label>
                             <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-4">
