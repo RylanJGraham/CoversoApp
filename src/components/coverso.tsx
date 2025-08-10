@@ -1,9 +1,9 @@
 
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, useMemo, type FC } from "react";
 import Image from 'next/image';
+import Link from 'next/link';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -237,8 +237,14 @@ export function Coverso() {
     <TooltipProvider>
     <div className="flex flex-col min-h-screen font-body bg-white">
       <div className="w-full h-16 bg-white">
-        <div className="h-full flex items-center justify-end px-4 sm:px-6 lg:px-8">
-            <Button variant="ghost" className="text-primary hover:bg-primary hover:text-primary-foreground text-lg">Login</Button>
+        <div className="h-full flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <nav className="flex items-center gap-4">
+              <Link href="/about" className="text-primary hover:underline">About Us</Link>
+              <Link href="/faq" className="text-primary hover:underline">FAQ</Link>
+            </nav>
+            <Button variant="ghost" className="text-primary hover:bg-primary hover:text-primary-foreground text-lg">
+              <Link href="/login">Login</Link>
+            </Button>
         </div>
       </div>
       <header className="h-[400px] w-full relative">
@@ -411,7 +417,7 @@ export function Coverso() {
                                     required
                                     className="min-h-[150px] h-full"
                                 />
-                                <Button type="button" variant="default" size="icon" className="absolute bottom-3 right-3 h-8 w-8 bg-primary hover:bg-primary/90" onClick={handlePaste} aria-label="Paste job description">
+                                <Button type="button" variant="default" size="icon" className="absolute bottom-6 right-6 h-8 w-8 bg-primary hover:bg-primary/90" onClick={handlePaste} aria-label="Paste job description">
                                   <ClipboardPaste className="h-4 w-4 text-primary-foreground" />
                                 </Button>
                             </CardContent>
