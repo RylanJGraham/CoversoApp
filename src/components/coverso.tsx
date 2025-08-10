@@ -232,37 +232,40 @@ export function Coverso() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
-      <div style={{ width: '100%', height: '400px', position: 'relative' }}>
-         <Hyperspeed
-          effectOptions={{
-            colors: {
-              roadColor: 0x080808,
-              islandColor: 0x0a0a0a,
-              background: 0x000000,
-              shoulderLines: 0x131318,
-              brokenLines: 0x131318,
-              leftCars: [0x10B981, 0x10B981, 0x10B981],
-              rightCars: [0x10B981, 0x10B981, 0x10B981],
-              sticks: 0x10B981,
-            }
-          }}
-        />
-        <div className="absolute inset-0 flex items-center justify-center text-center">
-          <GlassSurface
-            backgroundOpacity={0.2}
-            blur={5}
-            borderRadius={24}
-            className="p-8"
-          >
-              <div className="flex flex-col items-center justify-center">
-                <h1 className="text-6xl font-bold text-foreground">Coverso</h1>
-                <p className="text-2xl font-light text-foreground/80">Speeding Up Your Application</p>
-              </div>
-          </GlassSurface>
+      <header className="h-[500px] w-full relative grid grid-cols-3">
+        <div className="col-span-1 flex items-center justify-center p-8">
+            <GlassSurface
+                backgroundOpacity={0.2}
+                blur={5}
+                borderRadius={24}
+                className="p-8"
+            >
+                <div className="flex flex-col items-center justify-center text-center">
+                    <h1 className="text-6xl font-bold text-foreground">Coverso</h1>
+                    <p className="text-2xl font-light text-foreground/80">Speeding Up Your Application</p>
+                </div>
+            </GlassSurface>
         </div>
-      </div>
+        <div className="col-span-2 h-full w-full relative">
+            <Hyperspeed
+            effectOptions={{
+                colors: {
+                roadColor: 0x080808,
+                islandColor: 0x0a0a0a,
+                background: 0x000000,
+                shoulderLines: 0x131318,
+                brokenLines: 0x131318,
+                leftCars: [0x10B981, 0x10B981, 0x10B981],
+                rightCars: [0x10B981, 0x10B981, 0x10B981],
+                sticks: 0x10B981,
+                }
+            }}
+            />
+        </div>
+      </header>
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8" style={{ backgroundColor: '#ADEBB340' }}>
+
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
             <div className="w-full space-y-8">
                 
