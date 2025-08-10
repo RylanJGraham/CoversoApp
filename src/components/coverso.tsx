@@ -231,7 +231,7 @@ export function Coverso() {
 
 
   return (
-    <div className="flex flex-col min-h-screen font-body">
+    <div className="flex flex-col min-h-screen font-body bg-white">
       <header className="h-[500px] w-full relative grid grid-cols-3 bg-white">
         <div className="col-span-1 flex items-center justify-center p-8">
             <GlassSurface
