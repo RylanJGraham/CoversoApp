@@ -1144,7 +1144,7 @@ class App {
   init() {
     this.initPasses();
     const options = this.options;
-    this.road.init();
+    // this.road.init();
     this.leftCarLights.init();
     this.leftCarLights.mesh.position.setX(
       -options.roadWidth / 2 - options.islandWidth / 2
@@ -1193,7 +1193,7 @@ class App {
     this.rightCarLights.update(time);
     this.leftCarLights.update(time);
     this.leftSticks.update(time);
-    this.road.update(time);
+    // this.road.update(time);
 
     let updateCamera = false;
     const fovChange = lerp(this.camera.fov, this.fovTarget, lerpPercentage);
@@ -1307,3 +1307,5 @@ const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {} }) => {
 };
 
 export default Hyperspeed;
+
+    
