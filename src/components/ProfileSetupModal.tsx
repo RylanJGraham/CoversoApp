@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { useState, type FC, type ChangeEvent, useRef, useEffect } from 'react';
+import { useState, type FC, type ChangeEvent, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2, X, CreditCard } from 'lucide-react';
+import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2, X, CreditCard, Ticket } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from 'firebase/auth';
 import { getClientFirestore } from '@/lib/firebase';
@@ -24,6 +24,8 @@ import { useToast } from '@/hooks/use-toast';
 import { createSubscriptionFlow } from '@/ai/flows/stripe-checkout';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Separator } from './ui/separator';
+import { validateDiscountCode } from '@/ai/flows/validate-discount-code';
 
 
 interface ProfileSetupModalProps {
@@ -136,6 +138,11 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  const [discountCode, setDiscountCode] = useState("");
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  const [appliedCodePlan, setAppliedCodePlan] = useState<string | null>(null);
+
+
   const totalSteps = 4;
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, totalSteps));
@@ -205,6 +212,34 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     }
   }
 
+  const handleApplyDiscountCode = async () => {
+    if (!discountCode) return;
+    setIsVerifyingCode(true);
+    try {
+        const result = await validateDiscountCode({ code: discountCode });
+        if (result.isValid && result.planName) {
+            toast({ title: "Code Applied!", description: `You've been upgraded to the ${result.planName} plan.` });
+            setAppliedCodePlan(result.planName);
+        } else {
+            toast({ title: "Invalid Code", description: "That discount code is not valid. Please try again.", variant: "destructive" });
+            setAppliedCodePlan(null);
+        }
+    } catch (error) {
+        toast({ title: "Error", description: "Could not verify the code. Please try again.", variant: "destructive" });
+    } finally {
+        setIsVerifyingCode(false);
+    }
+  };
+  
+  const handleCompleteWithCode = async () => {
+    if (appliedCodePlan) {
+        const { success } = await saveProfileData(true, appliedCodePlan);
+        if (success) {
+            onClose();
+        }
+    }
+  };
+
 
   const handleChoosePlan = async (tier: Tier) => {
     if (!user) {
@@ -265,8 +300,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     </div>
   );
   
-  const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean }> = ({title, price, features, popular, priceId, onChoose, isPreparing, isSelected, ...tier}) => (
-    <div className={cn("border rounded-lg p-6 flex flex-col", popular && "border-primary border-2 relative")}>
+  const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean }> = ({title, price, features, popular, priceId, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
+    <div className={cn("border rounded-lg p-6 flex flex-col", popular && "border-primary border-2 relative", disabled && "opacity-50 bg-gray-50")}>
         {popular && <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">Most Popular</div>}
         <h3 className="text-xl font-bold">{title}</h3>
         <p className="text-3xl font-bold my-4">{price}<span className="text-base font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
@@ -278,7 +313,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 </li>
             ))}
         </ul>
-        <Button className="w-full mt-6" variant={popular ? "default" : "outline"} onClick={() => onChoose({title, price, features, popular, priceId, ...tier})} disabled={isPreparing}>
+        <Button className="w-full mt-6" variant={popular ? "default" : "outline"} onClick={() => onChoose({title, price, features, popular, priceId, ...tier})} disabled={isPreparing || disabled}>
             {isSelected && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             { isSelected ? 'Preparing...' : (priceId === null ? 'Choose Basic' : 'Choose Plan')}
         </Button>
@@ -333,16 +368,50 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                     <DialogTitle className="text-center text-2xl">Choose Your Plan</DialogTitle>
                     <DialogDescription className="text-center">Select a plan to complete your setup. You can change this at any time.</DialogDescription>
                 </DialogHeader>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-4">
-                   {tiers.map(tier => (
-                       <SubscriptionCard 
-                         key={tier.title}
-                         {...tier}
-                         onChoose={handleChoosePlan}
-                         isPreparing={isPreparingPayment !== null}
-                         isSelected={isPreparingPayment === tier.priceId}
-                       />
-                   ))}
+                 <div className="py-4 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {tiers.map(tier => (
+                        <SubscriptionCard 
+                            key={tier.title}
+                            {...tier}
+                            onChoose={handleChoosePlan}
+                            isPreparing={isPreparingPayment !== null}
+                            isSelected={isPreparingPayment === tier.priceId}
+                            disabled={!!appliedCodePlan}
+                        />
+                        ))}
+                    </div>
+                    <Separator />
+                    <div className="p-4 border rounded-lg bg-background">
+                         <div className="flex items-center gap-2 mb-2">
+                             <Ticket className="h-5 w-5 text-primary" />
+                             <h4 className="font-semibold">Have a code?</h4>
+                         </div>
+                        {appliedCodePlan ? (
+                            <div className='flex flex-col items-start gap-4'>
+                                <p className='text-green-600 font-medium'>
+                                    Success! You've unlocked the <span className='font-bold'>{appliedCodePlan}</span> plan.
+                                </p>
+                                 <Button onClick={handleCompleteWithCode} disabled={isSaving}>
+                                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Complete Setup
+                                </Button>
+                            </div>
+                        ) : (
+                             <div className="flex items-center gap-2">
+                                <Input 
+                                    placeholder="Enter discount code" 
+                                    value={discountCode}
+                                    onChange={(e) => setDiscountCode(e.target.value)}
+                                    disabled={isVerifyingCode}
+                                />
+                                <Button onClick={handleApplyDiscountCode} disabled={isVerifyingCode || !discountCode}>
+                                    {isVerifyingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Apply
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </>
          )
@@ -388,7 +457,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                         Back
                     </Button>
                     )}
-                    {step < 3 && (
+                    {step < 3 && !appliedCodePlan && (
                     <Button onClick={handleNext} className="flex items-center gap-2">
                         Next
                         <ArrowRight />

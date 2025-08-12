@@ -51,6 +51,7 @@ interface UserProfile {
   phone: string;
   email: string;
   linkedinUrl: string;
+  subscriptionPlan?: string;
   [key: string]: any;
 }
 
@@ -160,10 +161,30 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-     if (!user && anonGenerations >= 2) {
+
+    const isPremiumUser = profile?.subscriptionPlan && profile.subscriptionPlan !== 'Basic';
+
+    if (!user && anonGenerations >= 2) {
       setShowLimitDialog(true);
       return;
     }
+
+    if (user && !isPremiumUser && profile?.subscriptionPlan === 'Basic') {
+        const db = getClientFirestore();
+        const userDocRef = doc(db, "users", user.uid);
+        const documentsCollectionRef = collection(userDocRef, "documents");
+        const querySnapshot = await getDocs(documentsCollectionRef);
+        if (querySnapshot.size >= 2) {
+            toast({
+                title: "Basic Plan Limit Reached",
+                description: "You've reached your limit of 2 generations. Please upgrade your plan to continue.",
+                variant: "destructive"
+            });
+            return;
+        }
+    }
+
+
     if (files.length === 0) {
       toast({ title: "No CV Uploaded", description: "Please upload your CV to get started.", variant: "destructive" });
       return;
