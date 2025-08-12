@@ -1,7 +1,8 @@
+
 'use server';
 
 /**
- * @fileOverview A flow for validating discount codes.
+ * @fileOverview A flow for validating discount codes using the Firebase Admin SDK.
  *
  * - validateDiscountCode - Checks if a discount code is valid.
  * - ValidateDiscountCodeInput - The input type for the validateDiscountCode function.
@@ -9,8 +10,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { getClientFirestore } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { adminDb } from '@/lib/firebase-admin'; // Use the Admin SDK
 import { z } from 'genkit';
 
 const ValidateDiscountCodeInputSchema = z.object({
@@ -36,22 +36,26 @@ const validateDiscountCodeFlow = ai.defineFlow(
     outputSchema: ValidateDiscountCodeOutputSchema,
   },
   async ({ code }) => {
-    // Note: This uses the client SDK for simplicity in this environment.
-    // In a production scenario with stricter rules, you'd use the Admin SDK.
-    const db = getClientFirestore();
-    const codeRef = doc(db, 'discountCodes', code);
-    const codeSnap = await getDoc(codeRef);
+    try {
+      // Use the Admin SDK to access Firestore. This bypasses client-side security rules.
+      const codeRef = adminDb.collection('discountCodes').doc(code);
+      const codeSnap = await codeRef.get();
 
-    if (codeSnap.exists()) {
-      const codeData = codeSnap.data();
+      if (codeSnap.exists) {
+        const codeData = codeSnap.data();
+        return {
+          isValid: true,
+          planName: codeData?.planName || 'Special', // Access planName from data()
+        };
+      }
+
       return {
-        isValid: true,
-        planName: codeData.planName || 'Special',
+        isValid: false,
       };
+    } catch (error) {
+        console.error("Error validating discount code:", error);
+        // This will now only catch actual server errors, not permissions issues.
+        throw new Error("Could not verify the code due to a server error.");
     }
-
-    return {
-      isValid: false,
-    };
   }
 );
