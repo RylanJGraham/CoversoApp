@@ -13,7 +13,7 @@ import Hyperspeed from "@/components/hyperspeed"
 import { getClientAuth } from "@/lib/firebase";
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -76,7 +76,13 @@ export default function LoginPage() {
 
 
   return (
-    <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white">
+    <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white relative">
+       <Button asChild variant="outline" className="absolute top-4 left-4 z-20">
+            <Link href="/" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Return to Home
+            </Link>
+        </Button>
       <div className="hidden lg:block relative">
         <div className="absolute inset-0 z-10 flex items-center justify-center">
             <Image src="/Logo2.png" alt="Coverso Logo" width={400} height={100} />
