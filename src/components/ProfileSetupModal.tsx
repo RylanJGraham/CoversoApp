@@ -161,6 +161,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   const [discountCode, setDiscountCode] = useState("");
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [appliedCodePlan, setAppliedCodePlan] = useState<string | null>(null);
+  const [codeError, setCodeError] = useState<string | null>(null);
+
 
   const totalSteps = 4;
 
@@ -243,20 +245,20 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     }
   }
 
-  const handleApplyDiscountCode = async () => {
+ const handleApplyDiscountCode = async () => {
     if (!discountCode) return;
     setIsVerifyingCode(true);
+    setCodeError(null);
     try {
         const result = await validateDiscountCode({ code: discountCode });
         if (result.isValid && result.planName) {
-            toast({ title: "Code Applied!", description: `You've been upgraded to the ${result.planName} plan.` });
             setAppliedCodePlan(result.planName);
         } else {
-            toast({ title: "Invalid Code", description: "That discount code is not valid. Please try again.", variant: "destructive" });
+            setCodeError("That discount code is not valid. Please try again.");
             setAppliedCodePlan(null);
         }
     } catch (error) {
-        toast({ title: "Error", description: "Could not verify the code. Please try again.", variant: "destructive" });
+        setCodeError("Could not verify the code. Please try again.");
     } finally {
         setIsVerifyingCode(false);
     }
@@ -342,7 +344,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   
   const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean, isRecommended: boolean }> = ({title, price, features, isRecommended, generations, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
         <div className={cn("border rounded-lg p-4 flex flex-col h-full group hover:border-primary transition-colors", disabled && "opacity-50 bg-gray-50", "border-gray-300")}>
-            {isRecommended && <p className="text-sm font-semibold text-primary mb-2">Recommended for you</p>}
+             {isRecommended && <p className="text-sm font-semibold text-primary mb-2">Recommended for you</p>}
             <h3 className="text-lg font-bold text-foreground">{title}</h3>
             <p className="text-2xl font-bold my-2 text-foreground">{price}<span className="text-sm font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
             <ul className="space-y-2 text-muted-foreground text-sm flex-grow">
@@ -382,7 +384,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                             <UserIcon className="h-10 w-10 text-muted-foreground" />
                         </AvatarFallback>
                     </Avatar>
-                     <Button type="button" variant="outline" className="rounded-full h-12 w-12 p-0 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => fileInputRef.current?.click()}>
+                     <Button type="button" variant="default" className="rounded-full h-12 w-12 p-0" onClick={() => fileInputRef.current?.click()}>
                         <UploadCloud className="h-6 w-6" />
                     </Button>
                 </div>
@@ -488,8 +490,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                         ))}
                     </div>
                     <Separator/>
-                    <div className="grid grid-cols-3 gap-8">
-                        <div className="col-span-2">
+                    <div className="grid grid-cols-2 gap-8 pt-2">
+                        <div className="col-span-1">
                              <h4 className="font-semibold">Don't want to pay?</h4>
                               <p className="text-sm text-muted-foreground">
                                 <button type="button" onClick={() => handleChoosePlan(tiers[0])} className="text-primary font-semibold hover:underline">
@@ -514,8 +516,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                              </div>
                             {appliedCodePlan ? (
                                 <div className='flex flex-col items-start gap-4'>
-                                    <p className='font-medium text-sm'>
-                                        Success! You've unlocked the <span className='font-bold text-primary'>{appliedCodePlan}</span> plan.
+                                    <p className='font-medium text-sm text-primary'>
+                                        Success! You've unlocked the <span className='font-bold'>{appliedCodePlan}</span> plan.
                                     </p>
                                      <Button onClick={handleCompleteWithCode} disabled={isSaving} variant="default" size="sm">
                                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -523,18 +525,21 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                                     </Button>
                                 </div>
                             ) : (
-                                 <div className="flex flex-col items-start gap-2">
-                                    <Input 
-                                        placeholder="Enter discount code" 
-                                        value={discountCode}
-                                        onChange={(e) => setDiscountCode(e.target.value)}
-                                        disabled={isVerifyingCode}
-                                        className="h-9"
-                                    />
-                                    <Button onClick={handleApplyDiscountCode} disabled={isVerifyingCode || !discountCode} variant="secondary" size="sm">
-                                        {isVerifyingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Apply
-                                    </Button>
+                                 <div className="w-full space-y-2">
+                                    <div className="flex items-start gap-2">
+                                        <Input 
+                                            placeholder="Enter discount code" 
+                                            value={discountCode}
+                                            onChange={(e) => setDiscountCode(e.target.value)}
+                                            disabled={isVerifyingCode}
+                                            className="h-9"
+                                        />
+                                        <Button onClick={handleApplyDiscountCode} disabled={isVerifyingCode || !discountCode} variant="secondary" size="sm">
+                                            {isVerifyingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            Apply
+                                        </Button>
+                                    </div>
+                                     {codeError && <p className="text-sm text-destructive">{codeError}</p>}
                                 </div>
                             )}
                         </div>
@@ -570,8 +575,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     <Dialog open={isOpen} onOpenChange={() => { /* Don't close on overlay click */ }}>
       <DialogContent 
         className={cn(
-            "p-0 rounded-xl grid grid-cols-1 border-2 border-primary shadow-lg shadow-primary/20",
-            isPlanStep ? "md:max-w-4xl" : "md:max-w-3xl md:grid-cols-3"
+            "p-0 rounded-xl shadow-lg shadow-primary/20",
+            isPlanStep ? "max-w-4xl" : "max-w-3xl grid grid-cols-1 md:grid-cols-3 border-2 border-primary"
         )}
         hideCloseButton={true} 
          onEscapeKeyDown={(e) => e.preventDefault()}
@@ -612,9 +617,3 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
-
-    
-
-    
-
-    
