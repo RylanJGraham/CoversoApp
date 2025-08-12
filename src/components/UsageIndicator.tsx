@@ -34,7 +34,7 @@ const UsageIndicator = ({ current, max, planName }: UsageIndicatorProps) => {
             cy="50%"
             r={radius}
             strokeWidth="8"
-            className="text-white"
+            className="text-accent"
             fill="transparent"
             stroke="currentColor"
             strokeDasharray={circumference}

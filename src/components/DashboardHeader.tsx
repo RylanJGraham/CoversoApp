@@ -67,14 +67,14 @@ export function DashboardHeader() {
                     {!loading && user && userProfile ? (
                          <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="flex items-center gap-2 h-10 px-3">
+                                <Button variant="ghost" className="flex items-center gap-2 h-10 px-3 hover:bg-primary/10">
                                     <Avatar className="h-8 w-8">
                                         <AvatarImage src={userProfile.profileImage || user.photoURL || undefined} alt={userProfile.fullName} />
                                         <AvatarFallback>
                                             <UserIcon className="h-5 w-5" />
                                         </AvatarFallback>
                                     </Avatar>
-                                    <span className="font-medium text-gray-700">{userProfile.fullName}</span>
+                                    <span className="font-medium text-gray-700 hover:text-primary">{userProfile.fullName}</span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">

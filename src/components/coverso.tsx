@@ -309,7 +309,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                     <div className="flex flex-col items-start justify-center">
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
-                         <div className="mt-6 bg-accent text-accent-foreground p-4 rounded-lg text-left inline-block">
+                         <div className="mt-6 bg-primary text-primary-foreground p-4 rounded-lg text-left inline-block">
                             <h3 className="text-lg font-semibold">Cover Letters Drafted Today</h3>
                             <p className="text-4xl font-mono font-bold mt-1">
                             <AnimatedCounter to={100} />

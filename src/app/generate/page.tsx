@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Coverso as CoversoForm } from '@/components/coverso';
 import Hyperspeed from '@/components/hyperspeed';
-import { getClientAuth } from '@/lib/firebase';
+import { getClientAuth, getClientFirestore } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
