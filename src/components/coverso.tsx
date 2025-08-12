@@ -350,16 +350,16 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
   return (
     <TooltipProvider>
     <div className="flex flex-col min-h-screen font-body bg-white">
-      { user ? <DashboardHeader /> : <Header /> }
+       { user ? <DashboardHeader /> : <Header /> }
       
       { !isGeneratePage && (
          <header className="h-[400px] w-full relative bg-white">
             <div className="absolute inset-0 z-10 grid grid-cols-1 md:grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="col-span-1 flex items-center justify-start p-8 text-left">
                     <div className="flex flex-col items-start justify-center">
-                        <Image src="/Logo2.png" alt="Coverso Logo" width={400} height={100} />
+                        <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
-                        <div className="mt-6 bg-primary text-primary-foreground p-4 rounded-lg text-left inline-block">
+                        <div className="mt-6 bg-accent text-accent-foreground p-4 rounded-lg text-left inline-block">
                             <h3 className="text-lg font-semibold">Cover Letters Drafted Today</h3>
                             <p className="text-4xl font-mono font-bold mt-1">
                             <AnimatedCounter to={100} />

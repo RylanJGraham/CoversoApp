@@ -135,7 +135,7 @@ function DashboardContent() {
        <header className="h-[300px] w-full relative">
         <div className="absolute inset-0 z-10 flex items-center justify-start text-left max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-start justify-center">
-                <Image src="/Logo2.png" alt="Coverso Logo" width={400} height={100} />
+                <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                 <p className="text-2xl font-light text-black mt-2">
                     Welcome, {userProfile?.fullName || user?.email}
                 </p>

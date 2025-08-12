@@ -28,7 +28,7 @@ export function HamburgerMenu() {
       <SheetContent side="right" className="w-full max-w-xs sm:max-w-sm">
         <nav className="flex flex-col p-4">
            <Link href="/" className="mb-8" onClick={() => setOpen(false)}>
-              <Image src="/Logo2.png" alt="Coverso Logo" width={150} height={40} />
+              <Image src="/Coverso.png" alt="Coverso Logo" width={150} height={40} />
             </Link>
           <ul className="flex flex-col gap-4">
             <li>

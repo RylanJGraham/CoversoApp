@@ -85,7 +85,7 @@ export default function LoginPage() {
         </Button>
       <div className="hidden lg:block relative">
         <div className="absolute inset-0 z-10 flex items-center justify-center">
-            <Image src="/Logo2.png" alt="Coverso Logo" width={400} height={100} />
+            <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
         </div>
         <Hyperspeed
           effectOptions={{
