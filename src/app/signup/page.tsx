@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Hyperspeed from "@/components/hyperspeed"
 import { getClientAuth } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -26,38 +26,43 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState<false | 'google' | 'email'>(false);
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignUp = async () => {
     setIsLoading('google');
     const auth = getClientAuth();
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      toast({ title: "Successfully logged in!" });
+      toast({ title: "Account created successfully!" });
       router.push('/');
     } catch (error: any) {
-      toast({ title: "Google login failed", description: error.message, variant: "destructive" });
+      toast({ title: "Google sign-up failed", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
     setIsLoading('email');
     const auth = getClientAuth();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({ title: "Successfully logged in!" });
+      await createUserWithEmailAndPassword(auth, email, password);
+      toast({ title: "Account created successfully!" });
       router.push('/');
     } catch (error: any) {
-      toast({ title: "Email login failed", description: error.message, variant: "destructive" });
+      toast({ title: "Email sign-up failed", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +71,81 @@ export default function LoginPage() {
 
   return (
     <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white">
-      <div className="hidden lg:block relative">
+      <div className="flex items-center justify-center p-6 bg-primary order-2 lg:order-1">
+          <Card className="mx-auto w-full max-w-sm bg-white">
+            <CardHeader>
+              <CardTitle className="text-2xl">Sign Up</CardTitle>
+              <CardDescription>
+                Enter your information to create an account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleEmailSignUp} className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={!!isLoading}
+                  />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input 
+                        id="password" 
+                        type="password" 
+                        required 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={!!isLoading}
+                    />
+                </div>
+                 <div className="grid gap-2">
+                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Input 
+                        id="confirm-password" 
+                        type="password" 
+                        required 
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        disabled={!!isLoading}
+                    />
+                </div>
+                <Button type="submit" className="w-full" disabled={!!isLoading}>
+                   {isLoading === 'email' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Sign Up
+                </Button>
+              </form>
+               <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white px-2 text-muted-foreground">
+                        Or continue with
+                        </span>
+                    </div>
+                </div>
+                <div className="flex justify-center">
+                    <Button variant="outline" size="icon" className="rounded-full" onClick={handleGoogleSignUp} disabled={!!isLoading}>
+                         {isLoading === 'google' ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon className="h-5 w-5" /> }
+                        <span className="sr-only">Sign up with Google</span>
+                    </Button>
+                </div>
+              <div className="mt-4 text-center text-sm">
+                Already have an account?{" "}
+                <Link href="/login" className="underline">
+                  Login
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+      </div>
+      <div className="hidden lg:block relative order-1 lg:order-2">
         <Hyperspeed
           effectOptions={{
               colors: {
@@ -81,74 +160,6 @@ export default function LoginPage() {
               }
           }}
         />
-      </div>
-      <div className="flex items-center justify-center p-6 bg-primary">
-          <Card className="mx-auto w-full max-w-sm bg-white">
-            <CardHeader>
-              <CardTitle className="text-2xl">Login</CardTitle>
-              <CardDescription>
-                Enter your email below to login to your account
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleEmailLogin} className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={!!isLoading}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
-                    <Link href="#" className="ml-auto inline-block text-sm underline">
-                      Forgot your password?
-                    </Link>
-                  </div>
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    required 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={!!isLoading}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={!!isLoading}>
-                   {isLoading === 'email' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Login
-                </Button>
-              </form>
-               <div className="relative my-4">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-2 text-muted-foreground">
-                        Or continue with
-                        </span>
-                    </div>
-                </div>
-                <div className="flex justify-center">
-                    <Button variant="outline" size="icon" className="rounded-full" onClick={handleGoogleLogin} disabled={!!isLoading}>
-                         {isLoading === 'google' ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon className="h-5 w-5" /> }
-                        <span className="sr-only">Login with Google</span>
-                    </Button>
-                </div>
-              <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <Link href="/signup" className="underline">
-                  Sign up
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
       </div>
     </div>
   )
