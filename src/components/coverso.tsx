@@ -3,7 +3,6 @@
 
 import { useState, useRef, type ChangeEvent, useMemo, type FC } from "react";
 import Image from 'next/image';
-import Link from 'next/link';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +37,7 @@ import { cn } from "@/lib/utils";
 import Hyperspeed from "./hyperspeed";
 import TiltedCard from "./TiltedCard";
 import AnimatedCounter from "./AnimatedCounter";
-import { Separator } from "./ui/separator";
+import { Header } from "./Header";
 
 
 type AppState = "idle" | "loading" | "success" | "error";
@@ -237,18 +236,7 @@ export function Coverso() {
   return (
     <TooltipProvider>
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <div className="w-full h-16 bg-white">
-        <div className="h-full flex items-center justify-end px-4 sm:px-6 lg:px-8">
-            <nav className="flex items-center gap-4">
-              <Link href="/about" className="text-primary hover:underline">About Us</Link>
-              <Link href="/faq" className="text-primary hover:underline">FAQ</Link>
-              <Separator orientation="vertical" className="h-6 bg-primary" />
-              <Button variant="ghost" className="text-primary hover:bg-primary hover:text-primary-foreground text-lg">
-                <Link href="/login">Login</Link>
-              </Button>
-            </nav>
-        </div>
-      </div>
+      <Header />
       <header className="h-[400px] w-full relative">
         <div className="absolute inset-0 z-10 grid grid-cols-1 md:grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
@@ -555,5 +543,3 @@ export function Coverso() {
     </TooltipProvider>
   );
 }
-
-    
