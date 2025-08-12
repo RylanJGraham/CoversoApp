@@ -607,11 +607,11 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
          onPointerDownOutside={(e) => e.preventDefault()}
       >
         {!isPlanStep && (
-            <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground flex-col justify-between items-start gap-6 p-8">
-                <div>
+            <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground flex-col items-start gap-6 rounded-r-none rounded-l-xl py-8 pl-8 pr-4">
+                <div className="flex flex-col gap-4">
                     <Image src="/CoversoOrange.png" alt="Coverso Logo" width={200} height={80} />
+                    <p className="text-left text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
                 </div>
-                <p className="text-left text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
                 <div />
             </div>
         )}
