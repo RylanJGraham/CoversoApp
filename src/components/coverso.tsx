@@ -114,6 +114,24 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     }
   };
 
+  const handleGenerateSample = () => {
+    const sampleResult: GenerateCoverLetterOutput = {
+      coverLetter: `[Your Name]\n[Your Address] | [Your Email] | [Your Phone]\n\n[Date]\n\nHiring Manager\n[Company Name]\n[Company Address]\n\nDear Hiring Manager,\n\nI am writing to express my keen interest in the [Job Title] position at [Company Name], which I discovered on [Platform]. Having followed [Company Name]'s impressive work in the tech industry for some time, I am confident that my skills in software development and my passion for innovation align perfectly with your team's goals.\n\nIn my previous role at [Previous Company], I was instrumental in developing and launching a new feature that increased user engagement by 25%. My experience with React, Node.js, and cloud services has prepared me to tackle the challenges of this role and contribute meaningfully to your projects from day one.\n\nI am particularly drawn to this opportunity because of [Company Name]'s commitment to [a specific company value or project]. I am eager to bring my problem-solving abilities and collaborative spirit to your dynamic team.\n\nThank you for considering my application. I have attached my resume for your review and look forward to the possibility of discussing how I can contribute to [Company Name]'s continued success.\n\nSincerely,\n[Your Name]`,
+      jobTitle: "Software Engineer (Sample)",
+      companyName: "Tech Solutions Inc. (Sample)",
+      keyFocusPoints: [
+        "React and Node.js proficiency",
+        "Experience with cloud services (AWS/GCP)",
+        "Proven track record of increasing user engagement",
+      ],
+    };
+    setAiResult(sampleResult);
+    setGeneratedCoverLetter(sampleResult.coverLetter);
+    setAppState("success");
+    setError(null);
+  };
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -467,6 +485,9 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                     )}
                                     {appState === 'loading' ? "Drafting..." : "Generate Cover Letter"}
                                 </Button>
+                                <Button type="button" size="lg" className="w-full mt-2" variant="secondary" onClick={handleGenerateSample}>
+                                    Generate Sample (for testing)
+                                </Button>
                              </div>
                         </CardContent>
                     </div>
@@ -587,3 +608,6 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     </TooltipProvider>
   );
 }
+
+
+    
