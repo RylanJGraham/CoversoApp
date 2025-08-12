@@ -4,20 +4,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users can only read and write their own documents.
+    // Users can only read and write to their own user document.
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
 
-      // Documents subcollection can only be accessed by the owner.
+      // Users can only manage their own documents.
       match /documents/{docId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write, create: if request.auth != null && request.auth.uid == userId;
       }
     }
-
-    // Discount codes are publically readable, but not writable.
+    
+    // Discount codes are publicly readable by anyone, but not writable.
+    // This allows unauthenticated users to verify a code during onboarding.
     match /discountCodes/{code} {
-      allow get: if true;
-      allow list, create, update, delete: if false;
+      allow read: if true;
+      allow write: if false; // Prevent client-side writes
     }
   }
 }
