@@ -30,6 +30,7 @@ import {
   Info,
   DollarSign,
   PenLine,
+  LogIn,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -41,6 +42,8 @@ import { Header } from "./Header";
 import { getClientAuth, getClientFirestore } from "@/lib/firebase";
 import { addDoc, collection, doc, getDoc, serverTimestamp } from "firebase/firestore";
 import type { User as FirebaseUser } from 'firebase/auth';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 interface UserProfile {
   fullName: string;
@@ -71,8 +74,13 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
   const [error, setError] = useState<string | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
 
+  const [anonGenerations, setAnonGenerations] = useState(0);
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const router = useRouter();
+
 
   useEffect(() => {
     if (profile) {
@@ -85,6 +93,14 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
         setEmail(user.email || '');
     }
   }, [user, profile]);
+
+  useEffect(() => {
+    // Only run on client
+    if (typeof window !== 'undefined' && !user) {
+        const storedGenerations = localStorage.getItem('anonymousGenerations');
+        setAnonGenerations(storedGenerations ? parseInt(storedGenerations, 10) : 0);
+    }
+  }, [user]);
 
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -144,9 +160,9 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-       toast({ title: "Not Authenticated", description: "You must be logged in to generate a cover letter.", variant: "destructive" });
-       return;
+     if (!user && anonGenerations >= 2) {
+      setShowLimitDialog(true);
+      return;
     }
     if (files.length === 0) {
       toast({ title: "No CV Uploaded", description: "Please upload your CV to get started.", variant: "destructive" });
@@ -191,22 +207,34 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
       setAiResult(result);
       setGeneratedCoverLetter(result.coverLetter);
 
-      // Save to Firestore
-      const db = getClientFirestore();
-      const userDocRef = doc(db, "users", user.uid);
-      const documentsCollectionRef = collection(userDocRef, "documents");
-      await addDoc(documentsCollectionRef, {
-        coverLetter: result.coverLetter,
-        jobTitle: result.jobTitle,
-        companyName: result.companyName,
-        createdAt: serverTimestamp(),
-      });
+      if (user) {
+        // Save to Firestore for logged-in users
+        const db = getClientFirestore();
+        const userDocRef = doc(db, "users", user.uid);
+        const documentsCollectionRef = collection(userDocRef, "documents");
+        await addDoc(documentsCollectionRef, {
+            coverLetter: result.coverLetter,
+            jobTitle: result.jobTitle,
+            companyName: result.companyName,
+            createdAt: serverTimestamp(),
+        });
+        toast({
+            title: "Cover Letter Generated!",
+            description: "Your new cover letter is ready and saved to your dashboard.",
+        });
+      } else {
+        // Handle anonymous users
+        const newCount = anonGenerations + 1;
+        localStorage.setItem('anonymousGenerations', newCount.toString());
+        setAnonGenerations(newCount);
+        toast({
+            title: `Generation ${newCount} of 2 Used`,
+            description: "Sign up to save your documents and get more generations.",
+        });
+      }
+
 
       setAppState("success");
-      toast({
-        title: "Cover Letter Generated!",
-        description: "Your new cover letter is ready and saved to your dashboard.",
-      });
     } catch (err) {
       console.error(err);
       const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred.";
@@ -580,6 +608,23 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
             </div>
         </form>
       </main>
+      <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>You've Reached Your Limit</AlertDialogTitle>
+            <AlertDialogDescription>
+                You have used your 2 free cover letter generations. Please sign up or log in to continue generating and save your documents.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Stay as Guest</AlertDialogCancel>
+            <AlertDialogAction onClick={() => router.push('/login')}>
+                <LogIn className="w-4 h-4 mr-2" />
+                Login or Sign Up
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
     </TooltipProvider>
   );
