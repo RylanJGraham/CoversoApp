@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, DollarSign, FileText, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { getClientAuth, getClientFirestore } from '@/lib/firebase';
@@ -21,6 +21,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import TiltedCard from '@/components/TiltedCard';
+import { Badge } from '@/components/ui/badge';
+
 
 interface Tier {
     title: string;
@@ -177,43 +180,73 @@ export default function PricingPage() {
                     </p>
                 </div>
 
-                <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 items-end">
+                <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 items-stretch">
                     {tiers.map((tier) => (
-                        <Card key={tier.title} className={cn(
-                            "flex flex-col",
-                            tier.isMostPopular ? "border-primary border-2 shadow-lg" : ""
-                        )}>
-                            {tier.isMostPopular && (
-                                <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg">
-                                    Most Popular
+                        <TiltedCard key={tier.title} containerHeight="auto" scaleOnHover={1.05} rotateAmplitude={5}>
+                            <div className="flex flex-col h-full p-6">
+                                {tier.isMostPopular && (
+                                     <Badge variant="secondary" className="bg-accent text-accent-foreground font-semibold self-start mb-2">
+                                        Most Popular
+                                    </Badge>
+                                )}
+                                <div className="flex-grow">
+                                    <h3 className="text-2xl font-bold">{tier.title}</h3>
+                                    <p className="mt-2 text-4xl font-bold">{tier.price}<span className="text-lg font-normal text-muted-foreground">{tier.price !== 'Free' ? '/month' : ''}</span></p>
+                                    <p className="mt-4 text-primary font-semibold">{tier.generations}</p>
+                                    <ul className="mt-6 space-y-4 text-muted-foreground">
+                                        {tier.features.map((feature, i) => (
+                                            <li key={i} className="flex items-center gap-3">
+                                                <CheckCircle className="h-6 w-6 text-green-500" />
+                                                <span>{feature}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
-                            )}
-                            <CardHeader className="flex-grow">
-                                <CardTitle className="text-2xl">{tier.title}</CardTitle>
-                                <CardDescription className="text-lg font-bold">{tier.price}<span className="text-sm font-normal text-muted-foreground">{tier.price !== 'Free' ? '/month' : ''}</span></CardDescription>
-                                <p className="text-primary font-semibold">{tier.generations}</p>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ul className="space-y-2 text-muted-foreground">
-                                    {tier.features.map((feature, i) => (
-                                        <li key={i} className="flex items-center gap-2">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span>{feature}</span>
-                                        </li>
-                                    ))}
-                                </ul>
                                 <Button
-                                    className="w-full"
+                                    className="w-full mt-8"
+                                    variant="default"
                                     onClick={() => handleChoosePlan(tier)}
                                     disabled={isLoading !== null}
-                                    variant={tier.isMostPopular ? 'default' : 'outline'}
                                 >
                                     {isLoading === tier.priceId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Choose Plan'}
                                 </Button>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </TiltedCard>
                     ))}
                 </div>
+
+                <div className="mt-20 text-center">
+                     <h2 className="text-3xl font-bold text-gray-900">How It Works</h2>
+                </div>
+                 <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <Card>
+                        <CardHeader className="flex-row items-center gap-4">
+                             <div className="flex-shrink-0 bg-primary/10 text-primary rounded-lg p-3">
+                                 <DollarSign className="w-8 h-8"/>
+                            </div>
+                            <CardTitle>Transparent Billing</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">
+                                We bill you on a simple, monthly cycle for your chosen plan. No hidden fees, no surprises. You can upgrade, downgrade, or cancel your plan at any time from your profile page.
+                            </p>
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader className="flex-row items-center gap-4">
+                             <div className="flex-shrink-0 bg-primary/10 text-primary rounded-lg p-3">
+                                 <FileText className="w-8 h-8"/>
+                            </div>
+                            <CardTitle>Usage and Generations</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                             <p className="text-muted-foreground">
+                                Your plan comes with a specific number of cover letter "generations". You can track your usage right from your dashboard. If you need more, you can easily upgrade to a higher tier.
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+
             </main>
 
             <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
@@ -234,3 +267,4 @@ export default function PricingPage() {
         </div>
     );
 }
+
