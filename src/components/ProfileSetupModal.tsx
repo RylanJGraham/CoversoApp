@@ -20,13 +20,12 @@ import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight
 import { cn } from '@/lib/utils';
 import type { User } from 'firebase/auth';
 import { getClientFirestore } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { createSubscriptionFlow } from '@/ai/flows/stripe-checkout';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Separator } from './ui/separator';
-import { validateDiscountCode } from '@/actions/validate-discount-code';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ProfileSetupModalProps {
@@ -272,16 +271,21 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     setIsVerifyingCode(true);
     setCodeError(null);
     try {
-        const result = await validateDiscountCode(discountCode);
-        if (result.valid && result.planName) {
-            setAppliedCodePlan(result.planName);
-            toast({ title: "Discount Applied!", description: `You've unlocked the ${result.planName} plan!` });
+        const db = getClientFirestore();
+        const discountRef = doc(db, 'discountCodes', discountCode);
+        const docSnap = await getDoc(discountRef);
+
+        if (docSnap.exists()) {
+            const planName = docSnap.data()?.planName || 'Special';
+            setAppliedCodePlan(planName);
+            toast({ title: "Discount Applied!", description: `You've unlocked the ${planName} plan!` });
             setCodeError(null);
         } else {
-            setCodeError(result.error || "That discount code is not valid.");
+            setCodeError('Invalid discount code');
             setAppliedCodePlan(null);
         }
     } catch (error) {
+        console.error("Discount validation error:", error);
         setCodeError("Could not verify the code. Please try again later.");
         setAppliedCodePlan(null);
     } finally {
@@ -641,7 +645,3 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
-
-    
-
-    
