@@ -18,26 +18,20 @@ let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 
+// This function ensures that we initialize the app only once.
+// It's safe to call this multiple times.
 function getClientApp(): FirebaseApp {
-  if (typeof window === "undefined") {
-    // This is a server-side check, should ideally not happen with "use client"
-    // but as a fallback, we prevent initialization.
-    // A more robust solution would handle server-side logic separately.
     if (getApps().length === 0) {
-       return initializeApp(firebaseConfig);
+        app = initializeApp(firebaseConfig);
+    } else {
+        app = getApp();
     }
-    return getApp();
-  }
-
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApp();
-  }
-  return app;
+    return app;
 }
 
+
 function getClientAuth(): Auth {
+  // Check if auth is already initialized to avoid re-initializing
   if (!auth) {
     auth = getAuth(getClientApp());
   }
@@ -45,6 +39,7 @@ function getClientAuth(): Auth {
 }
 
 function getClientFirestore(): Firestore {
+  // Check if db is already initialized
   if (!db) {
     db = getFirestore(getClientApp());
   }
