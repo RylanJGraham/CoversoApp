@@ -61,7 +61,7 @@ interface UserProfile {
 
 type AppState = "idle" | "loading" | "success" | "error";
 
-export function Coverso({ user, profile }: { user: FirebaseUser | null, profile: UserProfile | null }) {
+export function Coverso({ user, profile, isGeneratePage = false }: { user: FirebaseUser | null, profile: UserProfile | null, isGeneratePage?: boolean }) {
   const [files, setFiles] = useState<File[]>([]);
   const [jobDescription, setJobDescription] = useState("");
   const [portfolioUrls, setPortfolioUrls] = useState<string[]>([""]);
@@ -351,7 +351,7 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
     <div className="flex flex-col min-h-screen font-body bg-white">
       { user ? <DashboardHeader /> : <Header /> }
       
-      {!user && (
+      { !isGeneratePage && (
          <header className="h-[400px] w-full relative">
             <div className="absolute inset-0 z-10 grid grid-cols-1 md:grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="col-span-1 flex items-center justify-start p-8 text-left">
@@ -379,14 +379,14 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
                 <Hyperspeed
                 effectOptions={{
                     colors: {
-                    roadColor: 0x080808,
-                    islandColor: 0x0a0a0a,
-                    background: 0x000000,
-                    shoulderLines: 0x131318,
-                    brokenLines: 0x131318,
-                    leftCars: [0x10B981, 0x10B981, 0x10B981],
-                    rightCars: [0x10B981, 0x10B981, 0x10B981],
-                    sticks: 0x10B981,
+                      roadColor: 0x080808,
+                      islandColor: 0x0a0a0a,
+                      background: 0x000000,
+                      shoulderLines: 0x131318,
+                      brokenLines: 0x131318,
+                      leftCars: [0x7653ff, 0xf76031, 0x7653ff],
+                      rightCars: [0x7653ff, 0xf76031, 0x7653ff],
+                      sticks: 0x7653ff,
                     }
                 }}
                 />
@@ -397,7 +397,7 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
 
       <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         
-         {user && (
+         { isGeneratePage && (
             <div className="grid grid-cols-3 gap-8 items-center py-8">
                 <div className="col-span-2">
                     <h1 className="text-4xl font-bold text-black">Cover Letter Generator</h1>

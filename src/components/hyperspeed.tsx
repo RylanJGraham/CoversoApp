@@ -1,3 +1,4 @@
+
 "use client";
 import { useEffect, useRef, FC } from "react";
 import * as THREE from "three";
@@ -97,11 +98,11 @@ const defaultOptions: HyperspeedOptions = {
     roadColor: 0x080808,
     islandColor: 0x0a0a0a,
     background: 0x000000,
-    shoulderLines: 0xffffff,
-    brokenLines: 0xffffff,
-    leftCars: [0xd856bf, 0x6750a2, 0xc247ac],
-    rightCars: [0x03b3c3, 0x0e5ea5, 0x324555],
-    sticks: 0x03b3c3,
+    shoulderLines: 0x131318,
+    brokenLines: 0x131318,
+    leftCars: [0x7653ff, 0xf76031, 0x7653ff],
+    rightCars: [0x7653ff, 0xf76031, 0x7653ff],
+    sticks: 0x7653ff,
   },
 };
 
@@ -1269,6 +1270,10 @@ const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {} }) => {
   const mergedOptions: HyperspeedOptions = {
     ...defaultOptions,
     ...effectOptions,
+    colors: {
+      ...defaultOptions.colors,
+      ...effectOptions?.colors
+    }
   };
   const hyperspeed = useRef<HTMLDivElement>(null);
   const appRef = useRef<App | null>(null);
@@ -1307,5 +1312,3 @@ const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {} }) => {
 };
 
 export default Hyperspeed;
-
-    

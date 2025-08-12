@@ -90,14 +90,14 @@ export default function LoginPage() {
         <Hyperspeed
           effectOptions={{
               colors: {
-              roadColor: 0x080808,
-              islandColor: 0x0a0a0a,
-              background: 0x000000,
-              shoulderLines: 0x131318,
-              brokenLines: 0x131318,
-              leftCars: [0x10B981, 0x10B981, 0x10B981],
-              rightCars: [0x10B981, 0x10B981, 0x10B981],
-              sticks: 0x10B981,
+                roadColor: 0x080808,
+                islandColor: 0x0a0a0a,
+                background: 0x000000,
+                shoulderLines: 0x131318,
+                brokenLines: 0x131318,
+                leftCars: [0x7653ff, 0xf76031, 0x7653ff],
+                rightCars: [0x7653ff, 0xf76031, 0x7653ff],
+                sticks: 0x7653ff,
               }
           }}
         />

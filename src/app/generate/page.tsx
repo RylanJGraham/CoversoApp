@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Coverso as CoversoForm } from '@/components/coverso';
 import Hyperspeed from '@/components/hyperspeed';
-import { getClientAuth, getClientFirestore } from '@/lib/firebase';
+import { getClientAuth } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
@@ -16,6 +16,8 @@ interface UserProfile {
   phone: string;
   email: string;
   linkedinUrl: string;
+  onboardingComplete?: boolean;
+  subscriptionPlan?: string;
   [key: string]: any;
 }
 
@@ -34,7 +36,14 @@ export default function GeneratePage() {
         const userDocRef = doc(db, 'users', user.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
-          setProfile(userDocSnap.data() as UserProfile);
+          const userProfile = userDocSnap.data() as UserProfile;
+           setProfile(userProfile);
+            if (!userProfile.onboardingComplete) {
+              router.push('/dashboard');
+            }
+        } else {
+            // If no profile exists, they likely haven't completed onboarding.
+            router.push('/dashboard');
         }
       } else {
         router.push('/login');
@@ -45,7 +54,7 @@ export default function GeneratePage() {
     return () => unsubscribe();
   }, [router]);
   
-  if (loading) {
+  if (loading || !profile) {
      return (
        <div className="w-full h-screen relative flex items-center justify-center">
          <Loader2 className="h-16 w-16 animate-spin text-primary" />
@@ -57,9 +66,9 @@ export default function GeneratePage() {
                   background: 0x000000,
                   shoulderLines: 0x131318,
                   brokenLines: 0x131318,
-                  leftCars: [0x10B981, 0x10B981, 0x10B981],
-                  rightCars: [0x10B981, 0x10B981, 0x10B981],
-                  sticks: 0x10B981,
+                  leftCars: [0x7653ff, 0xf76031, 0x7653ff],
+                  rightCars: [0x7653ff, 0xf76031, 0x7653ff],
+                  sticks: 0x7653ff,
                 }
             }}
           />
@@ -68,6 +77,6 @@ export default function GeneratePage() {
   }
   
   return (
-    <CoversoForm user={user} profile={profile} />
+    <CoversoForm user={user} profile={profile} isGeneratePage={true}/>
   );
 }
