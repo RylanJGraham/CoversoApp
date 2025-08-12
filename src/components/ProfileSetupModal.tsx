@@ -343,7 +343,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   );
   
   const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean, isRecommended: boolean }> = ({title, price, features, isRecommended, generations, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
-        <div className={cn("border rounded-lg p-4 flex flex-col h-full group hover:border-primary transition-colors", disabled && "opacity-50 bg-gray-50", "border-gray-300")}>
+        <div className={cn("border rounded-lg p-4 flex flex-col h-full group transition-colors", disabled && "opacity-50 bg-gray-50", "border-gray-300 hover:border-primary")}>
              {isRecommended && <p className="text-sm font-semibold text-primary mb-2">Recommended for you</p>}
             <h3 className="text-lg font-bold text-foreground">{title}</h3>
             <p className="text-2xl font-bold my-2 text-foreground">{price}<span className="text-sm font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
@@ -589,7 +589,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 <div />
             </div>
         )}
-        <div className={cn("p-8 flex flex-col h-full min-h-[500px]", isPlanStep ? "col-span-1" : "md:col-span-2")}>
+        <div className={cn("flex flex-col h-full min-h-[500px]", isPlanStep ? "p-8 col-span-1" : "p-8 md:col-span-2")}>
             <div className="flex-grow">
                  {renderStep()}
             </div>
