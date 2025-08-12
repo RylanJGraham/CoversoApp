@@ -75,14 +75,40 @@ const tiers: Tier[] = [
 ];
 
 const industryOptions = [
-  "Software Development",
-  "Marketing",
+  "Accounting",
+  "Administration",
+  "Advertising",
+  "Arts & Entertainment",
+  "Automotive",
+  "Banking",
+  "Biotechnology",
+  "Construction",
+  "Consulting",
+  "Customer Service",
   "Design",
-  "Finance",
-  "Healthcare",
   "Education",
-  "Sales",
   "Engineering",
+  "Finance",
+  "Government",
+  "Healthcare",
+  "Hospitality",
+  "Human Resources",
+  "Information Technology",
+  "Insurance",
+  "Legal",
+  "Logistics",
+  "Manufacturing",
+  "Marketing",
+  "Media",
+  "Non-profit",
+  "Pharmaceuticals",
+  "Real Estate",
+  "Retail",
+  "Sales",
+  "Science",
+  "Software Development",
+  "Telecommunications",
+  "Transportation",
   "Other"
 ];
 
@@ -249,12 +275,14 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
         const result = await validateDiscountCode({ code: discountCode });
         if (result.isValid && result.planName) {
             setAppliedCodePlan(result.planName);
+            setCodeError(null);
         } else {
             setCodeError("That discount code is not valid. Please try again.");
             setAppliedCodePlan(null);
         }
     } catch (error) {
         setCodeError("Could not verify the code. Please try again.");
+        setAppliedCodePlan(null);
     } finally {
         setIsVerifyingCode(false);
     }
@@ -325,7 +353,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 
 
   const StepIndicator: FC<{ current: number; total: number }> = ({ current, total }) => (
-    <div className="flex justify-center space-x-2 my-4">
+    <div className="flex justify-center space-x-2">
       {Array.from({ length: total }).map((_, index) => (
         <div
           key={index}
@@ -339,9 +367,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   );
   
   const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean, isRecommended: boolean }> = ({title, price, features, isRecommended, generations, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
-        <div className={cn("border rounded-lg p-4 flex flex-col h-full transition-colors", disabled && "opacity-50 bg-gray-50", "border-gray-300 hover:border-primary")}>
+        <div className={cn("border rounded-lg p-4 flex flex-col h-full transition-colors", "border-gray-300 hover:border-primary", disabled && "opacity-50 bg-gray-50")}>
             <div className='min-h-[24px]'>
-              {isRecommended && <p className="text-sm font-semibold text-primary mb-2">Recommended for you</p>}
+              {isRecommended && <p className="text-sm font-semibold text-primary mb-2 whitespace-nowrap">Recommended for you</p>}
             </div>
             <h3 className="text-lg font-bold text-foreground">{title}</h3>
             <p className="text-2xl font-bold my-2 text-foreground">{price}<span className="text-sm font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
@@ -523,7 +551,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                                         <Button 
                                             onClick={handleApplyDiscountCode} 
                                             disabled={isVerifyingCode || !discountCode} 
-                                            variant="secondary" 
+                                            variant={discountCode ? 'default' : 'secondary'} 
                                             size="sm"
                                         >
                                             {isVerifyingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -574,11 +602,11 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
          onPointerDownOutside={(e) => e.preventDefault()}
       >
         {!isPlanStep && (
-            <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground flex-col justify-between items-start gap-6 rounded-l-xl">
-                <div className='p-8'>
+            <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground flex-col justify-between items-start gap-6 rounded-l-xl p-8">
+                <div>
                     <Image src="/Logo2.png" alt="Coverso Logo" width={200} height={80} />
                 </div>
-                <p className="text-left text-lg font-medium p-8">Before the Job Hunt Begins, Let Us Get To Know You</p>
+                <p className="text-left text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
                 <div />
             </div>
         )}
@@ -586,23 +614,25 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             <div className="flex-grow">
                  {renderStep()}
             </div>
-            <div className="mt-auto">
-                <StepIndicator current={step} total={totalSteps} />
-                 <DialogFooter className="mt-6">
+             <DialogFooter className="mt-auto pt-6 flex justify-between w-full">
+                <div className="flex-1 flex justify-start">
+                    {step > 1 && <StepIndicator current={step} total={totalSteps} />}
+                </div>
+                <div className="flex gap-4">
                     {step > 1 && (
-                    <Button variant="outline" onClick={handleBack} className="flex items-center gap-2" disabled={isSaving || !!isPreparingPayment}>
-                        <ArrowLeft />
-                        Back
-                    </Button>
+                        <Button variant="outline" onClick={handleBack} className="flex items-center gap-2" disabled={isSaving || !!isPreparingPayment}>
+                            <ArrowLeft />
+                            Back
+                        </Button>
                     )}
                     {step < 3 && (
-                    <Button variant="default" onClick={handleNext} className="flex items-center gap-2">
-                        Next
-                        <ArrowRight />
-                    </Button>
+                        <Button variant="default" onClick={handleNext} className="flex items-center gap-2">
+                            Next
+                            <ArrowRight />
+                        </Button>
                     )}
-                </DialogFooter>
-            </div>
+                </div>
+            </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>
@@ -610,5 +640,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
+
+    
 
     
