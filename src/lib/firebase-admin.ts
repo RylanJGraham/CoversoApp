@@ -15,15 +15,21 @@ if (!admin.apps.length) {
         throw new Error('FIREBASE_PRIVATE_KEY is not set in the environment variables.');
     }
 
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // The private key from the .env file is a single line. 
-        // We need to re-format it back to a multi-line PEM format.
-        privateKey: privateKey.replace(/-----BEGIN PRIVATE KEY-----/g, '-----BEGIN PRIVATE KEY-----\n').replace(/-----END PRIVATE KEY-----/g, '\n-----END PRIVATE KEY-----'),
-      }),
-    });
+    try {
+        admin.initializeApp({
+          credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            // The private key from the .env file is a single line. 
+            // We need to re-format it back to a multi-line PEM format.
+            privateKey: privateKey.replace(/-----BEGIN PRIVATE KEY-----/g, '-----BEGIN PRIVATE KEY-----\n').replace(/-----END PRIVATE KEY-----/g, '\n-----END PRIVATE KEY-----'),
+          }),
+        });
+    } catch (error: any) {
+        console.error('Firebase admin initialization error', error.message);
+        // We throw the error to make it visible during development/build
+        throw new Error('Failed to initialize Firebase Admin SDK: ' + error.message);
+    }
 }
 
 const adminDb = admin.firestore();
