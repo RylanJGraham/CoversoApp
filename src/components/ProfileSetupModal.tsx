@@ -20,6 +20,7 @@ import type { User } from 'firebase/auth';
 import { getClientFirestore } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { createCheckoutSession, type CreateCheckoutSessionInput } from '@/ai/flows/stripe-checkout';
 
 interface ProfileSetupModalProps {
   isOpen: boolean;
@@ -27,9 +28,40 @@ interface ProfileSetupModalProps {
   user: User | null;
 }
 
+interface Tier {
+    title: string;
+    price: string;
+    features: string[];
+    priceId: string;
+    popular?: boolean;
+}
+
+const tiers: Tier[] = [
+    {
+        title: "Job Seeker",
+        price: "$5.99",
+        features: ["10 Generations per day", "Standard tone options", "Email support"],
+        priceId: process.env.NEXT_PUBLIC_STRIPE_JOB_SEEKER_PRICE_ID || '',
+        popular: true,
+    },
+    {
+        title: "Career Pro",
+        price: "$9.99",
+        features: ["30 Generations per day", "All tone options", "CV Analysis", "Priority support"],
+        priceId: process.env.NEXT_PUBLIC_STRIPE_CAREER_PRO_PRICE_ID || '',
+    },
+    {
+        title: "Executive",
+        price: "$19.99",
+        features: ["Unlimited Generations", "Premium tone options", "CV Analysis & Enhancement", "Priority support"],
+        priceId: process.env.NEXT_PUBLIC_STRIPE_EXECUTIVE_PRICE_ID || '',
+    },
+];
+
 const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }) => {
   const [step, setStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: user?.displayName || '',
     profileImage: user?.photoURL || '',
@@ -64,10 +96,10 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     }
   };
 
-  const handleFinish = async () => {
-    if (!user) {
+  const saveProfileData = async () => {
+     if (!user) {
         toast({ title: "Error", description: "You must be logged in to complete setup.", variant: "destructive" });
-        return;
+        return false;
     }
     setIsSaving(true);
     try {
@@ -77,16 +109,56 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             uid: user.uid,
             email: user.email,
             ...formData,
-            onboardingComplete: true // Flag to prevent showing this modal again
+            onboardingComplete: true
         }, { merge: true });
-
         toast({ title: "Profile Saved!", description: "Your profile has been successfully set up." });
-        onClose();
+        return true;
     } catch (error) {
         console.error("Error saving user data: ", error);
         toast({ title: "Save Failed", description: "Could not save your profile. Please try again.", variant: "destructive" });
+        return false;
     } finally {
         setIsSaving(false);
+    }
+  }
+
+  const handleChoosePlan = async (priceId: string) => {
+    if (!user) {
+        toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive" });
+        return;
+    }
+    
+    // First, save profile data
+    const saved = await saveProfileData();
+    if (!saved) return;
+    
+    setIsRedirecting(priceId);
+
+    try {
+      const { checkoutUrl } = await createCheckoutSession({ 
+          priceId,
+          userId: user.uid,
+          userEmail: user.email || '',
+      });
+
+      if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+      } else {
+          throw new Error("Could not create a checkout session.");
+      }
+
+    } catch (error) {
+      console.error("Stripe Checkout Error:", error);
+      toast({ title: "Checkout Error", description: "Could not redirect to Stripe. Please try again.", variant: "destructive" });
+      setIsRedirecting(null);
+    }
+  };
+
+
+  const handleFinish = async () => {
+    const saved = await saveProfileData();
+    if (saved) {
+      onClose(); // Close modal if user finishes without picking a plan
     }
   };
 
@@ -105,7 +177,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     </div>
   );
   
-  const SubscriptionCard: FC<{title: string, price: string, features: string[], popular?: boolean}> = ({title, price, features, popular}) => (
+  const SubscriptionCard: FC<Tier & { onChoose: (priceId: string) => void, isRedirecting: boolean }> = ({title, price, features, popular, priceId, onChoose, isRedirecting}) => (
     <div className={cn("border rounded-lg p-6 flex flex-col", popular && "border-primary border-2 relative")}>
         {popular && <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">Most Popular</div>}
         <h3 className="text-xl font-bold">{title}</h3>
@@ -118,7 +190,10 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 </li>
             ))}
         </ul>
-        <Button className="w-full mt-6" variant={popular ? "default" : "outline"}>Choose Plan</Button>
+        <Button className="w-full mt-6" variant={popular ? "default" : "outline"} onClick={() => onChoose(priceId)} disabled={isRedirecting}>
+            {isRedirecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Choose Plan
+        </Button>
     </div>
   )
 
@@ -184,20 +259,17 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             <>
                 <DialogHeader>
                     <DialogTitle className="text-center text-2xl">Choose Your Plan</DialogTitle>
-                    <DialogDescription className="text-center">You get 2 free generations a day. Upgrade for more.</DialogDescription>
+                    <DialogDescription className="text-center">You get 2 free generations. Upgrade for more.</DialogDescription>
                 </DialogHeader>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                   <SubscriptionCard 
-                     title="Job Seeker"
-                     price="$5.99"
-                     features={["10 Generations per day", "Standard tone options", "Email support"]}
-                     popular
-                   />
-                    <SubscriptionCard 
-                     title="Career Pro"
-                     price="$9.99"
-                     features={["30 Generations per day", "All tone options", "CV Analysis", "Priority support"]}
-                   />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+                   {tiers.map(tier => (
+                       <SubscriptionCard 
+                         key={tier.title}
+                         {...tier}
+                         onChoose={handleChoosePlan}
+                         isRedirecting={isRedirecting === tier.priceId}
+                       />
+                   ))}
                 </div>
             </>
          )
@@ -208,7 +280,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-2xl bg-white text-black p-8 rounded-xl shadow-2xl">
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-4xl bg-white text-black p-8 rounded-xl shadow-2xl">
         <div className="flex flex-col h-full">
             <div className="flex-grow">
                  {renderStep()}
@@ -217,7 +289,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 <StepIndicator current={step} total={totalSteps} />
                 <DialogFooter className="mt-6">
                     {step > 1 && (
-                    <Button variant="outline" onClick={handleBack} className="flex items-center gap-2" disabled={isSaving}>
+                    <Button variant="outline" onClick={handleBack} className="flex items-center gap-2" disabled={isSaving || !!isRedirecting}>
                         <ArrowLeft />
                         Back
                     </Button>
@@ -228,9 +300,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                         <ArrowRight />
                     </Button>
                     ) : (
-                    <Button onClick={handleFinish} disabled={isSaving}>
+                    <Button onClick={handleFinish} disabled={isSaving || !!isRedirecting}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Finish Setup
+                        Finish Setup & Skip
                     </Button>
                     )}
                 </DialogFooter>
