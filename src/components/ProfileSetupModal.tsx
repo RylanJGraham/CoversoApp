@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2, X, CreditCard, Ticket } from 'lucide-react';
+import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2, X, CreditCard, Ticket, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from 'firebase/auth';
 import { getClientFirestore } from '@/lib/firebase';
@@ -27,6 +27,9 @@ import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Separator } from './ui/separator';
 import { validateDiscountCode } from '@/ai/flows/validate-discount-code';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import TiltedCard from './TiltedCard';
+import './TiltedCard.css';
 
 
 interface ProfileSetupModalProps {
@@ -70,6 +73,18 @@ const tiers: Tier[] = [
         priceId: process.env.NEXT_PUBLIC_STRIPE_EXECUTIVE_PRICE_ID || 'price_1RvJqaRkulDjgBEWsVeQW4qi',
     },
 ];
+
+const industryOptions = [
+  "Software Development",
+  "Marketing",
+  "Design",
+  "Finance",
+  "Healthcare",
+  "Education",
+  "Sales",
+  "Engineering",
+];
+
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -129,20 +144,20 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   const [formData, setFormData] = useState({
     fullName: user?.displayName || '',
     profileImage: user?.photoURL || '',
-    industry: '',
-    age: '',
+    industries: [] as string[],
+    academicLevel: '',
     dailyGoal: '2',
     createdAt: new Date(),
     subscriptionPlan: 'Basic', // Default to basic
   });
   const [imagePreview, setImagePreview] = useState(user?.photoURL || '');
+  const [industryInput, setIndustryInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const [discountCode, setDiscountCode] = useState("");
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [appliedCodePlan, setAppliedCodePlan] = useState<string | null>(null);
-
 
   const totalSteps = 4;
 
@@ -155,7 +170,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     return Math.max(prev - 1, 1)
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -172,6 +187,18 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     }
   };
 
+  const handleIndustrySelect = (industry: string) => {
+    if (formData.industries.length < 3 && !formData.industries.includes(industry)) {
+      setFormData(prev => ({...prev, industries: [...prev.industries, industry]}));
+    }
+    setIndustryInput('');
+  }
+
+  const handleIndustryRemove = (industryToRemove: string) => {
+    setFormData(prev => ({...prev, industries: prev.industries.filter(i => i !== industryToRemove)}));
+  }
+
+
   const saveProfileData = async (onboardingStatus: boolean, plan: string) => {
      if (!user) {
         toast({ title: "Error", description: "You must be logged in to complete setup.", variant: "destructive" });
@@ -185,7 +212,10 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
         await setDoc(userRef, {
             uid: user.uid,
             email: user.email,
-            ...formData,
+            fullName: formData.fullName,
+            profileImage: formData.profileImage,
+            industries: formData.industries,
+            academicLevel: formData.academicLevel,
             subscriptionPlan: plan,
             onboardingComplete: onboardingStatus,
         }, { merge: true });
@@ -302,23 +332,25 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   );
   
   const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean }> = ({title, price, features, popular, priceId, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
-    <div className={cn("border rounded-lg p-6 flex flex-col bg-background", popular && "border-primary border-2 relative", disabled && "opacity-50 bg-gray-50")}>
-        {popular && <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">Most Popular</div>}
-        <h3 className="text-xl font-bold text-foreground">{title}</h3>
-        <p className="text-3xl font-bold my-4 text-foreground">{price}<span className="text-base font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
-        <ul className="space-y-3 text-muted-foreground flex-grow">
-            {features.map((feature, i) => (
-                <li key={i} className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-primary" />
-                    <span>{feature}</span>
-                </li>
-            ))}
-        </ul>
-        <Button className="w-full mt-6" variant={popular ? "default" : "outline"} onClick={() => onChoose({title, price, features, popular, priceId, ...tier})} disabled={isPreparing || disabled}>
-            {isSelected && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            { isSelected ? 'Preparing...' : (priceId === null ? 'Choose Basic' : 'Choose Plan')}
-        </Button>
-    </div>
+     <TiltedCard containerHeight="100%" scaleOnHover={1.05} rotateAmplitude={4}>
+        <div className={cn("border-2 rounded-lg p-4 flex flex-col h-full", popular ? "border-primary" : "border-gray-300", disabled && "opacity-50 bg-gray-50")}>
+            {popular && <div className="absolute top-0 right-4 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">Most Popular</div>}
+            <h3 className="text-lg font-bold text-foreground">{title}</h3>
+            <p className="text-2xl font-bold my-2 text-foreground">{price}<span className="text-sm font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
+            <ul className="space-y-2 text-muted-foreground text-sm flex-grow">
+                {features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                        <span>{feature}</span>
+                    </li>
+                ))}
+            </ul>
+            <Button className="w-full mt-4" variant={popular ? "default" : "outline"} onClick={() => onChoose({title, price, features, popular, priceId, ...tier})} disabled={isPreparing || disabled}>
+                {isSelected && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                { isSelected ? 'Preparing...' : (priceId === null ? 'Choose Basic' : 'Choose Plan')}
+            </Button>
+        </div>
+     </TiltedCard>
   )
 
   const renderStep = () => {
@@ -334,14 +366,19 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             </DialogHeader>
             <div className="flex flex-col items-start gap-4 py-4">
                <Label htmlFor="fullName">Full Name</Label>
-               <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="e.g., Jane Doe" className="border-gray-300"/>
+               <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="e.g., Jane Doe"/>
                <Label>Profile Picture (Optional)</Label>
-              <Avatar className="h-24 w-24 cursor-pointer border-2" onClick={() => fileInputRef.current?.click()}>
-                <AvatarImage src={imagePreview} alt="Profile" />
-                <AvatarFallback>
-                    <UploadCloud className="h-10 w-10 text-muted-foreground" />
-                </AvatarFallback>
-              </Avatar>
+                <div className="flex items-center gap-4">
+                    <Avatar className="h-24 w-24 border-2">
+                        <AvatarImage src={imagePreview} alt="Profile" />
+                        <AvatarFallback>
+                            <UserIcon className="h-10 w-10 text-muted-foreground" />
+                        </AvatarFallback>
+                    </Avatar>
+                     <Button type="button" variant="outline" className="rounded-full h-12 w-12 p-0 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => fileInputRef.current?.click()}>
+                        <UploadCloud className="h-6 w-6" />
+                    </Button>
+                </div>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
             </div>
           </>
@@ -353,69 +390,131 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
               <DialogTitle className="text-2xl">Tell Us About You</DialogTitle>
               <DialogDescription>This helps us tailor your experience.</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="industry">What industry are you in?</Label>
-                <Input id="industry" name="industry" value={formData.industry} onChange={handleChange} placeholder="e.g., Software Development" className="border-gray-300"/>
+            <div className="space-y-6 py-4">
+               <div>
+                <Label htmlFor="industry">What industry are you in? (Select up to 3)</Label>
+                <div className="flex items-center gap-2 mt-2">
+                    <Input 
+                        id="industry"
+                        list="industry-options"
+                        value={industryInput}
+                        onChange={(e) => setIndustryInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && industryInput) {
+                                e.preventDefault();
+                                handleIndustrySelect(industryInput);
+                            }
+                        }}
+                        placeholder="Type or select an industry"
+                        disabled={formData.industries.length >= 3}
+                    />
+                    <datalist id="industry-options">
+                        {industryOptions.map(opt => <option key={opt} value={opt} />)}
+                    </datalist>
+                    <Button type="button" onClick={() => handleIndustrySelect(industryInput)} disabled={!industryInput || formData.industries.length >= 3}>Add</Button>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                    {formData.industries.map(industry => (
+                        <div key={industry} className="flex items-center gap-1 bg-primary text-primary-foreground rounded-full px-3 py-1 text-sm">
+                            <span>{industry}</span>
+                            <button type="button" onClick={() => handleIndustryRemove(industry)} className="rounded-full hover:bg-black/20">
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
               </div>
-              <div>
-                <Label htmlFor="age">What is your age?</Label>
-                <Input id="age" name="age" type="number" value={formData.age} onChange={handleChange} placeholder="e.g., 28" className="border-gray-300"/>
-              </div>
+              
+               <div>
+                  <Label htmlFor="academicLevel">What is your current academic/career level?</Label>
+                   <Select name="academicLevel" onValueChange={(value) => setFormData(p => ({...p, academicLevel: value}))} value={formData.academicLevel}>
+                        <SelectTrigger className="w-full mt-2" id="academicLevel">
+                            <SelectValue placeholder="Select your level..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="student">Undergraduate Student</SelectItem>
+                            <SelectItem value="entry-level">Entry-level / Graduate</SelectItem>
+                            <SelectItem value="mid-level">Mid-level Professional</SelectItem>
+                            <SelectItem value="senior-level">Senior-level / Executive</SelectItem>
+                            <SelectItem value="postgraduate">Postgraduate Student</SelectItem>
+                        </SelectContent>
+                    </Select>
+               </div>
             </div>
           </>
         );
        case 3:
+         const paidTiers = tiers.filter(t => t.priceId !== null);
          return (
             <>
                 <DialogHeader>
                     <DialogTitle className="text-2xl">Choose Your Plan</DialogTitle>
                     <DialogDescription>Select a plan to complete your setup. You can change this at any time.</DialogDescription>
                 </DialogHeader>
-                 <div className="py-4 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {tiers.map(tier => (
+                 <div className="py-4 space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                        {paidTiers.map(tier => (
                         <SubscriptionCard 
                             key={tier.title}
                             {...tier}
                             onChoose={handleChoosePlan}
                             isPreparing={isPreparingPayment !== null}
                             isSelected={isPreparingPayment === tier.priceId}
-                            disabled={!!appliedCodePlan && tier.priceId !== null}
+                            disabled={!!appliedCodePlan || isPreparingPayment !== null}
                         />
                         ))}
                     </div>
                     <Separator/>
-                    <div className="p-4 border rounded-lg bg-secondary">
-                         <div className="flex items-center gap-2 mb-2">
-                             <Ticket className="h-5 w-5 text-primary" />
-                             <h4 className="font-semibold">Have a code?</h4>
-                         </div>
-                        {appliedCodePlan ? (
-                            <div className='flex flex-col items-start gap-4'>
-                                <p className='font-medium'>
-                                    Success! You've unlocked the <span className='font-bold text-primary'>{appliedCodePlan}</span> plan.
-                                </p>
-                                 <Button onClick={handleCompleteWithCode} disabled={isSaving} variant="default">
-                                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Complete Setup & Start
-                                </Button>
-                            </div>
-                        ) : (
-                             <div className="flex items-center gap-2">
-                                <Input 
-                                    placeholder="Enter discount code" 
-                                    value={discountCode}
-                                    onChange={(e) => setDiscountCode(e.target.value)}
-                                    disabled={isVerifyingCode}
-                                    className="border-gray-300"
-                                />
-                                <Button onClick={handleApplyDiscountCode} disabled={isVerifyingCode || !discountCode} variant="secondary">
-                                    {isVerifyingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Apply
-                                </Button>
-                            </div>
-                        )}
+                    <div className="grid grid-cols-3 gap-8">
+                        <div className="col-span-2">
+                             <h4 className="font-semibold">Don't want to pay?</h4>
+                              <p className="text-sm text-muted-foreground">
+                                <button type="button" onClick={() => handleChoosePlan(tiers[0])} className="text-primary font-semibold hover:underline">
+                                    Continue with Free
+                                </button>
+                                 &nbsp;to get started right away.
+                              </p>
+                              <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                                  {tiers[0].features.map((feature, i) => (
+                                    <p key={i} className="flex items-center gap-2">
+                                        <CheckCircle className="h-3.5 w-3.5" />
+                                        <span>{feature}</span>
+                                    </p>
+                                  ))}
+                              </div>
+                        </div>
+
+                        <div className="col-span-1 border-l pl-8">
+                             <div className="flex items-center gap-2 mb-2">
+                                 <Ticket className="h-5 w-5 text-primary" />
+                                 <h4 className="font-semibold">Have a code?</h4>
+                             </div>
+                            {appliedCodePlan ? (
+                                <div className='flex flex-col items-start gap-4'>
+                                    <p className='font-medium text-sm'>
+                                        Success! You've unlocked the <span className='font-bold text-primary'>{appliedCodePlan}</span> plan.
+                                    </p>
+                                     <Button onClick={handleCompleteWithCode} disabled={isSaving} variant="default" size="sm">
+                                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Complete Setup
+                                    </Button>
+                                </div>
+                            ) : (
+                                 <div className="flex flex-col items-start gap-2">
+                                    <Input 
+                                        placeholder="Enter discount code" 
+                                        value={discountCode}
+                                        onChange={(e) => setDiscountCode(e.target.value)}
+                                        disabled={isVerifyingCode}
+                                        className="h-9"
+                                    />
+                                    <Button onClick={handleApplyDiscountCode} disabled={isVerifyingCode || !discountCode} variant="secondary" size="sm">
+                                        {isVerifyingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Apply
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </>
@@ -426,7 +525,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                  <>
                 <DialogHeader>
                     <DialogTitle className="text-2xl">Enter Payment Details</DialogTitle>
-                    <DialogDescription className="text-left">Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
+                    <DialogDescription>Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
                 </DialogHeader>
                  <div className="py-4 bg-white rounded-lg p-4">
                     <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
@@ -445,16 +544,17 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   return (
     <Dialog open={isOpen} onOpenChange={() => { /* Don't close on overlay click */ }}>
       <DialogContent 
-        className="sm:max-w-md md:max-w-lg lg:max-w-5xl p-0 rounded-xl grid grid-cols-1 md:grid-cols-3 border-2 border-primary shadow-lg shadow-primary/40" 
+        className="sm:max-w-md md:max-w-lg lg:max-w-5xl p-0 rounded-xl grid grid-cols-1 md:grid-cols-3 border-2 border-primary shadow-lg shadow-primary/20" 
         hideCloseButton={true} 
          onEscapeKeyDown={(e) => e.preventDefault()}
          onPointerDownOutside={(e) => e.preventDefault()}
       >
-        <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground p-8 flex-col justify-center items-center gap-6 rounded-l-xl">
+        <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground p-8 flex-col justify-between items-start gap-6 rounded-l-xl">
             <Image src="/Logo2.png" alt="Coverso Logo" width={200} height={80} />
-            <p className="text-center text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
+            <p className="text-left text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
+            <div />
         </div>
-        <div className="col-span-1 md:col-span-2 p-8 flex flex-col h-full min-h-[500px] text-left">
+        <div className="col-span-1 md:col-span-2 p-8 flex flex-col h-full min-h-[500px]">
             <div className="flex-grow">
                  {renderStep()}
             </div>
@@ -482,7 +582,3 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
-
-    
-
-    
