@@ -332,10 +332,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   );
   
   const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean }> = ({title, price, features, popular, priceId, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
-     <TiltedCard containerHeight="100%" scaleOnHover={1.05} rotateAmplitude={4}>
-        <div className={cn("border-2 rounded-lg p-4 flex flex-col h-full", popular ? "border-primary" : "border-gray-300", disabled && "opacity-50 bg-gray-50")}>
-            {popular && <div className="absolute top-0 right-4 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">Most Popular</div>}
-            <h3 className="text-lg font-bold text-foreground">{title}</h3>
+        <div className={cn("border rounded-lg p-4 flex flex-col h-full relative", popular ? "border-primary" : "border-gray-300", disabled && "opacity-50 bg-gray-50")}>
+            {popular && <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">Most Popular</div>}
+            <h3 className="text-lg font-bold text-foreground mt-4">{title}</h3>
             <p className="text-2xl font-bold my-2 text-foreground">{price}<span className="text-sm font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
             <ul className="space-y-2 text-muted-foreground text-sm flex-grow">
                 {features.map((feature, i) => (
@@ -350,7 +349,6 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 { isSelected ? 'Preparing...' : (priceId === null ? 'Choose Basic' : 'Choose Plan')}
             </Button>
         </div>
-     </TiltedCard>
   )
 
   const renderStep = () => {
@@ -359,12 +357,12 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
         return (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl">Welcome to Coverso!</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-2xl text-left">Welcome to Coverso!</DialogTitle>
+              <DialogDescription className="text-left">
                 Let's set up your profile to get started. We'll use this information to pre-fill the contact details on your cover letters.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col items-start gap-4 py-4">
+            <div className="flex flex-col items-start gap-4 py-4 text-left">
                <Label htmlFor="fullName">Full Name</Label>
                <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="e.g., Jane Doe"/>
                <Label>Profile Picture (Optional)</Label>
@@ -387,8 +385,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
         return (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl">Tell Us About You</DialogTitle>
-              <DialogDescription>This helps us tailor your experience.</DialogDescription>
+              <DialogTitle className="text-2xl text-left">Tell Us About You</DialogTitle>
+              <DialogDescription className="text-left">This helps us tailor your experience.</DialogDescription>
             </DialogHeader>
             <div className="space-y-6 py-4">
                <div>
@@ -448,8 +446,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
          return (
             <>
                 <DialogHeader>
-                    <DialogTitle className="text-2xl">Choose Your Plan</DialogTitle>
-                    <DialogDescription>Select a plan to complete your setup. You can change this at any time.</DialogDescription>
+                    <DialogTitle className="text-2xl text-left">Choose Your Plan</DialogTitle>
+                    <DialogDescription className="text-left">Select a plan to complete your setup. You can change this at any time.</DialogDescription>
                 </DialogHeader>
                  <div className="py-4 space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
@@ -524,8 +522,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             return (
                  <>
                 <DialogHeader>
-                    <DialogTitle className="text-2xl">Enter Payment Details</DialogTitle>
-                    <DialogDescription>Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
+                    <DialogTitle className="text-2xl text-left">Enter Payment Details</DialogTitle>
+                    <DialogDescription className="text-left">Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
                 </DialogHeader>
                  <div className="py-4 bg-white rounded-lg p-4">
                     <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
@@ -541,20 +539,27 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     }
   };
 
+  const isPlanStep = step === 3 || step === 4;
+
   return (
     <Dialog open={isOpen} onOpenChange={() => { /* Don't close on overlay click */ }}>
       <DialogContent 
-        className="sm:max-w-md md:max-w-lg lg:max-w-5xl p-0 rounded-xl grid grid-cols-1 md:grid-cols-3 border-2 border-primary shadow-lg shadow-primary/20" 
+        className={cn(
+            "p-0 rounded-xl grid grid-cols-1 border-2 border-primary shadow-lg shadow-primary/20",
+            isPlanStep ? "md:max-w-4xl" : "md:max-w-lg md:grid-cols-3"
+        )}
         hideCloseButton={true} 
          onEscapeKeyDown={(e) => e.preventDefault()}
          onPointerDownOutside={(e) => e.preventDefault()}
       >
-        <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground p-8 flex-col justify-between items-start gap-6 rounded-l-xl">
-            <Image src="/Logo2.png" alt="Coverso Logo" width={200} height={80} />
-            <p className="text-left text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
-            <div />
-        </div>
-        <div className="col-span-1 md:col-span-2 p-8 flex flex-col h-full min-h-[500px]">
+        {!isPlanStep && (
+            <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground p-8 flex-col justify-between items-start gap-6 rounded-l-xl text-left">
+                <Image src="/Logo2.png" alt="Coverso Logo" width={200} height={80} />
+                <p className="text-left text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
+                <div />
+            </div>
+        )}
+        <div className={cn("p-8 flex flex-col h-full min-h-[500px]", isPlanStep ? "col-span-1" : "col-span-1 md:col-span-2")}>
             <div className="flex-grow">
                  {renderStep()}
             </div>
@@ -582,3 +587,5 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
+
+    
