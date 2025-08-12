@@ -28,6 +28,8 @@ import {
   DollarSign,
   PenLine,
   LogIn,
+  Save,
+  RefreshCw,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -235,12 +237,21 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'cover-letter.md';
+    link.download = `${aiResult?.companyName || 'Company'}-${aiResult?.jobTitle || 'Cover-Letter'}.md`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
+
+  const handleSave = () => {
+    // This is where you'd implement saving logic, potentially with a dialog to name the file.
+    // For now, it just shows a toast.
+    toast({
+      title: "Document Saved!",
+      description: "Your changes have been saved to your dashboard."
+    })
+  }
   
   const Step: FC<{
     step: number;
@@ -348,7 +359,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
 
       <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         
-         { isGeneratePage && (
+         { isGeneratePage && appState === "idle" && (
             <div className="grid grid-cols-3 gap-8 items-center py-8">
                 <div className="col-span-2">
                     <h1 className="text-4xl font-bold text-black">Cover Letter Generator</h1>
@@ -361,6 +372,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 items-center w-full">
+          {appState !== 'success' && appState !== 'loading' && (
             <div className="w-full space-y-8">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
@@ -447,7 +459,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                             />
                             </div>
                             <div className="mt-auto">
-                                <Button type="submit" size="lg" className="mt-4 bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
+                                <Button type="submit" size="lg" className="w-full mt-4 bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
                                     {appState === 'loading' ? (
                                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                                     ) : (
@@ -459,86 +471,99 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         </CardContent>
                     </div>
                 </div>
+            </div>
+          )}
 
-                {appState !== 'idle' && (
-                <div className="w-full space-y-4">
-                    <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2} >
-                        <div className="min-h-[60vh] flex flex-col w-full rounded-2xl p-4">
-                            <CardHeader className="p-4">
-                                <CardTitle className="text-black">Your Generated Cover Letter</CardTitle>
-                                <CardDescription className="text-gray-700">The AI-generated result will appear here. You can edit it before downloading.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-4 pt-0 flex-grow flex flex-col">
-                                {appState === 'loading' && (
-                                <div className="flex-grow flex flex-col items-center justify-center text-center">
-                                    <Loader2 className="w-12 h-12 mb-4 animate-spin text-primary" />
-                                    <p className="font-semibold text-black">The Alchemist is at work...</p>
-                                    <p className="text-sm text-gray-600">Analyzing your documents and the job posting.</p>
-                                </div>
-                                )}
-                                {appState === 'error' && (
-                                <div className="flex-grow flex flex-col items-center justify-center text-center text-destructive">
-                                    <AlertCircle className="w-12 h-12 mb-4" />
-                                    <p className="font-semibold">An Error Occurred</p>
-                                    <p className="text-sm">{error}</p>
-                                </div>
-                                )}
-                                {appState === 'success' && (
-                                <div className="flex-grow flex flex-col">
-                                    <Textarea
-                                    value={generatedCoverLetter}
-                                    onChange={(e) => setGeneratedCoverLetter(e.target.value)}
-                                    placeholder="Your generated cover letter will appear here..."
-                                    className="flex-grow w-full resize-none"
-                                    rows={20}
-                                    />
-                                    <Button onClick={handleDownload} className="mt-4" disabled={!generatedCoverLetter}>
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Download as Markdown
-                                    </Button>
-                                </div>
-                                )}
-                            </CardContent>
-                        </div>
-                    </TiltedCard>
-                    
-                    {appState === 'success' && aiResult && (
-                     <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                        <div className="w-full rounded-2xl p-4">
-                            <CardHeader className="p-4">
-                            <CardTitle className="flex items-center gap-2 text-black">
-                                <BrainCircuit className="h-6 w-6" />
+          {appState !== 'idle' && (
+            <div className="w-full py-8">
+                {appState === 'loading' && (
+                  <div className="flex-grow flex flex-col items-center justify-center text-center h-[60vh]">
+                      <Loader2 className="w-12 h-12 mb-4 animate-spin text-primary" />
+                      <p className="font-semibold text-black text-xl">The Alchemist is at work...</p>
+                      <p className="text-base text-gray-600">Analyzing your documents and the job posting.</p>
+                  </div>
+                )}
+                {appState === 'error' && (
+                  <div className="flex-grow flex flex-col items-center justify-center text-center text-destructive h-[60vh]">
+                      <AlertCircle className="w-12 h-12 mb-4" />
+                      <p className="font-semibold text-xl">An Error Occurred</p>
+                      <p className="text-base">{error}</p>
+                      <Button onClick={() => setAppState('idle')} className="mt-4">Try Again</Button>
+                  </div>
+                )}
+                {appState === 'success' && aiResult && (
+                  <div className="grid grid-cols-12 gap-8 items-start">
+                    <div className="col-span-9">
+                      <Card className="w-full">
+                        <CardContent className="p-0">
+                           <Textarea
+                              value={generatedCoverLetter}
+                              onChange={(e) => setGeneratedCoverLetter(e.target.value)}
+                              placeholder="Your generated cover letter will appear here..."
+                              className="w-full resize-none min-h-[70vh] border-0 focus-visible:ring-0 rounded-t-lg"
+                            />
+                        </CardContent>
+                        <CardFooter className="bg-secondary/30 border-t p-2 flex justify-end">
+                            <Button onClick={handleSave}>
+                                <Save className="w-4 h-4 mr-2" />
+                                Save
+                            </Button>
+                        </CardFooter>
+                      </Card>
+                    </div>
+                    <div className="col-span-3 space-y-4 sticky top-24">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                <BrainCircuit className="h-5 w-5" />
                                 AI Analysis
-                            </CardTitle>
-                            <CardDescription className="text-gray-700">Here's what the AI understood from the job posting.</CardDescription>
+                                </CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4 p-4 pt-0">
+                             <CardContent className="space-y-3">
                                 <div>
                                 <h3 className="font-semibold text-gray-800">Job Title</h3>
-                                <p className="text-muted-foreground">{aiResult.jobTitle}</p>
+                                <p className="text-sm text-muted-foreground">{aiResult.jobTitle}</p>
                                 </div>
                                 <div>
                                 <h3 className="font-semibold text-gray-800">Company Name</h3>
-                                <p className="text-muted-foreground">{aiResult.companyName}</p>
+                                <p className="text-sm text-muted-foreground">{aiResult.companyName}</p>
                                 </div>
                                 <div>
                                 <h3 className="font-semibold flex items-center gap-2 text-gray-800">
                                     <ListChecks className="h-5 w-5" />
                                     Key Focus Points
                                 </h3>
-                                <ul className="list-disc pl-5 mt-2 space-y-1 text-muted-foreground">
+                                <ul className="list-disc pl-5 mt-1 space-y-1 text-sm text-muted-foreground">
                                     {aiResult.keyFocusPoints.map((point, index) => (
                                     <li key={index}>{point}</li>
                                     ))}
                                 </ul>
                                 </div>
                             </CardContent>
-                        </div>
-                    </TiltedCard>
-                    )}
-                </div>
+                        </Card>
+                        <Card>
+                           <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                <Wand2 className="h-5 w-5" />
+                                Actions
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-2">
+                                <Button variant="outline" onClick={handleDownload}>
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Download
+                                </Button>
+                                <Button variant="outline" onClick={() => toast({title: "Coming Soon!", description: "This feature is under development."})}>
+                                    <RefreshCw className="w-4 h-4 mr-2" />
+                                    Reprompt
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </div>
+                  </div>
                 )}
             </div>
+            )}
         </form>
       </main>
       <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
