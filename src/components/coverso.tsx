@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, useMemo, type FC, useEffect } from "react";
@@ -352,7 +353,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
       { user ? <DashboardHeader /> : <Header /> }
       
       { !isGeneratePage && (
-         <header className="h-[400px] w-full relative">
+         <header className="h-[400px] w-full relative bg-white">
             <div className="absolute inset-0 z-10 grid grid-cols-1 md:grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="col-span-1 flex items-center justify-start p-8 text-left">
                     <div className="flex flex-col items-start justify-center">
