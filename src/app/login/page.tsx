@@ -8,7 +8,7 @@ import Hyperspeed from "@/components/hyperspeed"
 
 export default function LoginPage() {
   return (
-    <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2">
+    <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white">
       <div className="hidden lg:block relative">
         <Hyperspeed
           effectOptions={{
