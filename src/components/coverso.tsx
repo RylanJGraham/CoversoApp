@@ -447,7 +447,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                             />
                             </div>
                             <div className="mt-auto">
-                                <Button type="submit" size="lg" className="mt-4" disabled={appState === 'loading'}>
+                                <Button type="submit" size="lg" className="mt-4 bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
                                     {appState === 'loading' ? (
                                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                                     ) : (
