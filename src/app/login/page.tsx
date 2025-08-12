@@ -26,7 +26,7 @@ export default function LoginPage() {
         />
       </div>
       <div className="flex items-center justify-center p-6 bg-primary">
-          <Card className="mx-auto w-full max-w-sm">
+          <Card className="mx-auto w-full max-w-sm bg-white">
             <CardHeader>
               <CardTitle className="text-2xl">Login</CardTitle>
               <CardDescription>
