@@ -28,11 +28,11 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<false | 'google' | 'email'>(false);
   const { toast } = useToast();
 
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
+    setIsLoading('google');
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
@@ -47,7 +47,7 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsLoading('email');
     try {
       await signInWithEmailAndPassword(auth, email, password);
        // You can handle successful login redirection here
@@ -97,7 +97,7 @@ export default function LoginPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
+                    disabled={!!isLoading}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -113,11 +113,11 @@ export default function LoginPage() {
                     required 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
+                    disabled={!!isLoading}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" className="w-full" disabled={!!isLoading}>
+                   {isLoading === 'email' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Login
                 </Button>
               </form>
@@ -132,8 +132,8 @@ export default function LoginPage() {
                     </div>
                 </div>
                 <div className="flex justify-center">
-                    <Button variant="outline" size="icon" className="rounded-full" onClick={handleGoogleLogin} disabled={isLoading}>
-                         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon className="h-5 w-5" /> }
+                    <Button variant="outline" size="icon" className="rounded-full" onClick={handleGoogleLogin} disabled={!!isLoading}>
+                         {isLoading === 'google' ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon className="h-5 w-5" /> }
                         <span className="sr-only">Login with Google</span>
                     </Button>
                 </div>
