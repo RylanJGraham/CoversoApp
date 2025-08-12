@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { HamburgerMenu } from './HamburgerMenu';
 
 export function Header() {
     return (
@@ -11,7 +12,7 @@ export function Header() {
                 <Link href="/">
                     <Image src="/Logo2.png" alt="Coverso Logo" width={150} height={40} />
                 </Link>
-                <nav className="flex items-center gap-4">
+                <nav className="hidden lg:flex items-center gap-4">
                     <Link href="/about" className="text-primary hover:underline">About Us</Link>
                     <Link href="/faq" className="text-primary hover:underline">FAQ</Link>
                     <Separator orientation="vertical" className="h-6 bg-primary" />
@@ -19,6 +20,9 @@ export function Header() {
                         <Link href="/login">Login</Link>
                     </Button>
                 </nav>
+                <div className="lg:hidden">
+                    <HamburgerMenu />
+                </div>
             </div>
         </header>
     );
