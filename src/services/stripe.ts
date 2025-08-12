@@ -19,14 +19,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
  */
 export async function createStripeCheckoutSession(priceId: string, userId: string, userEmail: string): Promise<Stripe.Checkout.Session> {
     
-    // Check if a customer with this email already exists
     let customers = await stripe.customers.list({ email: userEmail, limit: 1 });
     let customer: Stripe.Customer;
 
     if (customers.data.length > 0) {
         customer = customers.data[0];
     } else {
-        // Create a new customer in Stripe and link it to the Firebase user
         customer = await stripe.customers.create({
             email: userEmail,
             metadata: {
@@ -45,10 +43,24 @@ export async function createStripeCheckoutSession(priceId: string, userId: strin
                 quantity: 1,
             },
         ],
-        allow_promotion_codes: true, // This enables the discount code field
+        allow_promotion_codes: true,
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`, // User can go back to dashboard if they cancel
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`, 
     });
 
     return session;
 }
+
+/**
+ * Retrieves a Stripe Checkout session.
+ * @param sessionId - The ID of the Stripe Checkout Session.
+ * @returns The Stripe Checkout Session object.
+ */
+export async function getStripeCheckoutSession(sessionId: string): Promise<Stripe.Checkout.Session> {
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+        expand: ['subscription', 'line_items.data.price.product']
+    });
+    return session;
+}
+
+    

@@ -5,13 +5,12 @@
  * @fileOverview A flow for creating a Stripe Checkout session.
  * 
  * - createCheckoutSession - Creates a Stripe Checkout session and returns the URL.
- * - CreateCheckoutSessionInput - The input type for the flow.
- * - CreateCheckoutSessionOutput - The output type for the flow.
+ * - verifyCheckoutSession - Verifies a Stripe Checkout session and returns subscription details.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { createStripeCheckoutSession } from '@/services/stripe';
+import { createStripeCheckoutSession, getStripeCheckoutSession } from '@/services/stripe';
 
 export const CreateCheckoutSessionInputSchema = z.object({
     priceId: z.string().describe('The ID of the Stripe Price object.'),
@@ -35,10 +34,6 @@ export const createCheckoutSession = ai.defineFlow(
   async (input) => {
     const { priceId, userId, userEmail } = input;
     
-    // This is where you would typically interact with your database
-    // to find or create a Stripe Customer ID for the user.
-    // For simplicity, we'll pass the Firebase UID and email to the service.
-
     const session = await createStripeCheckoutSession(priceId, userId, userEmail);
 
     if (!session.url) {
@@ -51,3 +46,55 @@ export const createCheckoutSession = ai.defineFlow(
     };
   }
 );
+
+
+export const VerifyCheckoutSessionInputSchema = z.object({
+  sessionId: z.string().describe('The ID of the Stripe Checkout Session to verify.'),
+});
+export type VerifyCheckoutSessionInput = z.infer<typeof VerifyCheckoutSessionInputSchema>;
+
+export const VerifyCheckoutSessionOutputSchema = z.object({
+  paymentStatus: z.string().describe('The payment status of the session (e.g., "paid").'),
+  subscriptionId: z.string().optional().describe('The ID of the created Stripe Subscription.'),
+  customerId: z.string().optional().describe('The ID of the Stripe Customer.'),
+  planId: z.string().optional().describe('The ID of the Stripe Price/Plan.'),
+});
+export type VerifyCheckoutSessionOutput = z.infer<typeof VerifyCheckoutSessionOutputSchema>;
+
+
+export const verifyCheckoutSession = ai.defineFlow(
+    {
+        name: 'verifyCheckoutSession',
+        inputSchema: VerifyCheckoutSessionInputSchema,
+        outputSchema: VerifyCheckoutSessionOutputSchema,
+    },
+    async ({ sessionId }) => {
+        const session = await getStripeCheckoutSession(sessionId);
+
+        if (!session) {
+            throw new Error('Stripe session not found.');
+        }
+        
+        let subscriptionId: string | undefined;
+        let planId: string | undefined;
+
+        if (session.subscription) {
+           // For subscriptions, get details from the subscription object
+           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+           subscriptionId = subscription.id;
+           planId = subscription.items.data[0]?.price.id;
+        } else if (session.line_items?.data[0]?.price) {
+           // For one-time payments
+           planId = session.line_items.data[0].price.id;
+        }
+
+        return {
+            paymentStatus: session.payment_status,
+            subscriptionId: subscriptionId,
+            customerId: typeof session.customer === 'string' ? session.customer : undefined,
+            planId: planId,
+        };
+    }
+);
+
+    

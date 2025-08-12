@@ -3,16 +3,19 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getClientAuth, getClientFirestore } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, orderBy, query, Timestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, orderBy, query, Timestamp, setDoc } from 'firebase/firestore';
 import Hyperspeed from '@/components/hyperspeed';
 import { Loader2, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
+import { verifyCheckoutSession } from '@/ai/flows/stripe-checkout';
+import { useToast } from '@/hooks/use-toast';
+
 
 interface UserProfile {
   fullName: string;
@@ -35,53 +38,96 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
 
   useEffect(() => {
     const auth = getClientAuth();
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        const db = getClientFirestore();
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
+        
+        const sessionId = searchParams.get('session_id');
+        if (sessionId) {
+            // Stripe redirect, verify session
+            setLoading(true);
+            try {
+                const { paymentStatus, subscriptionId, customerId, planId } = await verifyCheckoutSession({ sessionId });
+                if (paymentStatus === 'paid') {
+                    const db = getClientFirestore();
+                    const userDocRef = doc(db, 'users', user.uid);
+                    await setDoc(userDocRef, {
+                        onboardingComplete: true,
+                        stripe: {
+                            subscriptionId,
+                            customerId,
+                            planId,
+                            status: 'active',
+                        },
+                    }, { merge: true });
 
-        if (userDocSnap.exists()) {
-          const profile = userDocSnap.data() as UserProfile;
-          setUserProfile(profile);
-          if (!profile.onboardingComplete) {
-            setShowOnboarding(true);
-          } else {
-            // Fetch documents if onboarding is complete
-            const docsQuery = query(collection(userDocRef, 'documents'), orderBy('createdAt', 'desc'));
-            const docsSnap = await getDocs(docsQuery);
-            setDocuments(docsSnap.docs.map(d => ({ id: d.id, ...d.data() } as CoverLetterDoc)));
-          }
-        } else {
-          // User exists in Auth, but not in Firestore -> new user
-          setShowOnboarding(true);
+                    toast({
+                        title: "Payment Successful!",
+                        description: "Your subscription is active and your profile is complete.",
+                    });
+                    
+                    // Clear search params from URL
+                    router.replace('/dashboard', undefined);
+                } else {
+                     toast({
+                        title: "Payment Incomplete",
+                        description: "Your payment was not successful. Please try again.",
+                        variant: "destructive",
+                    });
+                }
+            } catch (error) {
+                console.error("Stripe verification failed:", error);
+                toast({
+                    title: "Verification Failed",
+                    description: "We couldn't verify your payment. Please contact support.",
+                    variant: "destructive",
+                });
+            }
         }
+        
+        await checkUserProfile(user);
+
       } else {
-        // Not logged in, redirect to login
         router.push('/login');
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, searchParams]);
+  
+  const checkUserProfile = async (user: User) => {
+      setLoading(true);
+      const db = getClientFirestore();
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
 
-  const handleOnboardingComplete = async () => {
-    setShowOnboarding(false);
-    // Refetch user profile to get latest data
-     if (user) {
-        setLoading(true);
-        const db = getClientFirestore();
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          setUserProfile(userDocSnap.data() as UserProfile);
+      if (userDocSnap.exists()) {
+        const profile = userDocSnap.data() as UserProfile;
+        setUserProfile(profile);
+        if (!profile.onboardingComplete) {
+          setShowOnboarding(true);
+        } else {
+          setShowOnboarding(false);
+          const docsQuery = query(collection(userDocRef, 'documents'), orderBy('createdAt', 'desc'));
+          const docsSnap = await getDocs(docsQuery);
+          setDocuments(docsSnap.docs.map(d => ({ id: d.id, ...d.data() } as CoverLetterDoc)));
         }
-        setLoading(false);
+      } else {
+        setShowOnboarding(true);
+      }
+      setLoading(false);
+  }
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+     if (user) {
+        checkUserProfile(user);
       }
   };
 
@@ -207,3 +253,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

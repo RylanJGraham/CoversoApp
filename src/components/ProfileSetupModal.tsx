@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from 'firebase/auth';
 import { getClientFirestore } from '@/lib/firebase';
@@ -32,11 +32,17 @@ interface Tier {
     title: string;
     price: string;
     features: string[];
-    priceId: string;
+    priceId: string | null; // null priceId for the free plan
     popular?: boolean;
 }
 
 const tiers: Tier[] = [
+    {
+        title: "Basic",
+        price: "Free",
+        features: ["2 Generations per day", "Standard tone options", "Community support"],
+        priceId: null,
+    },
     {
         title: "Job Seeker",
         price: "$5.99",
@@ -69,6 +75,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     age: '',
     dailyGoal: '2',
     createdAt: new Date(),
+    subscriptionPlan: 'Basic', // Default to basic
   });
   const [imagePreview, setImagePreview] = useState(user?.photoURL || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -96,7 +103,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     }
   };
 
-  const saveProfileData = async () => {
+  const saveProfileData = async (onboardingStatus: boolean, plan: string) => {
      if (!user) {
         toast({ title: "Error", description: "You must be logged in to complete setup.", variant: "destructive" });
         return false;
@@ -109,9 +116,14 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             uid: user.uid,
             email: user.email,
             ...formData,
-            onboardingComplete: true
+            subscriptionPlan: plan,
+            onboardingComplete: onboardingStatus,
         }, { merge: true });
-        toast({ title: "Profile Saved!", description: "Your profile has been successfully set up." });
+        
+        if(onboardingStatus){
+            toast({ title: "Profile Saved!", description: "Welcome to Coverso!" });
+        }
+        
         return true;
     } catch (error) {
         console.error("Error saving user data: ", error);
@@ -122,21 +134,30 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     }
   }
 
-  const handleChoosePlan = async (priceId: string) => {
+  const handleChoosePlan = async (tier: Tier) => {
     if (!user) {
         toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive" });
         return;
     }
     
-    // First, save profile data
-    const saved = await saveProfileData();
+    // If it's the free plan, just save and close.
+    if (tier.priceId === null) {
+      const saved = await saveProfileData(true, tier.title);
+      if (saved) {
+        onClose();
+      }
+      return;
+    }
+    
+    // For paid plans, first save profile data *without* completing onboarding
+    const saved = await saveProfileData(false, tier.title);
     if (!saved) return;
     
-    setIsRedirecting(priceId);
+    setIsRedirecting(tier.priceId);
 
     try {
       const { checkoutUrl } = await createCheckoutSession({ 
-          priceId,
+          priceId: tier.priceId,
           userId: user.uid,
           userEmail: user.email || '',
       });
@@ -154,15 +175,6 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     }
   };
 
-
-  const handleFinish = async () => {
-    const saved = await saveProfileData();
-    if (saved) {
-      onClose(); // Close modal if user finishes without picking a plan
-    }
-  };
-
-
   const StepIndicator: FC<{ current: number; total: number }> = ({ current, total }) => (
     <div className="flex justify-center space-x-2 my-4">
       {Array.from({ length: total }).map((_, index) => (
@@ -177,11 +189,11 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     </div>
   );
   
-  const SubscriptionCard: FC<Tier & { onChoose: (priceId: string) => void, isRedirecting: boolean }> = ({title, price, features, popular, priceId, onChoose, isRedirecting}) => (
+  const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isRedirecting: boolean, isSelected: boolean }> = ({title, price, features, popular, priceId, onChoose, isRedirecting, isSelected, ...tier}) => (
     <div className={cn("border rounded-lg p-6 flex flex-col", popular && "border-primary border-2 relative")}>
         {popular && <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">Most Popular</div>}
         <h3 className="text-xl font-bold">{title}</h3>
-        <p className="text-3xl font-bold my-4">{price}<span className="text-base font-normal text-muted-foreground">/month</span></p>
+        <p className="text-3xl font-bold my-4">{price}<span className="text-base font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
         <ul className="space-y-3 text-muted-foreground flex-grow">
             {features.map((feature, i) => (
                 <li key={i} className="flex items-center gap-2">
@@ -190,9 +202,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 </li>
             ))}
         </ul>
-        <Button className="w-full mt-6" variant={popular ? "default" : "outline"} onClick={() => onChoose(priceId)} disabled={isRedirecting}>
-            {isRedirecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Choose Plan
+        <Button className="w-full mt-6" variant={popular ? "default" : "outline"} onClick={() => onChoose({title, price, features, popular, priceId, ...tier})} disabled={isRedirecting}>
+            {isSelected && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            { isSelected ? 'Redirecting...' : (priceId === null ? 'Choose Basic' : 'Choose Plan')}
         </Button>
     </div>
   )
@@ -259,15 +271,16 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             <>
                 <DialogHeader>
                     <DialogTitle className="text-center text-2xl">Choose Your Plan</DialogTitle>
-                    <DialogDescription className="text-center">You get 2 free generations. Upgrade for more.</DialogDescription>
+                    <DialogDescription className="text-center">Select a plan to complete your setup. You can change this at any time.</DialogDescription>
                 </DialogHeader>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-4">
                    {tiers.map(tier => (
                        <SubscriptionCard 
                          key={tier.title}
                          {...tier}
                          onChoose={handleChoosePlan}
-                         isRedirecting={isRedirecting === tier.priceId}
+                         isRedirecting={isRedirecting !== null}
+                         isSelected={isRedirecting === tier.priceId}
                        />
                    ))}
                 </div>
@@ -279,8 +292,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-4xl bg-white text-black p-8 rounded-xl shadow-2xl">
+    <Dialog open={isOpen} onOpenChange={() => { /* Don't close on overlay click */ }}>
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-5xl bg-white text-black p-8 rounded-xl shadow-2xl" hideCloseButton={true}>
         <div className="flex flex-col h-full">
             <div className="flex-grow">
                  {renderStep()}
@@ -294,15 +307,10 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                         Back
                     </Button>
                     )}
-                    {step < totalSteps ? (
+                    {step < totalSteps && (
                     <Button onClick={handleNext} className="flex items-center gap-2">
                         Next
                         <ArrowRight />
-                    </Button>
-                    ) : (
-                    <Button onClick={handleFinish} disabled={isSaving || !!isRedirecting}>
-                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Finish Setup & Skip
                     </Button>
                     )}
                 </DialogFooter>
@@ -313,4 +321,35 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   );
 };
 
+// Add hideCloseButton prop to DialogContent
+const DialogContentWithButton = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { hideCloseButton?: boolean }
+>(({ className, children, hideCloseButton, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
+      onEscapeKeyDown={(e) => e.preventDefault()}
+      onPointerDownOutside={(e) => e.preventDefault()}
+    >
+      {children}
+      {!hideCloseButton && (
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+      )}
+    </DialogPrimitive.Content>
+  </DialogPortal>
+));
+DialogContentWithButton.displayName = "DialogContentWithButton";
+
 export default ProfileSetupModal;
+
+    
