@@ -1,8 +1,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, type Auth } from "firebase/auth";
 
-let app: FirebaseApp;
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,12 +11,16 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-if (typeof window !== "undefined" && !getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
+// Initialize Firebase for client-side
+function getClientApp(): FirebaseApp {
+    if (getApps().length) {
+        return getApp();
+    }
+    return initializeApp(firebaseConfig);
 }
 
-const auth = getAuth(app);
+function getClientAuth(): Auth {
+    return getAuth(getClientApp());
+}
 
-export { app, auth };
+export { getClientApp, getClientAuth };

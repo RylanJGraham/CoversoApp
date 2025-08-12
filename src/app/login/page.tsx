@@ -3,12 +3,13 @@
 
 import Link from "next/link"
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Hyperspeed from "@/components/hyperspeed"
-import { auth } from "@/lib/firebase";
+import { getClientAuth } from "@/lib/firebase";
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -30,14 +31,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState<false | 'google' | 'email'>(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleGoogleLogin = async () => {
     setIsLoading('google');
+    const auth = getClientAuth();
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      // You can handle successful login redirection here
-      toast({ title: "Successfully logged in with Google!" });
+      toast({ title: "Successfully logged in!" });
+      router.push('/');
     } catch (error: any) {
       toast({ title: "Google login failed", description: error.message, variant: "destructive" });
     } finally {
@@ -48,10 +51,11 @@ export default function LoginPage() {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading('email');
+    const auth = getClientAuth();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-       // You can handle successful login redirection here
       toast({ title: "Successfully logged in!" });
+      router.push('/');
     } catch (error: any) {
       toast({ title: "Email login failed", description: error.message, variant: "destructive" });
     } finally {
