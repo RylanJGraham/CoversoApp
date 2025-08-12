@@ -40,7 +40,7 @@ import TiltedCard from "./TiltedCard";
 import AnimatedCounter from "./AnimatedCounter";
 import { Header } from "./Header";
 import { getClientAuth, getClientFirestore } from "@/lib/firebase";
-import { addDoc, collection, doc, getDoc, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, serverTimestamp } from "firebase/firestore";
 import type { User as FirebaseUser } from 'firebase/auth';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
@@ -162,26 +162,28 @@ export function Coverso({ user, profile }: { user: FirebaseUser | null, profile:
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const isPremiumUser = profile?.subscriptionPlan && profile.subscriptionPlan !== 'Basic';
-
-    if (!user && anonGenerations >= 2) {
-      setShowLimitDialog(true);
-      return;
-    }
-
-    if (user && !isPremiumUser && profile?.subscriptionPlan === 'Basic') {
-        const db = getClientFirestore();
-        const userDocRef = doc(db, "users", user.uid);
-        const documentsCollectionRef = collection(userDocRef, "documents");
+    if (!user) {
+      if (anonGenerations >= 2) {
+        setShowLimitDialog(true);
+        return;
+      }
+    } else if (profile?.subscriptionPlan === 'Basic') {
+      const db = getClientFirestore();
+      const userDocRef = doc(db, "users", user.uid);
+      const documentsCollectionRef = collection(userDocRef, "documents");
+      try {
         const querySnapshot = await getDocs(documentsCollectionRef);
         if (querySnapshot.size >= 2) {
-            toast({
-                title: "Basic Plan Limit Reached",
-                description: "You've reached your limit of 2 generations. Please upgrade your plan to continue.",
-                variant: "destructive"
-            });
-            return;
+          toast({
+            title: "Basic Plan Limit Reached",
+            description: "You've reached your limit of 2 generations. Please upgrade your plan to continue.",
+            variant: "destructive"
+          });
+          return;
         }
+      } catch (error) {
+         console.error("Error fetching user documents for limit check:", error);
+      }
     }
 
 

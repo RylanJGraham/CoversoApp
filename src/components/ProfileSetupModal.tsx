@@ -457,7 +457,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                         Back
                     </Button>
                     )}
-                    {step < 3 && !appliedCodePlan && (
+                    {step < 3 && (
                     <Button onClick={handleNext} className="flex items-center gap-2">
                         Next
                         <ArrowRight />
@@ -472,5 +472,3 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
-
-    
