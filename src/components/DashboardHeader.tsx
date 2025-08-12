@@ -17,16 +17,16 @@ export function DashboardHeader() {
         router.push('/login');
     }
     return (
-        <header className="w-full h-16 bg-white shadow-sm" style={{ '--primary': 'hsl(141 71% 47%)' } as React.CSSProperties}>
+        <header className="w-full h-16 bg-primary shadow-sm">
             <div className="h-full flex items-center justify-between px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
                 <Link href="/dashboard">
                     <Image src="/Logo2.png" alt="Coverso Logo" width={150} height={40} />
                 </Link>
                 <nav className="hidden lg:flex items-center gap-4">
-                    <Link href="/about" className="text-primary hover:underline">About Us</Link>
-                    <Link href="/faq" className="text-primary hover:underline">FAQ</Link>
-                    <Separator orientation="vertical" className="h-6 bg-primary" />
-                    <Button onClick={handleLogout} variant="ghost" className="text-primary hover:bg-primary hover:text-primary-foreground text-lg">
+                    <Link href="/about" className="text-primary-foreground hover:underline">About Us</Link>
+                    <Link href="/faq" className="text-primary-foreground hover:underline">FAQ</Link>
+                    <Separator orientation="vertical" className="h-6 bg-primary-foreground/50" />
+                    <Button onClick={handleLogout} variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground text-lg">
                         Logout
                     </Button>
                 </nav>
