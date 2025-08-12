@@ -1,5 +1,5 @@
 import type { SpringOptions } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useMemo } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import "./TiltedCard.css";
 
@@ -55,6 +55,8 @@ export default function TiltedCard({
     rotateX.set(0);
     rotateY.set(0);
   }
+  
+  const memoizedChildren = useMemo(() => children, [children]);
 
   return (
     <div
@@ -84,7 +86,7 @@ export default function TiltedCard({
         }}
       >
         <div className="tilted-card-content">
-          {children}
+          {memoizedChildren}
         </div>
       </motion.div>
     </div>
