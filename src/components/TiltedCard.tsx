@@ -1,5 +1,8 @@
+
+"use client";
+
 import type { SpringOptions } from "framer-motion";
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, memo } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import "./TiltedCard.css";
 
@@ -18,7 +21,7 @@ const springValues: SpringOptions = {
   mass: 2,
 };
 
-export default function TiltedCard({
+function TiltedCard({
   children,
   containerHeight = "300px",
   containerWidth = "100%",
@@ -92,3 +95,5 @@ export default function TiltedCard({
     </div>
   );
 }
+
+export default memo(TiltedCard);

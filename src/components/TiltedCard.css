@@ -36,11 +36,6 @@
   padding: 1.5rem;
   width: 100%;
   height: 100%;
-  /* Fix for blurry text on transform */
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 .tilted-card-content {
