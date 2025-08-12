@@ -20,7 +20,8 @@ import type { User } from 'firebase/auth';
 import { getClientFirestore } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { createCheckoutSession, type CreateCheckoutSessionInput } from '@/ai/flows/stripe-checkout';
+import { createCheckoutSessionFlow, type CreateCheckoutSessionInput } from '@/ai/flows/stripe-checkout';
+import * as DialogPrimitive from "@radix-ui/react-dialog"
 
 interface ProfileSetupModalProps {
   isOpen: boolean;
@@ -156,7 +157,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     setIsRedirecting(tier.priceId);
 
     try {
-      const { checkoutUrl } = await createCheckoutSession({ 
+      const { checkoutUrl } = await createCheckoutSessionFlow({ 
           priceId: tier.priceId,
           userId: user.uid,
           userEmail: user.email || '',
@@ -351,5 +352,3 @@ const DialogContentWithButton = React.forwardRef<
 DialogContentWithButton.displayName = "DialogContentWithButton";
 
 export default ProfileSetupModal;
-
-    

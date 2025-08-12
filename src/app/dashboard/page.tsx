@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
-import { verifyCheckoutSession } from '@/ai/flows/stripe-checkout';
+import { verifyCheckoutSessionFlow } from '@/ai/flows/stripe-checkout';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -52,7 +52,7 @@ export default function DashboardPage() {
             // Stripe redirect, verify session
             setLoading(true);
             try {
-                const { paymentStatus, subscriptionId, customerId, planId } = await verifyCheckoutSession({ sessionId });
+                const { paymentStatus, subscriptionId, customerId, planId } = await verifyCheckoutSessionFlow({ sessionId });
                 if (paymentStatus === 'paid') {
                     const db = getClientFirestore();
                     const userDocRef = doc(db, 'users', user.uid);
@@ -253,5 +253,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
