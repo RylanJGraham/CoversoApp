@@ -10,6 +10,7 @@ import { Coverso as CoversoForm } from '@/components/coverso';
 import Hyperspeed from '@/components/hyperspeed';
 import { Loader2 } from 'lucide-react';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface UserProfile {
   onboardingComplete?: boolean;
@@ -18,24 +19,30 @@ interface UserProfile {
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const auth = getClientAuth();
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user);
-        // If user is logged in, redirect to dashboard.
-        router.push('/dashboard');
+        const db = getClientFirestore();
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setProfile(userDocSnap.data() as UserProfile);
+        }
       } else {
-        // Not logged in, show the main page
-        setLoading(false);
+        setUser(null);
+        setProfile(null);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   if (loading) {
      return (
@@ -59,8 +66,8 @@ export default function Home() {
      );
   }
 
-  // This is the public-facing page for non-logged-in users.
+  // This is the public-facing page for all users.
   return (
-    <CoversoForm />
+    <CoversoForm user={user} profile={profile} />
   );
 }
