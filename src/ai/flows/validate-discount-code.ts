@@ -13,12 +13,12 @@ import { getClientFirestore } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { z } from 'genkit';
 
-export const ValidateDiscountCodeInputSchema = z.object({
+const ValidateDiscountCodeInputSchema = z.object({
   code: z.string().describe('The discount code to validate.'),
 });
 export type ValidateDiscountCodeInput = z.infer<typeof ValidateDiscountCodeInputSchema>;
 
-export const ValidateDiscountCodeOutputSchema = z.object({
+const ValidateDiscountCodeOutputSchema = z.object({
   isValid: z.boolean().describe('Whether the code is valid or not.'),
   planName: z.string().optional().describe('The name of the plan granted by the code.'),
 });
