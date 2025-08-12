@@ -92,7 +92,7 @@ export const PortfolioVaultForm = forwardRef<PortfolioVaultHandle, {}>((props, r
                     <span className="truncate">{file.name}</span>
                     {(file.name.toLowerCase().includes('cv') || file.name.toLowerCase().includes('resume')) && <Badge variant="outline">CV</Badge>}
                 </div>
-                <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
+                <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
                     <Trash2 className="w-4 h-4" />
                 </Button>
                 </li>
@@ -110,12 +110,12 @@ export const PortfolioVaultForm = forwardRef<PortfolioVaultHandle, {}>((props, r
                 value={url} 
                 onChange={(e) => handlePortfolioUrlChange(index, e.target.value)} 
             />
-            <Button variant="ghost" size="icon" className="w-8 h-8 shrink-0" onClick={() => removePortfolioUrlInput(index)} aria-label="Remove URL">
+            <Button variant="ghost" size="icon" className="w-8 h-8 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => removePortfolioUrlInput(index)} aria-label="Remove URL">
                 <Trash2 className="w-4 h-4" />
             </Button>
             </div>
         ))}
-        <Button type="button" variant="outline" size="sm" onClick={addPortfolioUrlInput}>
+        <Button type="button" variant="outline" size="sm" onClick={addPortfolioUrlInput} className="hover:bg-primary/10 hover:text-primary">
             <PlusCircle className="w-4 h-4 mr-2" />
             Add URL
         </Button>
