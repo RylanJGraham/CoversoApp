@@ -1,21 +1,19 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getClientAuth, getClientFirestore } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, orderBy, query, Timestamp, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, orderBy, query, Timestamp } from 'firebase/firestore';
 import Hyperspeed from '@/components/hyperspeed';
 import { Loader2, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
-import { verifyCheckoutSessionFlow } from '@/ai/flows/stripe-checkout';
 import { useToast } from '@/hooks/use-toast';
-
 
 interface UserProfile {
   fullName: string;
@@ -31,15 +29,13 @@ interface CoverLetterDoc {
     createdAt: Timestamp;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [documents, setDocuments] = useState<CoverLetterDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { toast } = useToast();
 
   useEffect(() => {
     const auth = getClientAuth();
@@ -206,4 +202,31 @@ export default function DashboardPage() {
       </main>
     </div>
   );
+}
+
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full h-screen relative flex items-center justify-center">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+         <Hyperspeed
+          effectOptions={{
+            colors: {
+              roadColor: 0x080808,
+              islandColor: 0x0a0a0a,
+              background: 0x000000,
+              shoulderLines: 0x131318,
+              brokenLines: 0x131318,
+              leftCars: [0x10B981, 0x10B981, 0x10B981],
+              rightCars: [0x10B981, 0x10B981, 0x10B981],
+              sticks: 0x10B981,
+            }
+          }}
+        />
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
+  )
 }

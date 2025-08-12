@@ -3,6 +3,7 @@
 
 import Link from "next/link"
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -77,6 +78,9 @@ export default function LoginPage() {
   return (
     <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white">
       <div className="hidden lg:block relative">
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+            <Image src="/Logo2.png" alt="Coverso Logo" width={400} height={100} />
+        </div>
         <Hyperspeed
           effectOptions={{
               colors: {
