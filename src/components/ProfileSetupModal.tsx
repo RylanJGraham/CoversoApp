@@ -341,9 +341,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   );
   
   const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean, isRecommended: boolean }> = ({title, price, features, isRecommended, generations, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
-        <div className={cn("border rounded-lg p-4 flex flex-col h-full relative", isRecommended ? "border-primary" : "border-gray-300", disabled && "opacity-50 bg-gray-50")}>
-            {isRecommended && <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">Recommended for you</div>}
-            <h3 className="text-lg font-bold text-foreground mt-4">{title}</h3>
+        <div className={cn("border rounded-lg p-4 flex flex-col h-full group hover:border-primary transition-colors", disabled && "opacity-50 bg-gray-50", "border-gray-300")}>
+            {isRecommended && <p className="text-sm font-semibold text-primary mb-2">Recommended for you</p>}
+            <h3 className="text-lg font-bold text-foreground">{title}</h3>
             <p className="text-2xl font-bold my-2 text-foreground">{price}<span className="text-sm font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
             <ul className="space-y-2 text-muted-foreground text-sm flex-grow">
                 {features.map((feature, i) => (
@@ -353,7 +353,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                     </li>
                 ))}
             </ul>
-            <Button className="w-full mt-4" variant={isRecommended ? "default" : "outline"} onClick={() => onChoose({title, price, features, generations, ...tier})} disabled={isPreparing || disabled}>
+            <Button className="w-full mt-4" onClick={() => onChoose({title, price, features, generations, ...tier})} disabled={isPreparing || disabled}>
                 {isSelected && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 { isSelected ? 'Preparing...' : (tier.priceId === null ? 'Choose Basic' : 'Choose Plan')}
             </Button>
@@ -473,7 +473,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                     <DialogTitle className="text-2xl text-left">Choose Your Plan</DialogTitle>
                     <DialogDescription className="text-left">Select a plan to complete your setup. You can change this at any time.</DialogDescription>
                 </DialogHeader>
-                 <div className="py-4 space-y-8">
+                 <div className="py-4 space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                         {paidTiers.map(tier => (
                         <SubscriptionCard 
@@ -612,6 +612,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
+
+    
 
     
 
