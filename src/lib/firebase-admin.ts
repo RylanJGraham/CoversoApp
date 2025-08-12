@@ -5,11 +5,11 @@ import * as admin from 'firebase-admin';
 
 // Check if the app is already initialized to prevent errors.
 if (!admin.apps.length) {
-  try {
     // When deploying to Vercel, you need to use environment variables for the credentials.
     // The SDK will automatically pick them up if they are named correctly.
     // Ensure you have FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY
     // set in your Vercel project settings.
+    // For local development, these are loaded from the .env file.
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
@@ -18,9 +18,6 @@ if (!admin.apps.length) {
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
       }),
     });
-  } catch (error) {
-    console.error('Firebase admin initialization error', error);
-  }
 }
 
 const adminDb = admin.firestore();
