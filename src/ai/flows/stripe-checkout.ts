@@ -4,52 +4,52 @@
 /**
  * @fileOverview A flow for creating a Stripe Checkout session.
  * 
- * - createCheckoutSessionFlow - Creates a Stripe Checkout session and returns the URL.
+ * - createSubscriptionFlow - Creates a Stripe Subscription and returns a client secret for payment.
  * - verifyCheckoutSessionFlow - Verifies a Stripe Checkout session and returns subscription details.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { createStripeCheckoutSession, getStripeCheckoutSession } from '@/services/stripe';
+import { createStripeCheckoutSession, getStripeCheckoutSession, createStripeSubscription } from '@/services/stripe';
 import Stripe from 'stripe';
 
-const CreateCheckoutSessionInputSchema = z.object({
+const CreateSubscriptionInputSchema = z.object({
     priceId: z.string().describe('The ID of the Stripe Price object.'),
     userId: z.string().describe('The Firebase user ID.'),
     userEmail: z.string().email().describe("The user's email address."),
 });
-export type CreateCheckoutSessionInput = z.infer<typeof CreateCheckoutSessionInputSchema>;
+export type CreateSubscriptionInput = z.infer<typeof CreateSubscriptionInputSchema>;
 
-const CreateCheckoutSessionOutputSchema = z.object({
-    sessionId: z.string().describe('The ID of the created Stripe Checkout Session.'),
-    checkoutUrl: z.string().url().describe('The URL to redirect the user to for checkout.'),
+const CreateSubscriptionOutputSchema = z.object({
+    subscriptionId: z.string().describe('The ID of the created Stripe Subscription.'),
+    clientSecret: z.string().describe('The client secret for the subscription\'s latest invoice payment intent.'),
 });
-export type CreateCheckoutSessionOutput = z.infer<typeof CreateCheckoutSessionOutputSchema>;
+export type CreateSubscriptionOutput = z.infer<typeof CreateSubscriptionOutputSchema>;
 
-const createCheckoutSession = ai.defineFlow(
+const createSubscription = ai.defineFlow(
   {
-    name: 'createCheckoutSession',
-    inputSchema: CreateCheckoutSessionInputSchema,
-    outputSchema: CreateCheckoutSessionOutputSchema,
+    name: 'createSubscription',
+    inputSchema: CreateSubscriptionInputSchema,
+    outputSchema: CreateSubscriptionOutputSchema,
   },
   async (input) => {
     const { priceId, userId, userEmail } = input;
     
-    const session = await createStripeCheckoutSession(priceId, userId, userEmail);
+    const { subscription, clientSecret } = await createStripeSubscription(priceId, userId, userEmail);
 
-    if (!session.url) {
-        throw new Error("Stripe session URL not found.");
+    if (!subscription.id || !clientSecret) {
+        throw new Error("Stripe subscription or client secret not found.");
     }
 
     return {
-      sessionId: session.id,
-      checkoutUrl: session.url,
+      subscriptionId: subscription.id,
+      clientSecret: clientSecret,
     };
   }
 );
 
-export async function createCheckoutSessionFlow(input: CreateCheckoutSessionInput): Promise<CreateCheckoutSessionOutput> {
-    return createCheckoutSession(input);
+export async function createSubscriptionFlow(input: CreateSubscriptionInput): Promise<CreateSubscriptionOutput> {
+    return createSubscription(input);
 }
 
 

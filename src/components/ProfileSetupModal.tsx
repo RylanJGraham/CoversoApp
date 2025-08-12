@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { useState, type FC, type ChangeEvent, useRef } from 'react';
+import { useState, type FC, type ChangeEvent, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,13 +15,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2, X } from 'lucide-react';
+import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2, X, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from 'firebase/auth';
 import { getClientFirestore } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { createCheckoutSessionFlow, type CreateCheckoutSessionInput } from '@/ai/flows/stripe-checkout';
+import { createSubscriptionFlow } from '@/ai/flows/stripe-checkout';
+import { loadStripe, type Stripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
 
 interface ProfileSetupModalProps {
   isOpen: boolean;
@@ -33,7 +36,7 @@ interface Tier {
     title: string;
     price: string;
     features: string[];
-    priceId: string | null; // null priceId for the free plan
+    priceId: string | null;
     popular?: boolean;
 }
 
@@ -65,10 +68,61 @@ const tiers: Tier[] = [
     },
 ];
 
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+
+
+const CheckoutForm: FC<{ clientSecret: string, onSuccessfulPayment: () => void }> = ({ clientSecret, onSuccessfulPayment }) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [isProcessing, setIsProcessing] = useState(false);
+    const { toast } = useToast();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!stripe || !elements) {
+            return;
+        }
+        setIsProcessing(true);
+
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                // No return_url needed for this flow
+            },
+            redirect: 'if_required',
+        });
+
+        if (error) {
+            toast({ title: "Payment Failed", description: error.message, variant: "destructive" });
+            setIsProcessing(false);
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+            toast({ title: "Payment Successful!", description: "Your subscription is active." });
+            onSuccessfulPayment();
+        } else {
+             toast({ title: "Payment Incomplete", description: "Your payment requires further action.", variant: "destructive" });
+        }
+        
+        setIsProcessing(false);
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <PaymentElement />
+            <Button disabled={isProcessing || !stripe || !elements} className="w-full mt-6">
+                {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : `Pay and Subscribe`}
+            </Button>
+        </form>
+    );
+}
+
+
 const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }) => {
   const [step, setStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState<string | null>(null);
+  const [isPreparingPayment, setIsPreparingPayment] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
+
   const [formData, setFormData] = useState({
     fullName: user?.displayName || '',
     profileImage: user?.photoURL || '',
@@ -82,10 +136,16 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, totalSteps));
-  const handleBack = () => setStep((prev) => Math.max(prev - 1, 1));
+  const handleBack = () => setStep((prev) => {
+    if (prev === 4 && clientSecret) {
+        setClientSecret(null); // Reset payment state if going back from payment screen
+        setIsPreparingPayment(null);
+    }
+    return Math.max(prev - 1, 1)
+  });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -107,12 +167,14 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   const saveProfileData = async (onboardingStatus: boolean, plan: string) => {
      if (!user) {
         toast({ title: "Error", description: "You must be logged in to complete setup.", variant: "destructive" });
-        return false;
+        return { success: false };
     }
     setIsSaving(true);
+    let customerId;
     try {
         const db = getClientFirestore();
         const userRef = doc(db, "users", user.uid);
+        
         await setDoc(userRef, {
             uid: user.uid,
             email: user.email,
@@ -125,15 +187,25 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             toast({ title: "Profile Saved!", description: "Welcome to Coverso!" });
         }
         
-        return true;
+        return { success: true };
     } catch (error) {
         console.error("Error saving user data: ", error);
         toast({ title: "Save Failed", description: "Could not save your profile. Please try again.", variant: "destructive" });
-        return false;
+        return { success: false };
     } finally {
         setIsSaving(false);
     }
   }
+  
+  const handleSuccessfulPayment = async () => {
+    if (selectedTier) {
+      const { success } = await saveProfileData(true, selectedTier.title);
+      if (success) {
+        onClose();
+      }
+    }
+  }
+
 
   const handleChoosePlan = async (tier: Tier) => {
     if (!user) {
@@ -141,38 +213,39 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
         return;
     }
     
-    // If it's the free plan, just save and close.
+    setSelectedTier(tier);
+    
     if (tier.priceId === null) {
-      const saved = await saveProfileData(true, tier.title);
-      if (saved) {
+      const { success } = await saveProfileData(true, tier.title);
+      if (success) {
         onClose();
       }
       return;
     }
     
-    // For paid plans, first save profile data *without* completing onboarding
-    const saved = await saveProfileData(false, tier.title);
-    if (!saved) return;
-    
-    setIsRedirecting(tier.priceId);
+    const { success: profileSaved } = await saveProfileData(false, tier.title);
+    if (!profileSaved) return;
+
+    setIsPreparingPayment(tier.priceId);
 
     try {
-      const { checkoutUrl } = await createCheckoutSessionFlow({ 
+      const { clientSecret } = await createSubscriptionFlow({
           priceId: tier.priceId,
           userId: user.uid,
           userEmail: user.email || '',
       });
 
-      if (checkoutUrl) {
-          window.location.href = checkoutUrl;
+      if (clientSecret) {
+          setClientSecret(clientSecret);
+          handleNext(); // Move to payment step
       } else {
-          throw new Error("Could not create a checkout session.");
+          throw new Error("Could not create a subscription session.");
       }
 
     } catch (error) {
-      console.error("Stripe Checkout Error:", error);
-      toast({ title: "Checkout Error", description: "Could not redirect to Stripe. Please try again.", variant: "destructive" });
-      setIsRedirecting(null);
+      console.error("Stripe Subscription Error:", error);
+      toast({ title: "Subscription Error", description: "Could not prepare the payment form. Please try again.", variant: "destructive" });
+      setIsPreparingPayment(null);
     }
   };
 
@@ -190,7 +263,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     </div>
   );
   
-  const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isRedirecting: boolean, isSelected: boolean }> = ({title, price, features, popular, priceId, onChoose, isRedirecting, isSelected, ...tier}) => (
+  const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean }> = ({title, price, features, popular, priceId, onChoose, isPreparing, isSelected, ...tier}) => (
     <div className={cn("border rounded-lg p-6 flex flex-col", popular && "border-primary border-2 relative")}>
         {popular && <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">Most Popular</div>}
         <h3 className="text-xl font-bold">{title}</h3>
@@ -203,9 +276,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 </li>
             ))}
         </ul>
-        <Button className="w-full mt-6" variant={popular ? "default" : "outline"} onClick={() => onChoose({title, price, features, popular, priceId, ...tier})} disabled={isRedirecting}>
+        <Button className="w-full mt-6" variant={popular ? "default" : "outline"} onClick={() => onChoose({title, price, features, popular, priceId, ...tier})} disabled={isPreparing}>
             {isSelected && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            { isSelected ? 'Redirecting...' : (priceId === null ? 'Choose Basic' : 'Choose Plan')}
+            { isSelected ? 'Preparing...' : (priceId === null ? 'Choose Basic' : 'Choose Plan')}
         </Button>
     </div>
   )
@@ -268,6 +341,21 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
           </>
         );
        case 4:
+         if (clientSecret) {
+            return (
+                 <>
+                <DialogHeader>
+                    <DialogTitle className="text-center text-2xl">Enter Payment Details</DialogTitle>
+                    <DialogDescription className="text-center">Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
+                </DialogHeader>
+                 <div className="py-4">
+                    <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+                        <CheckoutForm clientSecret={clientSecret} onSuccessfulPayment={handleSuccessfulPayment}/>
+                    </Elements>
+                 </div>
+                 </>
+            )
+         }
          return (
             <>
                 <DialogHeader>
@@ -280,13 +368,16 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                          key={tier.title}
                          {...tier}
                          onChoose={handleChoosePlan}
-                         isRedirecting={isRedirecting !== null}
-                         isSelected={isRedirecting === tier.priceId}
+                         isPreparing={isPreparingPayment !== null}
+                         isSelected={isPreparingPayment === tier.priceId}
                        />
                    ))}
                 </div>
             </>
          )
+        case 5:
+            // This step is effectively replaced by the payment modal or free plan selection.
+            return null;
       default:
         return null;
     }
@@ -298,20 +389,20 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
          onEscapeKeyDown={(e) => e.preventDefault()}
          onPointerDownOutside={(e) => e.preventDefault()}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full min-h-[400px]">
             <div className="flex-grow">
                  {renderStep()}
             </div>
             <div className="mt-auto">
-                <StepIndicator current={step} total={totalSteps} />
-                <DialogFooter className="mt-6">
+                <StepIndicator current={step} total={4} />
+                 <DialogFooter className="mt-6">
                     {step > 1 && (
-                    <Button variant="outline" onClick={handleBack} className="flex items-center gap-2" disabled={isSaving || !!isRedirecting}>
+                    <Button variant="outline" onClick={handleBack} className="flex items-center gap-2" disabled={isSaving || !!isPreparingPayment}>
                         <ArrowLeft />
                         Back
                     </Button>
                     )}
-                    {step < totalSteps && (
+                    {step < 4 && !clientSecret &&(
                     <Button onClick={handleNext} className="flex items-center gap-2">
                         Next
                         <ArrowRight />

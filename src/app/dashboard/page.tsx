@@ -46,60 +46,14 @@ export default function DashboardPage() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        
-        const sessionId = searchParams.get('session_id');
-        if (sessionId) {
-            // Stripe redirect, verify session
-            setLoading(true);
-            try {
-                const { paymentStatus, subscriptionId, customerId, planId } = await verifyCheckoutSessionFlow({ sessionId });
-                if (paymentStatus === 'paid') {
-                    const db = getClientFirestore();
-                    const userDocRef = doc(db, 'users', user.uid);
-                    await setDoc(userDocRef, {
-                        onboardingComplete: true,
-                        stripe: {
-                            subscriptionId,
-                            customerId,
-                            planId,
-                            status: 'active',
-                        },
-                    }, { merge: true });
-
-                    toast({
-                        title: "Payment Successful!",
-                        description: "Your subscription is active and your profile is complete.",
-                    });
-                    
-                    // Clear search params from URL
-                    router.replace('/dashboard', undefined);
-                } else {
-                     toast({
-                        title: "Payment Incomplete",
-                        description: "Your payment was not successful. Please try again.",
-                        variant: "destructive",
-                    });
-                }
-            } catch (error) {
-                console.error("Stripe verification failed:", error);
-                toast({
-                    title: "Verification Failed",
-                    description: "We couldn't verify your payment. Please contact support.",
-                    variant: "destructive",
-                });
-            }
-        }
-        
         await checkUserProfile(user);
-
       } else {
         router.push('/login');
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [router, searchParams]);
+  }, [router]);
   
   const checkUserProfile = async (user: User) => {
       setLoading(true);

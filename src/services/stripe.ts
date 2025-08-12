@@ -11,14 +11,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 /**
- * Creates a Stripe Checkout session for a subscription.
- * @param priceId - The ID of the Stripe Price object.
- * @param userId - The Firebase user ID to associate with the Stripe customer.
+ * Gets or creates a Stripe Customer.
+ * @param userId - The Firebase user ID.
  * @param userEmail - The user's email.
- * @returns The Stripe Checkout Session object.
+ * @returns The Stripe Customer object.
  */
-export async function createStripeCheckoutSession(priceId: string, userId: string, userEmail: string): Promise<Stripe.Checkout.Session> {
-    
+async function getOrCreateStripeCustomer(userId: string, userEmail: string): Promise<Stripe.Customer> {
     let customers = await stripe.customers.list({ email: userEmail, limit: 1 });
     let customer: Stripe.Customer;
 
@@ -32,6 +30,46 @@ export async function createStripeCheckoutSession(priceId: string, userId: strin
             },
         });
     }
+    return customer;
+}
+
+/**
+ * Creates a Stripe Subscription with an incomplete status for payment confirmation on the client.
+ * @param priceId - The ID of the Stripe Price object.
+ * @param userId - The Firebase user ID to associate with the Stripe customer.
+ * @param userEmail - The user's email.
+ * @returns The Stripe Subscription object and the client_secret of its first invoice.
+ */
+export async function createStripeSubscription(priceId: string, userId: string, userEmail: string): Promise<{ subscription: Stripe.Subscription, clientSecret: string | null }> {
+    const customer = await getOrCreateStripeCustomer(userId, userEmail);
+
+    const subscription = await stripe.subscriptions.create({
+        customer: customer.id,
+        items: [{ price: priceId }],
+        payment_behavior: 'default_incomplete',
+        payment_settings: { save_default_payment_method: 'on_subscription' },
+        expand: ['latest_invoice.payment_intent'],
+    });
+
+    const latestInvoice = subscription.latest_invoice as Stripe.Invoice;
+    const paymentIntent = latestInvoice.payment_intent as Stripe.PaymentIntent;
+
+    return {
+        subscription,
+        clientSecret: paymentIntent.client_secret,
+    };
+}
+
+
+/**
+ * Creates a Stripe Checkout session for a subscription. (Legacy - kept for reference if needed)
+ * @param priceId - The ID of the Stripe Price object.
+ * @param userId - The Firebase user ID to associate with the Stripe customer.
+ * @param userEmail - The user's email.
+ * @returns The Stripe Checkout Session object.
+ */
+export async function createStripeCheckoutSession(priceId: string, userId: string, userEmail: string): Promise<Stripe.Checkout.Session> {
+    const customer = await getOrCreateStripeCustomer(userId, userEmail);
 
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -51,6 +89,7 @@ export async function createStripeCheckoutSession(priceId: string, userId: strin
     return session;
 }
 
+
 /**
  * Retrieves a Stripe Checkout session.
  * @param sessionId - The ID of the Stripe Checkout Session.
@@ -62,5 +101,3 @@ export async function getStripeCheckoutSession(sessionId: string): Promise<Strip
     });
     return session;
 }
-
-    
