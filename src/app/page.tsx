@@ -2,14 +2,12 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { getClientAuth, getClientFirestore } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { Coverso as CoversoForm } from '@/components/coverso';
 import Hyperspeed from '@/components/hyperspeed';
 import { Loader2 } from 'lucide-react';
-import ProfileSetupModal from '@/components/ProfileSetupModal';
 import { onAuthStateChanged } from 'firebase/auth';
 
 interface UserProfile {
@@ -21,7 +19,6 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     const auth = getClientAuth();
