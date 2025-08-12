@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type ChangeEvent, useMemo, type FC } from "react";
+import { useState, useRef, type ChangeEvent, useMemo, type FC, useEffect } from "react";
 import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,9 @@ import Hyperspeed from "./hyperspeed";
 import TiltedCard from "./TiltedCard";
 import AnimatedCounter from "./AnimatedCounter";
 import { Header } from "./Header";
+import { getClientAuth, getClientFirestore } from "@/lib/firebase";
+import { addDoc, collection, doc, serverTimestamp } from "firebase/firestore";
+import type { User as FirebaseUser } from 'firebase/auth';
 
 
 type AppState = "idle" | "loading" | "success" | "error";
@@ -58,9 +61,19 @@ export function Coverso() {
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const auth = getClientAuth();
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -119,6 +132,10 @@ export function Coverso() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentUser) {
+       toast({ title: "Not Authenticated", description: "You must be logged in to generate a cover letter.", variant: "destructive" });
+       return;
+    }
     if (files.length === 0) {
       toast({ title: "No CV Uploaded", description: "Please upload your CV to get started.", variant: "destructive" });
       return;
@@ -161,10 +178,22 @@ export function Coverso() {
 
       setAiResult(result);
       setGeneratedCoverLetter(result.coverLetter);
+
+      // Save to Firestore
+      const db = getClientFirestore();
+      const userDocRef = doc(db, "users", currentUser.uid);
+      const documentsCollectionRef = collection(userDocRef, "documents");
+      await addDoc(documentsCollectionRef, {
+        coverLetter: result.coverLetter,
+        jobTitle: result.jobTitle,
+        companyName: result.companyName,
+        createdAt: serverTimestamp(),
+      });
+
       setAppState("success");
       toast({
         title: "Cover Letter Generated!",
-        description: "Your new cover letter is ready for editing and download.",
+        description: "Your new cover letter is ready and saved to your dashboard.",
       });
     } catch (err) {
       console.error(err);

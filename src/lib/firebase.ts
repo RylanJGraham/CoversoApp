@@ -1,6 +1,9 @@
 
+"use client";
+
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,16 +14,42 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase for client-side
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+
 function getClientApp(): FirebaseApp {
-    if (getApps().length) {
-        return getApp();
+  if (typeof window === "undefined") {
+    // This is a server-side check, should ideally not happen with "use client"
+    // but as a fallback, we prevent initialization.
+    // A more robust solution would handle server-side logic separately.
+    if (getApps().length === 0) {
+       return initializeApp(firebaseConfig);
     }
-    return initializeApp(firebaseConfig);
+    return getApp();
+  }
+
+  if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApp();
+  }
+  return app;
 }
 
 function getClientAuth(): Auth {
-    return getAuth(getClientApp());
+  if (!auth) {
+    auth = getAuth(getClientApp());
+  }
+  return auth;
 }
 
-export { getClientApp, getClientAuth };
+function getClientFirestore(): Firestore {
+  if (!db) {
+    db = getFirestore(getClientApp());
+  }
+  return db;
+}
+
+
+export { getClientApp, getClientAuth, getClientFirestore };

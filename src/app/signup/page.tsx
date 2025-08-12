@@ -41,7 +41,7 @@ export default function SignupPage() {
     try {
       await signInWithPopup(auth, provider);
       toast({ title: "Account created successfully!" });
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({ title: "Google sign-up failed", description: error.message, variant: "destructive" });
     } finally {
@@ -60,7 +60,7 @@ export default function SignupPage() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       toast({ title: "Account created successfully!" });
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({ title: "Email sign-up failed", description: error.message, variant: "destructive" });
     } finally {

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Coverso as CoversoForm } from '@/components/coverso';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
 import Hyperspeed from '@/components/hyperspeed';
@@ -12,32 +13,26 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const auth = getClientAuth();
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
       
-      // This is a placeholder for checking if a user is new.
-      // In a real app, you would check a flag in your database.
-      const isNewUser = localStorage.getItem('onboardingComplete') !== 'true';
-
-      if (user && isNewUser) {
-        setShowOnboarding(true);
-      } else {
-        setShowOnboarding(false);
+      if (user) {
+        // If user is logged in, redirect to dashboard. 
+        // The dashboard will handle the onboarding check.
+        router.push('/dashboard');
+        return;
       }
+
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
   
-  const handleOnboardingComplete = () => {
-    localStorage.setItem('onboardingComplete', 'true');
-    setShowOnboarding(false);
-  };
-
   if (loading) {
      return (
        <div className="w-full h-screen relative">
@@ -59,32 +54,8 @@ export default function Home() {
      );
   }
   
-  if (showOnboarding) {
-    return (
-      <div className="w-full h-screen relative">
-        <Hyperspeed
-          effectOptions={{
-              colors: {
-                roadColor: 0x080808,
-                islandColor: 0x0a0a0a,
-                background: 0x000000,
-                shoulderLines: 0x131318,
-                brokenLines: 0x131318,
-                leftCars: [0x10B981, 0x10B981, 0x10B981],
-                rightCars: [0x10B981, 0x10B981, 0x10B981],
-                sticks: 0x10B981,
-              }
-          }}
-        />
-        <ProfileSetupModal
-          isOpen={showOnboarding}
-          onClose={handleOnboardingComplete}
-          user={user}
-        />
-      </div>
-    );
-  }
-
+  // This part is now primarily for non-logged-in users.
+  // Onboarding logic will be moved to the dashboard.
   return (
     <CoversoForm />
   );

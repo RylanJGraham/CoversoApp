@@ -40,7 +40,7 @@ export default function LoginPage() {
     try {
       await signInWithPopup(auth, provider);
       toast({ title: "Successfully logged in!" });
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({ title: "Google login failed", description: error.message, variant: "destructive" });
     } finally {
@@ -55,7 +55,7 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({ title: "Successfully logged in!" });
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({ title: "Email login failed", description: error.message, variant: "destructive" });
     } finally {

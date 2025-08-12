@@ -14,9 +14,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from 'firebase/auth';
+import { getClientFirestore } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProfileSetupModalProps {
   isOpen: boolean;
@@ -26,15 +29,18 @@ interface ProfileSetupModalProps {
 
 const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }) => {
   const [step, setStep] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user?.displayName || '',
     profileImage: user?.photoURL || '',
     industry: '',
     age: '',
     dailyGoal: '2',
+    createdAt: new Date(),
   });
   const [imagePreview, setImagePreview] = useState(user?.photoURL || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const totalSteps = 4;
 
@@ -57,6 +63,33 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
       reader.readAsDataURL(file);
     }
   };
+
+  const handleFinish = async () => {
+    if (!user) {
+        toast({ title: "Error", description: "You must be logged in to complete setup.", variant: "destructive" });
+        return;
+    }
+    setIsSaving(true);
+    try {
+        const db = getClientFirestore();
+        const userRef = doc(db, "users", user.uid);
+        await setDoc(userRef, {
+            uid: user.uid,
+            email: user.email,
+            ...formData,
+            onboardingComplete: true // Flag to prevent showing this modal again
+        }, { merge: true });
+
+        toast({ title: "Profile Saved!", description: "Your profile has been successfully set up." });
+        onClose();
+    } catch (error) {
+        console.error("Error saving user data: ", error);
+        toast({ title: "Save Failed", description: "Could not save your profile. Please try again.", variant: "destructive" });
+    } finally {
+        setIsSaving(false);
+    }
+  };
+
 
   const StepIndicator: FC<{ current: number; total: number }> = ({ current, total }) => (
     <div className="flex justify-center space-x-2 my-4">
@@ -184,7 +217,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 <StepIndicator current={step} total={totalSteps} />
                 <DialogFooter className="mt-6">
                     {step > 1 && (
-                    <Button variant="outline" onClick={handleBack} className="flex items-center gap-2">
+                    <Button variant="outline" onClick={handleBack} className="flex items-center gap-2" disabled={isSaving}>
                         <ArrowLeft />
                         Back
                     </Button>
@@ -195,7 +228,10 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                         <ArrowRight />
                     </Button>
                     ) : (
-                    <Button onClick={onClose}>Finish Setup</Button>
+                    <Button onClick={handleFinish} disabled={isSaving}>
+                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Finish Setup
+                    </Button>
                     )}
                 </DialogFooter>
             </div>
