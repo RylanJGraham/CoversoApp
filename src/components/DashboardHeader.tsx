@@ -63,6 +63,7 @@ export function DashboardHeader() {
                 <nav className="hidden lg:flex items-center gap-4">
                     <Link href="/about" className="text-primary hover:underline">About Us</Link>
                     <Link href="/faq" className="text-primary hover:underline">FAQ</Link>
+                    <Link href="/pricing" className="text-primary hover:underline">Pricing</Link>
                     <Separator orientation="vertical" className="h-6 bg-primary/50" />
                     {!loading && user && userProfile ? (
                          <DropdownMenu>
@@ -78,6 +79,11 @@ export function DashboardHeader() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
+                                <DropdownMenuItem onClick={() => router.push('/profile')}>
+                                    <UserIcon className="mr-2 h-4 w-4" />
+                                    <span>Profile</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
                                     <LogOut className="mr-2 h-4 w-4" />
                                     <span>Logout</span>

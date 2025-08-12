@@ -1,7 +1,10 @@
 
 "use client";
 
+import { useRouter } from 'next/navigation';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from 'recharts';
+import { Button } from './ui/button';
+import { ArrowRight } from 'lucide-react';
 
 interface UsageIndicatorProps {
   current: number;
@@ -10,31 +13,32 @@ interface UsageIndicatorProps {
 }
 
 const UsageIndicator = ({ current, max, planName }: UsageIndicatorProps) => {
+  const router = useRouter();
   const isUnlimited = max === Infinity;
   const percentage = isUnlimited ? 100 : Math.min((current / max) * 100, 100);
 
   const data = [{ name: 'usage', value: percentage }];
   
-  // Define color stops for the gauge
   const getColor = (percent: number) => {
-    if (percent >= 90) return 'hsl(var(--destructive))'; // Red for high usage
-    if (percent >= 60) return 'hsl(var(--accent))';   // Orange for medium usage
-    return 'hsl(var(--primary))'; // Purple for low usage
+    if (isUnlimited) return 'hsl(var(--primary))';
+    if (percent >= 90) return 'hsl(var(--destructive))';
+    if (percent >= 60) return 'hsl(var(--accent))';
+    return 'hsl(var(--primary))';
   };
 
   const color = getColor(percentage);
 
   return (
-    <div className="flex flex-col items-center justify-center bg-white border-2 border-primary/10 rounded-2xl p-4 w-[200px] h-[150px] shadow-lg">
-      <div className="relative w-28 h-28">
+    <div className="flex flex-col items-center justify-between bg-white border-2 border-primary/10 rounded-2xl p-4 w-full h-full max-w-[300px] max-h-[250px] shadow-lg">
+      <div className="relative w-full h-full flex-grow">
         <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart
-            innerRadius="70%"
-            outerRadius="90%"
+            innerRadius="65%"
+            outerRadius="85%"
             data={data}
             startAngle={180}
             endAngle={0}
-            barSize={12}
+            barSize={20}
           >
             <PolarAngleAxis
               type="number"
@@ -46,7 +50,6 @@ const UsageIndicator = ({ current, max, planName }: UsageIndicatorProps) => {
               background
               dataKey="value"
               cornerRadius={10}
-              className="fill-primary"
               style={{ fill: color }}
             />
              <text
@@ -54,7 +57,7 @@ const UsageIndicator = ({ current, max, planName }: UsageIndicatorProps) => {
                 y="55%"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="fill-foreground text-xl font-bold"
+                className="fill-foreground text-3xl font-bold"
              >
                 {isUnlimited ? '∞' : `${current}/${max}`}
             </text>
@@ -63,14 +66,20 @@ const UsageIndicator = ({ current, max, planName }: UsageIndicatorProps) => {
                 y="80%"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="fill-muted-foreground text-xs font-semibold"
+                className="fill-muted-foreground text-lg font-semibold"
              >
                 Generations
             </text>
           </RadialBarChart>
         </ResponsiveContainer>
       </div>
-       <p className="mt-1 text-sm font-semibold tracking-wide text-black">{planName} Plan</p>
+      <div className="text-center mt-auto">
+        <p className="text-xl font-bold tracking-wide text-black">{planName} Plan</p>
+         <Button variant="link" className="text-primary text-base" onClick={() => router.push('/pricing')}>
+            Upgrade Plan
+            <ArrowRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
     </div>
   );
 };
