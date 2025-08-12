@@ -51,27 +51,27 @@ const tiers: Tier[] = [
         title: "Job Seeker",
         price: "$5.99",
         features: ["10 Generations per day", "Standard tone options", "Email support"],
-        priceId: process.env.NEXT_PUBLIC_STRIPE_JOB_SEEKER_PRICE_ID || '',
+        priceId: process.env.NEXT_PUBLIC_STRIPE_JOB_SEEKER_PRICE_ID || 'price_1RvJpbRkulDjgBEWEyl0pYdE',
         popular: true,
     },
     {
         title: "Career Pro",
         price: "$9.99",
         features: ["30 Generations per day", "All tone options", "CV Analysis", "Priority support"],
-        priceId: process.env.NEXT_PUBLIC_STRIPE_CAREER_PRO_PRICE_ID || '',
+        priceId: process.env.NEXT_PUBLIC_STRIPE_CAREER_PRO_PRICE_ID || 'price_1RvJqDRkulDjgBEWioi7QL9P',
     },
     {
         title: "Executive",
         price: "$19.99",
         features: ["Unlimited Generations", "Premium tone options", "CV Analysis & Enhancement", "Priority support"],
-        priceId: process.env.NEXT_PUBLIC_STRIPE_EXECUTIVE_PRICE_ID || '',
+        priceId: process.env.NEXT_PUBLIC_STRIPE_EXECUTIVE_PRICE_ID || 'price_1RvJqaRkulDjgBEWsVeQW4qi',
     },
 ];
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 
-const CheckoutForm: FC<{ clientSecret: string, onSuccessfulPayment: () => void }> = ({ clientSecret, onSuccessfulPayment }) => {
+const CheckoutForm: FC<{ onSuccessfulPayment: () => void }> = ({ onSuccessfulPayment }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [isProcessing, setIsProcessing] = useState(false);
@@ -136,7 +136,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const totalSteps = 5;
+  const totalSteps = 4;
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, totalSteps));
   const handleBack = () => setStep((prev) => {
@@ -170,7 +170,6 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
         return { success: false };
     }
     setIsSaving(true);
-    let customerId;
     try {
         const db = getClientFirestore();
         const userRef = doc(db, "users", user.uid);
@@ -215,6 +214,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     
     setSelectedTier(tier);
     
+    // For free plan, save profile and close modal.
     if (tier.priceId === null) {
       const { success } = await saveProfileData(true, tier.title);
       if (success) {
@@ -223,20 +223,21 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
       return;
     }
     
+    // First, save the user's current data but keep onboarding incomplete.
     const { success: profileSaved } = await saveProfileData(false, tier.title);
     if (!profileSaved) return;
 
     setIsPreparingPayment(tier.priceId);
 
     try {
-      const { clientSecret } = await createSubscriptionFlow({
+      const { clientSecret: newClientSecret } = await createSubscriptionFlow({
           priceId: tier.priceId,
           userId: user.uid,
           userEmail: user.email || '',
       });
 
-      if (clientSecret) {
-          setClientSecret(clientSecret);
+      if (newClientSecret) {
+          setClientSecret(newClientSecret);
           handleNext(); // Move to payment step
       } else {
           throw new Error("Could not create a subscription session.");
@@ -245,7 +246,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     } catch (error) {
       console.error("Stripe Subscription Error:", error);
       toast({ title: "Subscription Error", description: "Could not prepare the payment form. Please try again.", variant: "destructive" });
-      setIsPreparingPayment(null);
+    } finally {
+        setIsPreparingPayment(null);
     }
   };
 
@@ -325,37 +327,6 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
           </>
         );
        case 3:
-        return (
-          <>
-            <DialogHeader>
-              <DialogTitle className="text-center text-2xl">Your Goals</DialogTitle>
-              <DialogDescription className="text-center">How active will you be?</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="dailyGoal">How many cover letters do you hope to generate a day?</Label>
-                <Input id="dailyGoal" name="dailyGoal" type="number" value={formData.dailyGoal} onChange={handleChange} placeholder="e.g., 5" />
-              </div>
-               <p className="text-sm text-muted-foreground text-center pt-4">This helps us recommend the best plan for you.</p>
-            </div>
-          </>
-        );
-       case 4:
-         if (clientSecret) {
-            return (
-                 <>
-                <DialogHeader>
-                    <DialogTitle className="text-center text-2xl">Enter Payment Details</DialogTitle>
-                    <DialogDescription className="text-center">Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
-                </DialogHeader>
-                 <div className="py-4">
-                    <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
-                        <CheckoutForm clientSecret={clientSecret} onSuccessfulPayment={handleSuccessfulPayment}/>
-                    </Elements>
-                 </div>
-                 </>
-            )
-         }
          return (
             <>
                 <DialogHeader>
@@ -375,9 +346,24 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 </div>
             </>
          )
-        case 5:
-            // This step is effectively replaced by the payment modal or free plan selection.
-            return null;
+       case 4:
+         if (clientSecret) {
+            return (
+                 <>
+                <DialogHeader>
+                    <DialogTitle className="text-center text-2xl">Enter Payment Details</DialogTitle>
+                    <DialogDescription className="text-center">Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
+                </DialogHeader>
+                 <div className="py-4">
+                    <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+                        <CheckoutForm onSuccessfulPayment={handleSuccessfulPayment}/>
+                    </Elements>
+                 </div>
+                 </>
+            )
+         }
+         // Fallback if clientSecret isn't ready, though this shouldn't be seen.
+         return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>;
       default:
         return null;
     }
@@ -394,7 +380,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                  {renderStep()}
             </div>
             <div className="mt-auto">
-                <StepIndicator current={step} total={4} />
+                <StepIndicator current={step} total={totalSteps} />
                  <DialogFooter className="mt-6">
                     {step > 1 && (
                     <Button variant="outline" onClick={handleBack} className="flex items-center gap-2" disabled={isSaving || !!isPreparingPayment}>
@@ -402,7 +388,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                         Back
                     </Button>
                     )}
-                    {step < 4 && !clientSecret &&(
+                    {step < 3 && (
                     <Button onClick={handleNext} className="flex items-center gap-2">
                         Next
                         <ArrowRight />
@@ -417,3 +403,5 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
+
+    
