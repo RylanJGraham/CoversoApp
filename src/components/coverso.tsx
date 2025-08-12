@@ -1,17 +1,13 @@
 
-
 "use client";
 
-import { useState, useRef, type ChangeEvent, useMemo, type FC, useEffect } from "react";
+import { useState, useRef, type ChangeEvent, type FC, useEffect, forwardRef, useImperativeHandle } from "react";
 import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
 import {
   FileUp,
   FlaskConical,
@@ -35,6 +31,7 @@ import {
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import Hyperspeed from "./hyperspeed";
 import TiltedCard from "./TiltedCard";
@@ -42,11 +39,14 @@ import AnimatedCounter from "./AnimatedCounter";
 import { Header } from "./Header";
 import { DashboardHeader } from "./DashboardHeader";
 import { getClientAuth, getClientFirestore } from "@/lib/firebase";
-import { addDoc, collection, doc, getDoc, getDocs, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, serverTimestamp } from "firebase/firestore";
 import type { User as FirebaseUser } from 'firebase/auth';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import UsageIndicator from "./UsageIndicator";
+import { PersonalInfoForm, type PersonalInfoHandle } from "./PersonalInfoForm";
+import { PortfolioVaultForm, type PortfolioVaultHandle } from "./PortfolioVaultForm";
+
 
 interface UserProfile {
   fullName: string;
@@ -56,21 +56,14 @@ interface UserProfile {
   linkedinUrl: string;
   subscriptionPlan?: string;
   generations?: number; // Add this
-  [key: string]: any;
+  [key:string]: any;
 }
 
 
 type AppState = "idle" | "loading" | "success" | "error";
 
 export function Coverso({ user, profile, isGeneratePage = false }: { user: FirebaseUser | null, profile: UserProfile | null, isGeneratePage?: boolean }) {
-  const [files, setFiles] = useState<File[]>([]);
   const [jobDescription, setJobDescription] = useState("");
-  const [portfolioUrls, setPortfolioUrls] = useState<string[]>([""]);
-  const [fullName, setFullName] = useState("");
-  const [userLocation, setUserLocation] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
   const [tone, setTone] = useState("Professional");
   const [mustHaveInfo, setMustHaveInfo] = useState("");
 
@@ -83,22 +76,11 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const [userGenerations, setUserGenerations] = useState(0);
   
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const personalInfoRef = useRef<PersonalInfoHandle>(null);
+  const portfolioVaultRef = useRef<PortfolioVaultHandle>(null);
   const { toast } = useToast();
   const router = useRouter();
 
-
-  useEffect(() => {
-    if (profile) {
-      setFullName(profile.fullName || '');
-      setUserLocation(profile.userLocation || '');
-      setPhone(profile.phone || '');
-      setEmail(profile.email || user?.email || '');
-      setLinkedinUrl(profile.linkedinUrl || '');
-    } else if(user) {
-        setEmail(user.email || '');
-    }
-  }, [user, profile]);
 
   useEffect(() => {
     // Only run on client
@@ -119,40 +101,6 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
   }, [user]);
 
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      const hasCv = files.some(f => f.name.toLowerCase().includes('cv') || f.name.toLowerCase().includes('resume'));
-      if (hasCv && newFiles.some(f => f.name.toLowerCase().includes('cv') || f.name.toLowerCase().includes('resume'))) {
-        toast({
-          title: "CV already uploaded",
-          description: "You have already uploaded a CV. To replace it, please remove the existing one first.",
-          variant: "destructive"
-        });
-        return;
-      }
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-    }
-  };
-
-  const handleRemoveFile = (index: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
-  
-  const handlePortfolioUrlChange = (index: number, value: string) => {
-    const newUrls = [...portfolioUrls];
-    newUrls[index] = value;
-    setPortfolioUrls(newUrls);
-  };
-
-  const addPortfolioUrlInput = () => {
-    setPortfolioUrls([...portfolioUrls, ""]);
-  };
-  
-  const removePortfolioUrlInput = (index: number) => {
-    setPortfolioUrls(portfolioUrls.filter((_, i) => i !== index));
-  };
-
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
@@ -164,20 +112,10 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     }
   };
 
-
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!user) {
+     if (!user) {
       if (anonGenerations >= 2) {
         setShowLimitDialog(true);
         return;
@@ -193,12 +131,19 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
       }
     }
 
+    const personalInfo = personalInfoRef.current?.getValues();
+    const portfolioInfo = portfolioVaultRef.current?.getValues();
 
-    if (files.length === 0) {
+    if (!personalInfo || !portfolioInfo) {
+      toast({ title: "Form Error", description: "Could not read form data.", variant: "destructive" });
+      return;
+    }
+
+    if (portfolioInfo.files.length === 0) {
       toast({ title: "No CV Uploaded", description: "Please upload your CV to get started.", variant: "destructive" });
       return;
     }
-     if (!fullName || !userLocation) {
+    if (!personalInfo.fullName || !personalInfo.userLocation) {
       toast({ title: "Missing Personal Info", description: "Please provide your full name and location.", variant: "destructive" });
       return;
     }
@@ -213,19 +158,25 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     setError(null);
 
     try {
+      const { files, portfolioUrls } = portfolioInfo;
       const cvFile = files.find(f => f.name.toLowerCase().includes('cv') || f.name.toLowerCase().includes('resume')) || files[0];
       const supportingFiles = files.filter(f => f !== cvFile);
+
+      const fileToDataUri = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      };
 
       const cvDataUri = await fileToDataUri(cvFile);
       const supportingDocs = await Promise.all(supportingFiles.map(fileToDataUri));
       const finalPortfolioUrls = portfolioUrls.filter(url => url.trim() !== "");
 
       const result = await generateCoverLetter({
-        fullName,
-        userLocation,
-        phone,
-        email,
-        linkedinUrl,
+        ...personalInfo,
         cvDataUri,
         jobDescription,
         supportingDocs,
@@ -263,7 +214,6 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             description: "Sign up to save your documents and get more generations.",
         });
       }
-
 
       setAppState("success");
     } catch (err) {
@@ -359,7 +309,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                     <div className="flex flex-col items-start justify-center">
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
-                        <div className="mt-6 bg-accent text-accent-foreground p-4 rounded-lg text-left inline-block">
+                         <div className="mt-6 bg-accent text-accent-foreground p-4 rounded-lg text-left inline-block">
                             <h3 className="text-lg font-semibold">Cover Letters Drafted Today</h3>
                             <p className="text-4xl font-mono font-bold mt-1">
                             <AnimatedCounter to={100} />
@@ -415,88 +365,11 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
                     <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter." tooltipContent="We use this information to populate the header of your cover letter.">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                          <Label htmlFor="fullName" className="text-gray-800">Full Name*</Label>
-                          <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
-                          </div>
-                          <div className="space-y-2">
-                          <Label htmlFor="location" className="text-gray-800">Location*</Label>
-                          <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
-                          </div>
-                          <div className="space-y-2">
-                          <Label htmlFor="phone" className="text-gray-800">Phone Number</Label>
-                          <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
-                          </div>
-                          <div className="space-y-2">
-                          <Label htmlFor="email" className="text-gray-800">Email</Label>
-                          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
-                          </div>
-                          <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="linkedin" className="text-gray-800">LinkedIn Profile URL</Label>
-                          <Input id="linkedin" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/yourprofile" />
-                          </div>
-                      </div>
+                      <PersonalInfoForm ref={personalInfoRef} profile={profile} user={user} />
                     </Step>
                   
                     <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents." tooltipContent="Upload your CV (PDF, DOCX) and any other relevant files. You can also link to online portfolios or documents.">
-                       <div className="space-y-4">
-                        <div
-                        className="relative flex flex-col items-center justify-center w-full p-4 transition-colors border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/80 hover:bg-primary/5"
-                        onClick={() => fileInputRef.current?.click()}
-                        >
-                        <UploadCloud className="w-10 h-10 text-muted-foreground" />
-                        <p className="font-semibold text-primary">Click to upload files</p>
-                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT. Ensure one file is your CV.</p>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            className="hidden"
-                            multiple
-                            accept=".pdf,.doc,.docx,.txt"
-                            onChange={handleFileChange}
-                        />
-                        </div>
-                        {files.length > 0 && (
-                        <div className="space-y-2">
-                            <Label className="text-gray-800">Uploaded Files:</Label>
-                            <ul className="space-y-2">
-                            {files.map((file, index) => (
-                                <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-secondary">
-                                <div className="flex items-center gap-2 truncate">
-                                    <FileText className="w-4 h-4 shrink-0" />
-                                    <span className="truncate">{file.name}</span>
-                                    {(file.name.toLowerCase().includes('cv') || file.name.toLowerCase().includes('resume')) && <Badge variant="outline">CV</Badge>}
-                                </div>
-                                <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                                </li>
-                            ))}
-                            </ul>
-                        </div>
-                        )}
-                        <div className="space-y-2">
-                        <Label className="text-gray-800">Portfolio / Document URLs</Label>
-                        {portfolioUrls.map((url, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                            <Input 
-                                type="url" 
-                                placeholder="https://docs.google.com/document/d/..." 
-                                value={url} 
-                                onChange={(e) => handlePortfolioUrlChange(index, e.target.value)} 
-                            />
-                            <Button variant="ghost" size="icon" className="w-8 h-8 shrink-0" onClick={() => removePortfolioUrlInput(index)} aria-label="Remove URL">
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
-                            </div>
-                        ))}
-                        <Button type="button" variant="outline" size="sm" onClick={addPortfolioUrlInput}>
-                            <PlusCircle className="w-4 h-4 mr-2" />
-                            Add URL
-                        </Button>
-                        </div>
-                       </div>
+                      <PortfolioVaultForm ref={portfolioVaultRef} />
                     </Step>
                 </div>
 
