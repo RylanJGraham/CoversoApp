@@ -18,39 +18,41 @@ let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 
-// This function ensures Firebase is initialized only on the client side.
-function initializeFirebase() {
-    if (typeof window !== 'undefined') {
-        if (!getApps().length) {
-            app = initializeApp(firebaseConfig);
-        } else {
-            app = getApp();
-        }
-        auth = getAuth(app);
-        db = getFirestore(app);
-    }
+if (typeof window !== 'undefined' && !getApps().length) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
 }
 
-// Call initialization right away
-initializeFirebase();
-
 function getClientApp(): FirebaseApp {
+    if (typeof window === 'undefined') {
+        // This is a server-side render, return a placeholder or handle appropriately.
+        // For now, we will assume this function is only called on the client.
+        // A more robust solution might involve a server-side admin SDK if needed.
+        throw new Error("Firebase client SDK can't be used on the server.");
+    }
     if (!app) {
-        initializeFirebase();
+        app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     }
     return app;
 }
 
 function getClientAuth(): Auth {
-  if (!auth) {
-      initializeFirebase();
+  if (typeof window === 'undefined') {
+      throw new Error("Firebase client Auth can't be used on the server.");
+  }
+   if (!auth) {
+      auth = getAuth(getClientApp());
   }
   return auth;
 }
 
 function getClientFirestore(): Firestore {
+  if (typeof window === 'undefined') {
+      throw new Error("Firebase client Firestore can't be used on the server.");
+  }
   if (!db) {
-      initializeFirebase();
+      db = getFirestore(getClientApp());
   }
   return db;
 }
