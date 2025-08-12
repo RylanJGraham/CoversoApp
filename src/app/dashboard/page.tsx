@@ -166,7 +166,7 @@ export default function DashboardPage() {
        <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold">Your Documents</h2>
-             <Button onClick={() => router.push('/')}>Create New</Button>
+             <Button onClick={() => router.push('/generate')}>Create New</Button>
         </div>
         
         {documents.length > 0 ? (
@@ -199,7 +199,7 @@ export default function DashboardPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   You haven't generated any cover letters. Get started by creating one.
                 </p>
-                <Button className="mt-6" onClick={() => router.push('/')}>Create Your First Cover Letter</Button>
+                <Button className="mt-6" onClick={() => router.push('/generate')}>Create Your First Cover Letter</Button>
             </div>
         )}
 

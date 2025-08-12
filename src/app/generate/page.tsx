@@ -1,23 +1,27 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getClientAuth, getClientFirestore } from '@/lib/firebase';
-import type { User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import { Coverso as CoversoForm } from '@/components/coverso';
 import Hyperspeed from '@/components/hyperspeed';
+import { getClientAuth, getClientFirestore } from '@/lib/firebase';
+import type { User } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
-import ProfileSetupModal from '@/components/ProfileSetupModal';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface UserProfile {
-  onboardingComplete?: boolean;
+  fullName: string;
+  userLocation: string;
+  phone: string;
+  email: string;
+  linkedinUrl: string;
   [key: string]: any;
 }
 
-export default function Home() {
+export default function GeneratePage() {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -26,17 +30,21 @@ export default function Home() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        // If user is logged in, redirect to dashboard.
-        router.push('/dashboard');
+        const db = getClientFirestore();
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setProfile(userDocSnap.data() as UserProfile);
+        }
       } else {
-        // Not logged in, show the main page
-        setLoading(false);
+        router.push('/login');
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, [router]);
-
+  
   if (loading) {
      return (
        <div className="w-full h-screen relative flex items-center justify-center">
@@ -58,9 +66,8 @@ export default function Home() {
        </div>
      );
   }
-
-  // This is the public-facing page for non-logged-in users.
+  
   return (
-    <CoversoForm />
+    <CoversoForm user={user} profile={profile} />
   );
 }

@@ -39,13 +39,22 @@ import TiltedCard from "./TiltedCard";
 import AnimatedCounter from "./AnimatedCounter";
 import { Header } from "./Header";
 import { getClientAuth, getClientFirestore } from "@/lib/firebase";
-import { addDoc, collection, doc, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, serverTimestamp } from "firebase/firestore";
 import type { User as FirebaseUser } from 'firebase/auth';
+
+interface UserProfile {
+  fullName: string;
+  userLocation: string;
+  phone: string;
+  email: string;
+  linkedinUrl: string;
+  [key: string]: any;
+}
 
 
 type AppState = "idle" | "loading" | "success" | "error";
 
-export function Coverso() {
+export function Coverso({ user, profile }: { user: FirebaseUser | null, profile: UserProfile | null }) {
   const [files, setFiles] = useState<File[]>([]);
   const [jobDescription, setJobDescription] = useState("");
   const [portfolioUrls, setPortfolioUrls] = useState<string[]>([""]);
@@ -61,19 +70,22 @@ export function Coverso() {
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
-  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    const auth = getClientAuth();
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
+    if (profile) {
+      setFullName(profile.fullName || '');
+      setUserLocation(profile.userLocation || '');
+      setPhone(profile.phone || '');
+      setEmail(profile.email || user?.email || '');
+      setLinkedinUrl(profile.linkedinUrl || '');
+    } else if(user) {
+        setEmail(user.email || '');
+    }
+  }, [user, profile]);
+
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -132,7 +144,7 @@ export function Coverso() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser) {
+    if (!user) {
        toast({ title: "Not Authenticated", description: "You must be logged in to generate a cover letter.", variant: "destructive" });
        return;
     }
@@ -181,7 +193,7 @@ export function Coverso() {
 
       // Save to Firestore
       const db = getClientFirestore();
-      const userDocRef = doc(db, "users", currentUser.uid);
+      const userDocRef = doc(db, "users", user.uid);
       const documentsCollectionRef = collection(userDocRef, "documents");
       await addDoc(documentsCollectionRef, {
         coverLetter: result.coverLetter,
@@ -265,7 +277,7 @@ export function Coverso() {
   return (
     <TooltipProvider>
     <div className="flex flex-col min-h-screen font-body bg-white">
-      <Header />
+      { user ? <Header /> : <Header /> }
       <header className="h-[400px] w-full relative">
         <div className="absolute inset-0 z-10 grid grid-cols-1 md:grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="col-span-1 flex items-center justify-start p-8 text-left">
