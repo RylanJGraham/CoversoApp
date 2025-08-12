@@ -26,7 +26,7 @@ import { createSubscriptionFlow } from '@/ai/flows/stripe-checkout';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Separator } from './ui/separator';
-import { validateDiscountCode } from '@/ai/flows/validate-discount-code';
+import { validateDiscountCode } from '@/actions/validate-discount-code';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ProfileSetupModalProps {
@@ -272,16 +272,17 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     setIsVerifyingCode(true);
     setCodeError(null);
     try {
-        const result = await validateDiscountCode({ code: discountCode });
-        if (result.isValid && result.planName) {
+        const result = await validateDiscountCode(discountCode);
+        if (result.valid && result.planName) {
             setAppliedCodePlan(result.planName);
+            toast({ title: "Discount Applied!", description: `You've unlocked the ${result.planName} plan!` });
             setCodeError(null);
         } else {
-            setCodeError("That discount code is not valid. Please try again.");
+            setCodeError(result.error || "That discount code is not valid.");
             setAppliedCodePlan(null);
         }
     } catch (error) {
-        setCodeError("Could not verify the code. Please try again.");
+        setCodeError("Could not verify the code. Please try again later.");
         setAppliedCodePlan(null);
     } finally {
         setIsVerifyingCode(false);

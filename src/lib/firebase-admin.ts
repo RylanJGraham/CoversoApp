@@ -1,37 +1,39 @@
 
 import * as admin from 'firebase-admin';
 
-// This file is for server-side access to Firebase services.
+// This file is for server-side initialization of the Firebase Admin SDK.
 
-// Check if the app is already initialized to prevent errors.
 if (!admin.apps.length) {
-    // When deploying to Vercel or running locally, we use environment variables for the credentials.
-    // The SDK will automatically pick them up if they are named correctly.
-    // For local development, these are loaded from the .env file.
+  try {
+    // When running on Vercel or locally with a .env file,
+    // we use a single environment variable to hold the entire service account JSON.
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
     
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-    
-    if (!privateKey) {
-        throw new Error('FIREBASE_PRIVATE_KEY is not set in the environment variables.');
+    if (!serviceAccountJson) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable is not set. Please provide your service account credentials.');
     }
 
-    try {
-        admin.initializeApp({
-          credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            // The private key from the .env file is a single line. 
-            // We need to re-format it back to a multi-line PEM format.
-            privateKey: privateKey.replace(/-----BEGIN PRIVATE KEY-----/g, '-----BEGIN PRIVATE KEY-----\n').replace(/-----END PRIVATE KEY-----/g, '\n-----END PRIVATE KEY-----'),
-          }),
-        });
-    } catch (error: any) {
-        console.error('Firebase admin initialization error', error.message);
-        // We throw the error to make it visible during development/build
-        throw new Error('Failed to initialize Firebase Admin SDK: ' + error.message);
-    }
+    const serviceAccount = JSON.parse(serviceAccountJson);
+
+    // The private key needs to have its newlines properly escaped.
+    const privateKey = serviceAccount.private_key.replace(/\\n/g, '\n');
+
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: serviceAccount.project_id,
+        clientEmail: serviceAccount.client_email,
+        privateKey: privateKey,
+      })
+    });
+
+    console.log('Firebase Admin SDK initialized successfully.');
+
+  } catch (error: any) {
+    console.error('Firebase admin initialization error:', error);
+    // Throw a more specific error to make debugging easier.
+    throw new Error('Failed to initialize Firebase Admin SDK. Please check your FIREBASE_SERVICE_ACCOUNT environment variable. Original error: ' + error.message);
+  }
 }
 
 const adminDb = admin.firestore();
-
 export { adminDb };
