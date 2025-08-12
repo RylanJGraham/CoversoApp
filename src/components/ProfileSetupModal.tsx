@@ -110,7 +110,7 @@ const CheckoutForm: FC<{ onSuccessfulPayment: () => void }> = ({ onSuccessfulPay
     return (
         <form onSubmit={handleSubmit}>
             <PaymentElement />
-            <Button disabled={isProcessing || !stripe || !elements} className="w-full mt-6">
+            <Button disabled={isProcessing || !stripe || !elements} className="w-full mt-6 bg-accent-foreground text-accent hover:bg-accent-foreground/90">
                 {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : `Pay and Subscribe`}
             </Button>
         </form>
@@ -293,7 +293,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
           key={index}
           className={cn(
             'h-2 w-2 rounded-full transition-all duration-300',
-            index + 1 === current ? 'bg-primary w-4' : 'bg-gray-300'
+            index + 1 === current ? 'bg-accent-foreground w-4' : 'bg-accent-foreground/30'
           )}
         />
       ))}
@@ -301,14 +301,14 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   );
   
   const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean }> = ({title, price, features, popular, priceId, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
-    <div className={cn("border rounded-lg p-6 flex flex-col", popular && "border-primary border-2 relative", disabled && "opacity-50 bg-gray-50")}>
-        {popular && <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">Most Popular</div>}
-        <h3 className="text-xl font-bold">{title}</h3>
-        <p className="text-3xl font-bold my-4">{price}<span className="text-base font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
-        <ul className="space-y-3 text-muted-foreground flex-grow">
+    <div className={cn("border rounded-lg p-6 flex flex-col bg-accent-foreground/10 border-accent-foreground/20", popular && "border-accent-foreground border-2 relative", disabled && "opacity-50 bg-gray-50")}>
+        {popular && <div className="absolute top-0 -translate-y-1/2 bg-accent-foreground text-accent px-3 py-1 rounded-full text-sm font-semibold">Most Popular</div>}
+        <h3 className="text-xl font-bold text-accent-foreground">{title}</h3>
+        <p className="text-3xl font-bold my-4 text-accent-foreground">{price}<span className="text-base font-normal text-accent-foreground/80">{price !== 'Free' ? '/month' : ''}</span></p>
+        <ul className="space-y-3 text-accent-foreground/80 flex-grow">
             {features.map((feature, i) => (
                 <li key={i} className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-accent-foreground" />
                     <span>{feature}</span>
                 </li>
             ))}
@@ -327,18 +327,18 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
           <>
             <DialogHeader>
               <DialogTitle className="text-center text-2xl">Welcome to Coverso!</DialogTitle>
-              <DialogDescription className="text-center">Let's set up your profile to get started.</DialogDescription>
+              <DialogDescription className="text-center text-accent-foreground/80">Let's set up your profile to get started.</DialogDescription>
             </DialogHeader>
             <div className="flex flex-col items-center gap-4 py-4">
-              <Avatar className="h-24 w-24 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              <Avatar className="h-24 w-24 cursor-pointer border-2 border-accent-foreground/20" onClick={() => fileInputRef.current?.click()}>
                 <AvatarImage src={imagePreview} alt="Profile" />
-                <AvatarFallback>
-                    <UploadCloud className="h-10 w-10 text-gray-400" />
+                <AvatarFallback className="bg-accent-foreground/10">
+                    <UploadCloud className="h-10 w-10 text-accent-foreground/50" />
                 </AvatarFallback>
               </Avatar>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
                <Label htmlFor="fullName">Full Name</Label>
-               <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="e.g., Jane Doe" className="text-center" />
+               <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="e.g., Jane Doe" className="text-center bg-transparent border-accent-foreground/30 placeholder:text-accent-foreground/50" />
             </div>
           </>
         );
@@ -347,16 +347,16 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
           <>
             <DialogHeader>
               <DialogTitle className="text-center text-2xl">Tell Us About You</DialogTitle>
-              <DialogDescription className="text-center">This helps us tailor your experience.</DialogDescription>
+              <DialogDescription className="text-center text-accent-foreground/80">This helps us tailor your experience.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
                 <Label htmlFor="industry">What industry are you in?</Label>
-                <Input id="industry" name="industry" value={formData.industry} onChange={handleChange} placeholder="e.g., Software Development" />
+                <Input id="industry" name="industry" value={formData.industry} onChange={handleChange} placeholder="e.g., Software Development" className="bg-transparent border-accent-foreground/30 placeholder:text-accent-foreground/50" />
               </div>
               <div>
                 <Label htmlFor="age">What is your age?</Label>
-                <Input id="age" name="age" type="number" value={formData.age} onChange={handleChange} placeholder="e.g., 28" />
+                <Input id="age" name="age" type="number" value={formData.age} onChange={handleChange} placeholder="e.g., 28" className="bg-transparent border-accent-foreground/30 placeholder:text-accent-foreground/50"/>
               </div>
             </div>
           </>
@@ -366,7 +366,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             <>
                 <DialogHeader>
                     <DialogTitle className="text-center text-2xl">Choose Your Plan</DialogTitle>
-                    <DialogDescription className="text-center">Select a plan to complete your setup. You can change this at any time.</DialogDescription>
+                    <DialogDescription className="text-center text-accent-foreground/80">Select a plan to complete your setup. You can change this at any time.</DialogDescription>
                 </DialogHeader>
                  <div className="py-4 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -377,22 +377,22 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                             onChoose={handleChoosePlan}
                             isPreparing={isPreparingPayment !== null}
                             isSelected={isPreparingPayment === tier.priceId}
-                            disabled={!!appliedCodePlan}
+                            disabled={!!appliedCodePlan && appliedCodePlan !== tier.title}
                         />
                         ))}
                     </div>
-                    <Separator />
-                    <div className="p-4 border rounded-lg bg-background">
+                    <Separator className="bg-accent-foreground/20"/>
+                    <div className="p-4 border rounded-lg bg-accent-foreground/10 border-accent-foreground/20">
                          <div className="flex items-center gap-2 mb-2">
-                             <Ticket className="h-5 w-5 text-primary" />
-                             <h4 className="font-semibold">Have a code?</h4>
+                             <Ticket className="h-5 w-5 text-accent-foreground" />
+                             <h4 className="font-semibold text-accent-foreground">Have a code?</h4>
                          </div>
                         {appliedCodePlan ? (
                             <div className='flex flex-col items-start gap-4'>
-                                <p className='text-green-600 font-medium'>
+                                <p className='text-accent-foreground font-medium'>
                                     Success! You've unlocked the <span className='font-bold'>{appliedCodePlan}</span> plan.
                                 </p>
-                                 <Button onClick={handleCompleteWithCode} disabled={isSaving}>
+                                 <Button onClick={handleCompleteWithCode} disabled={isSaving} variant="secondary">
                                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Complete Setup
                                 </Button>
@@ -404,8 +404,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                                     value={discountCode}
                                     onChange={(e) => setDiscountCode(e.target.value)}
                                     disabled={isVerifyingCode}
+                                    className="bg-transparent border-accent-foreground/30 placeholder:text-accent-foreground/50"
                                 />
-                                <Button onClick={handleApplyDiscountCode} disabled={isVerifyingCode || !discountCode}>
+                                <Button onClick={handleApplyDiscountCode} disabled={isVerifyingCode || !discountCode} variant="secondary">
                                     {isVerifyingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Apply
                                 </Button>
@@ -421,9 +422,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                  <>
                 <DialogHeader>
                     <DialogTitle className="text-center text-2xl">Enter Payment Details</DialogTitle>
-                    <DialogDescription className="text-center">Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
+                    <DialogDescription className="text-center text-accent-foreground/80">Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
                 </DialogHeader>
-                 <div className="py-4">
+                 <div className="py-4 bg-white rounded-lg p-4">
                     <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
                         <CheckoutForm onSuccessfulPayment={handleSuccessfulPayment}/>
                     </Elements>
@@ -431,7 +432,6 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                  </>
             )
          }
-         // Fallback if clientSecret isn't ready, though this shouldn't be seen.
          return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>;
       default:
         return null;
@@ -440,7 +440,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 
   return (
     <Dialog open={isOpen} onOpenChange={() => { /* Don't close on overlay click */ }}>
-      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-5xl bg-white text-black p-8 rounded-xl shadow-2xl" hideCloseButton={true} 
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-5xl bg-accent text-accent-foreground p-8 rounded-xl shadow-2xl" hideCloseButton={true} 
          onEscapeKeyDown={(e) => e.preventDefault()}
          onPointerDownOutside={(e) => e.preventDefault()}
       >
@@ -458,7 +458,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                     </Button>
                     )}
                     {step < 3 && (
-                    <Button onClick={handleNext} className="flex items-center gap-2">
+                    <Button variant="secondary" onClick={handleNext} className="flex items-center gap-2">
                         Next
                         <ArrowRight />
                     </Button>
@@ -472,3 +472,6 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
+
+
+    
