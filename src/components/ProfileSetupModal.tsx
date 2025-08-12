@@ -327,10 +327,15 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
         return (
           <>
             <DialogHeader>
-              <DialogTitle className="text-center text-2xl">Welcome to Coverso!</DialogTitle>
-              <DialogDescription className="text-center">Let's set up your profile to get started.</DialogDescription>
+              <DialogTitle className="text-2xl">Welcome to Coverso!</DialogTitle>
+              <DialogDescription>
+                Let's set up your profile to get started. We'll use this information to pre-fill the contact details on your cover letters.
+              </DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col items-center gap-4 py-4">
+            <div className="flex flex-col items-start gap-4 py-4">
+               <Label htmlFor="fullName">Full Name</Label>
+               <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="e.g., Jane Doe" className="border-gray-300"/>
+               <Label>Profile Picture (Optional)</Label>
               <Avatar className="h-24 w-24 cursor-pointer border-2" onClick={() => fileInputRef.current?.click()}>
                 <AvatarImage src={imagePreview} alt="Profile" />
                 <AvatarFallback>
@@ -338,8 +343,6 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 </AvatarFallback>
               </Avatar>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-               <Label htmlFor="fullName">Full Name</Label>
-               <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="e.g., Jane Doe" className="text-center" />
             </div>
           </>
         );
@@ -347,17 +350,17 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
         return (
           <>
             <DialogHeader>
-              <DialogTitle className="text-center text-2xl">Tell Us About You</DialogTitle>
-              <DialogDescription className="text-center">This helps us tailor your experience.</DialogDescription>
+              <DialogTitle className="text-2xl">Tell Us About You</DialogTitle>
+              <DialogDescription>This helps us tailor your experience.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
                 <Label htmlFor="industry">What industry are you in?</Label>
-                <Input id="industry" name="industry" value={formData.industry} onChange={handleChange} placeholder="e.g., Software Development" />
+                <Input id="industry" name="industry" value={formData.industry} onChange={handleChange} placeholder="e.g., Software Development" className="border-gray-300"/>
               </div>
               <div>
                 <Label htmlFor="age">What is your age?</Label>
-                <Input id="age" name="age" type="number" value={formData.age} onChange={handleChange} placeholder="e.g., 28" />
+                <Input id="age" name="age" type="number" value={formData.age} onChange={handleChange} placeholder="e.g., 28" className="border-gray-300"/>
               </div>
             </div>
           </>
@@ -366,8 +369,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
          return (
             <>
                 <DialogHeader>
-                    <DialogTitle className="text-center text-2xl">Choose Your Plan</DialogTitle>
-                    <DialogDescription className="text-center">Select a plan to complete your setup. You can change this at any time.</DialogDescription>
+                    <DialogTitle className="text-2xl">Choose Your Plan</DialogTitle>
+                    <DialogDescription>Select a plan to complete your setup. You can change this at any time.</DialogDescription>
                 </DialogHeader>
                  <div className="py-4 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -405,6 +408,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                                     value={discountCode}
                                     onChange={(e) => setDiscountCode(e.target.value)}
                                     disabled={isVerifyingCode}
+                                    className="border-gray-300"
                                 />
                                 <Button onClick={handleApplyDiscountCode} disabled={isVerifyingCode || !discountCode} variant="secondary">
                                     {isVerifyingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -421,8 +425,8 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             return (
                  <>
                 <DialogHeader>
-                    <DialogTitle className="text-center text-2xl">Enter Payment Details</DialogTitle>
-                    <DialogDescription className="text-center">Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
+                    <DialogTitle className="text-2xl">Enter Payment Details</DialogTitle>
+                    <DialogDescription className="text-left">Securely complete your subscription for the {selectedTier?.title} plan.</DialogDescription>
                 </DialogHeader>
                  <div className="py-4 bg-white rounded-lg p-4">
                     <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
@@ -440,7 +444,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 
   return (
     <Dialog open={isOpen} onOpenChange={() => { /* Don't close on overlay click */ }}>
-      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-5xl p-0 rounded-xl shadow-2xl grid grid-cols-1 md:grid-cols-3" hideCloseButton={true} 
+      <DialogContent 
+        className="sm:max-w-md md:max-w-lg lg:max-w-5xl p-0 rounded-xl grid grid-cols-1 md:grid-cols-3 border-2 border-primary shadow-lg shadow-primary/40" 
+        hideCloseButton={true} 
          onEscapeKeyDown={(e) => e.preventDefault()}
          onPointerDownOutside={(e) => e.preventDefault()}
       >
@@ -448,7 +454,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             <Image src="/Logo2.png" alt="Coverso Logo" width={200} height={80} />
             <p className="text-center text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
         </div>
-        <div className="col-span-1 md:col-span-2 p-8 flex flex-col h-full min-h-[500px]">
+        <div className="col-span-1 md:col-span-2 p-8 flex flex-col h-full min-h-[500px] text-left">
             <div className="flex-grow">
                  {renderStep()}
             </div>
@@ -476,5 +482,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
+
+    
 
     
