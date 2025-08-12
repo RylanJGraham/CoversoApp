@@ -35,6 +35,8 @@ export default {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+          'gradient-start': 'hsl(var(--primary-gradient-start))',
+          'gradient-end': 'hsl(var(--primary-gradient-end))',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
