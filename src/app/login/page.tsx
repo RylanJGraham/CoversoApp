@@ -1,10 +1,17 @@
 
+"use client";
+
 import Link from "next/link"
+import { useState } from "react";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Hyperspeed from "@/components/hyperspeed"
+import { auth } from "@/lib/firebase";
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -19,6 +26,40 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      // You can handle successful login redirection here
+      toast({ title: "Successfully logged in with Google!" });
+    } catch (error: any) {
+      toast({ title: "Google login failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+       // You can handle successful login redirection here
+      toast({ title: "Successfully logged in!" });
+    } catch (error: any) {
+      toast({ title: "Email login failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white">
       <div className="hidden lg:block relative">
@@ -46,7 +87,7 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4">
+              <form onSubmit={handleEmailLogin} className="grid gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -54,6 +95,9 @@ export default function LoginPage() {
                     type="email"
                     placeholder="m@example.com"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -63,12 +107,21 @@ export default function LoginPage() {
                       Forgot your password?
                     </Link>
                   </div>
-                  <Input id="password" type="password" required />
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    required 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                  />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Login
                 </Button>
-                <div className="relative my-4">
+              </form>
+               <div className="relative my-4">
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />
                     </div>
@@ -79,12 +132,11 @@ export default function LoginPage() {
                     </div>
                 </div>
                 <div className="flex justify-center">
-                    <Button variant="outline" size="icon" className="rounded-full">
-                        <GoogleIcon className="h-5 w-5" />
+                    <Button variant="outline" size="icon" className="rounded-full" onClick={handleGoogleLogin} disabled={isLoading}>
+                         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon className="h-5 w-5" /> }
                         <span className="sr-only">Login with Google</span>
                     </Button>
                 </div>
-              </div>
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
                 <Link href="#" className="underline">
