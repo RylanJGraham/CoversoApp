@@ -28,9 +28,6 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { Separator } from './ui/separator';
 import { validateDiscountCode } from '@/ai/flows/validate-discount-code';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import TiltedCard from './TiltedCard';
-import './TiltedCard.css';
-
 
 interface ProfileSetupModalProps {
   isOpen: boolean;
@@ -86,6 +83,7 @@ const industryOptions = [
   "Education",
   "Sales",
   "Engineering",
+  "Other"
 ];
 
 
@@ -154,7 +152,6 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     subscriptionPlan: 'Basic', // Default to basic
   });
   const [imagePreview, setImagePreview] = useState(user?.photoURL || '');
-  const [industryInput, setIndustryInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -196,7 +193,6 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     if (formData.industries.length < 3 && !formData.industries.includes(industry)) {
       setFormData(prev => ({...prev, industries: [...prev.industries, industry]}));
     }
-    setIndustryInput('');
   }
 
   const handleIndustryRemove = (industryToRemove: string) => {
@@ -343,8 +339,10 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   );
   
   const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean, isRecommended: boolean }> = ({title, price, features, isRecommended, generations, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
-        <div className={cn("border rounded-lg p-4 flex flex-col h-full group transition-colors", disabled && "opacity-50 bg-gray-50", "border-gray-300 hover:border-primary")}>
-             {isRecommended && <p className="text-sm font-semibold text-primary mb-2">Recommended for you</p>}
+        <div className={cn("border rounded-lg p-4 flex flex-col h-full transition-colors", disabled && "opacity-50 bg-gray-50", "border-gray-300 hover:border-primary")}>
+            <div className='min-h-[24px]'>
+              {isRecommended && <p className="text-sm font-semibold text-primary mb-2">Recommended for you</p>}
+            </div>
             <h3 className="text-lg font-bold text-foreground">{title}</h3>
             <p className="text-2xl font-bold my-2 text-foreground">{price}<span className="text-sm font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
             <ul className="space-y-2 text-muted-foreground text-sm flex-grow">
@@ -378,14 +376,14 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="e.g., Jane Doe"/>
                <Label>Profile Picture (Optional)</Label>
                 <div className="flex items-center gap-4">
-                    <Avatar className="h-24 w-24 border-2">
+                    <Avatar className="h-24 w-24 border-2 border-primary/20">
                         <AvatarImage src={imagePreview} alt="Profile" />
                         <AvatarFallback>
                             <UserIcon className="h-10 w-10 text-muted-foreground" />
                         </AvatarFallback>
                     </Avatar>
                      <Button type="button" variant="default" className="rounded-full h-12 w-12 p-0" onClick={() => fileInputRef.current?.click()}>
-                        <UploadCloud className="h-6 w-6" />
+                        <UploadCloud className="h-6 w-6 text-primary-foreground" />
                     </Button>
                 </div>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
@@ -402,26 +400,14 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
             <div className="space-y-6 py-4">
                <div>
                 <Label htmlFor="industry">What industry are you in? (Select up to 3)</Label>
-                <div className="flex items-center gap-2 mt-2">
-                    <Input 
-                        id="industry"
-                        list="industry-options"
-                        value={industryInput}
-                        onChange={(e) => setIndustryInput(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && industryInput) {
-                                e.preventDefault();
-                                handleIndustrySelect(industryInput);
-                            }
-                        }}
-                        placeholder="Type or select an industry"
-                        disabled={formData.industries.length >= 3}
-                    />
-                    <datalist id="industry-options">
-                        {industryOptions.map(opt => <option key={opt} value={opt} />)}
-                    </datalist>
-                    <Button type="button" onClick={() => handleIndustrySelect(industryInput)} disabled={!industryInput || formData.industries.length >= 3}>Add</Button>
-                </div>
+                    <Select onValueChange={handleIndustrySelect} disabled={formData.industries.length >= 3}>
+                        <SelectTrigger className="w-full mt-2" id="industry">
+                            <SelectValue placeholder="Select an industry..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                             {industryOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                 <div className="flex flex-wrap gap-2 mt-3">
                     {formData.industries.map(industry => (
                         <div key={industry} className="flex items-center gap-1 bg-primary text-primary-foreground rounded-full px-3 py-1 text-sm">
@@ -510,10 +496,10 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                         </div>
 
                         <div className="col-span-1 border-l pl-8">
-                             <div className="flex items-center gap-2 mb-2">
-                                 <Ticket className="h-5 w-5 text-primary" />
-                                 <h4 className="font-semibold">Have a code?</h4>
-                             </div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <Ticket className="h-5 w-5 text-primary" />
+                                <h4 className="font-semibold">Have a code?</h4>
+                            </div>
                             {appliedCodePlan ? (
                                 <div className='flex flex-col items-start gap-4'>
                                     <p className='font-medium text-sm text-primary'>
@@ -525,7 +511,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                                     </Button>
                                 </div>
                             ) : (
-                                 <div className="w-full space-y-2">
+                                <div className="w-full space-y-2">
                                     <div className="flex items-start gap-2">
                                         <Input 
                                             placeholder="Enter discount code" 
@@ -534,12 +520,17 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                                             disabled={isVerifyingCode}
                                             className="h-9"
                                         />
-                                        <Button onClick={handleApplyDiscountCode} disabled={isVerifyingCode || !discountCode} variant="secondary" size="sm">
+                                        <Button 
+                                            onClick={handleApplyDiscountCode} 
+                                            disabled={isVerifyingCode || !discountCode} 
+                                            variant="secondary" 
+                                            size="sm"
+                                        >
                                             {isVerifyingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                             Apply
                                         </Button>
                                     </div>
-                                     {codeError && <p className="text-sm text-destructive">{codeError}</p>}
+                                    {codeError && <p className="text-sm text-destructive">{codeError}</p>}
                                 </div>
                             )}
                         </div>
@@ -575,21 +566,23 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     <Dialog open={isOpen} onOpenChange={() => { /* Don't close on overlay click */ }}>
       <DialogContent 
         className={cn(
-            "p-0 rounded-xl shadow-lg shadow-primary/20",
-            isPlanStep ? "max-w-4xl" : "max-w-3xl grid grid-cols-1 md:grid-cols-3 border-2 border-primary"
+            "p-0 rounded-xl shadow-lg shadow-primary/20 border-2 border-primary",
+            isPlanStep ? "max-w-4xl" : "max-w-3xl grid grid-cols-1 md:grid-cols-3"
         )}
         hideCloseButton={true} 
          onEscapeKeyDown={(e) => e.preventDefault()}
          onPointerDownOutside={(e) => e.preventDefault()}
       >
         {!isPlanStep && (
-            <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground p-8 flex-col justify-between items-start gap-6 rounded-l-xl text-left">
-                <Image src="/Logo2.png" alt="Coverso Logo" width={200} height={80} />
-                <p className="text-left text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
+            <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground flex-col justify-between items-start gap-6 rounded-l-xl">
+                <div className='p-8'>
+                    <Image src="/Logo2.png" alt="Coverso Logo" width={200} height={80} />
+                </div>
+                <p className="text-left text-lg font-medium p-8">Before the Job Hunt Begins, Let Us Get To Know You</p>
                 <div />
             </div>
         )}
-        <div className={cn("flex flex-col h-full min-h-[500px]", isPlanStep ? "p-8 col-span-1" : "p-8 md:col-span-2")}>
+        <div className={cn("flex flex-col h-full min-h-[500px]", isPlanStep ? "col-span-1 p-8" : "md:col-span-2 p-8")}>
             <div className="flex-grow">
                  {renderStep()}
             </div>
@@ -617,3 +610,5 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
+
+    
