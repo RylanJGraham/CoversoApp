@@ -38,6 +38,7 @@ import { cn } from "@/lib/utils";
 import Hyperspeed from "./hyperspeed";
 import TiltedCard from "./TiltedCard";
 import AnimatedCounter from "./AnimatedCounter";
+import { Separator } from "./ui/separator";
 
 
 type AppState = "idle" | "loading" | "success" | "error";
@@ -237,14 +238,15 @@ export function Coverso() {
     <TooltipProvider>
     <div className="flex flex-col min-h-screen font-body bg-white">
       <div className="w-full h-16 bg-white">
-        <div className="h-full flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="h-full flex items-center justify-end px-4 sm:px-6 lg:px-8">
             <nav className="flex items-center gap-4">
               <Link href="/about" className="text-primary hover:underline">About Us</Link>
               <Link href="/faq" className="text-primary hover:underline">FAQ</Link>
+              <Separator orientation="vertical" className="h-6 bg-primary" />
+              <Button variant="ghost" className="text-primary hover:bg-primary hover:text-primary-foreground text-lg">
+                <Link href="/login">Login</Link>
+              </Button>
             </nav>
-            <Button variant="ghost" className="text-primary hover:bg-primary hover:text-primary-foreground text-lg">
-              <Link href="/login">Login</Link>
-            </Button>
         </div>
       </div>
       <header className="h-[400px] w-full relative">
