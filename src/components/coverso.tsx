@@ -5,7 +5,7 @@ import { useState, useRef, type ChangeEvent, type FC, useEffect, forwardRef, use
 import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -609,5 +609,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
   );
 }
 
+
+    
 
     
