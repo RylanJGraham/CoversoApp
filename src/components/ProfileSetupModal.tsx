@@ -607,9 +607,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
          onPointerDownOutside={(e) => e.preventDefault()}
       >
         {!isPlanStep && (
-            <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground flex-col justify-between items-start gap-6 rounded-l-xl p-8">
+            <div className="hidden md:flex md:col-span-1 bg-primary text-primary-foreground flex-col justify-between items-start gap-6 p-8">
                 <div>
-                    <Image src="/Coverso.png" alt="Coverso Logo" width={200} height={80} />
+                    <Image src="/CoversoOrange.png" alt="Coverso Logo" width={200} height={80} />
                 </div>
                 <p className="text-left text-lg font-medium">Before the Job Hunt Begins, Let Us Get To Know You</p>
                 <div />
@@ -645,3 +645,5 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
+
+    
