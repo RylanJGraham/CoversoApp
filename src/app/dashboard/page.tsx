@@ -14,10 +14,12 @@ import { Button } from '@/components/ui/button';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
 import { useToast } from '@/hooks/use-toast';
+import UsageIndicator from '@/components/UsageIndicator';
 
 interface UserProfile {
   fullName: string;
   onboardingComplete?: boolean;
+  subscriptionPlan?: string;
   [key: string]: any;
 }
 
@@ -81,6 +83,18 @@ function DashboardContent() {
       }
   };
 
+  const getUsage = () => {
+    const userGenerations = documents.length;
+    switch (userProfile?.subscriptionPlan) {
+        case "Basic": return { current: userGenerations, max: 2, plan: "Basic" };
+        case "Job Seeker": return { current: userGenerations, max: 10, plan: "Job Seeker" };
+        case "Career Pro": return { current: userGenerations, max: 30, plan: "Career Pro" };
+        case "Executive": return { current: userGenerations, max: Infinity, plan: "Executive" };
+        case "Special": return { current: userGenerations, max: Infinity, plan: "Special Code" };
+        default: return { current: 0, max: 2, plan: "Guest" };
+    }
+  }
+
   if (loading) {
     return (
       <div className="w-full h-screen relative flex items-center justify-center">
@@ -128,18 +142,21 @@ function DashboardContent() {
       </div>
     )
   }
+  
+  const { current, max, plan } = getUsage();
 
   return (
     <div className="flex flex-col min-h-screen font-body bg-white text-black">
       <DashboardHeader />
        <header className="h-[300px] w-full relative">
-        <div className="absolute inset-0 z-10 flex items-center justify-start text-left max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 z-10 flex items-center justify-between max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-start justify-center">
                 <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                 <p className="text-2xl font-light text-black mt-2">
                     Welcome, {userProfile?.fullName || user?.email}
                 </p>
             </div>
+             <UsageIndicator current={current} max={max} planName={plan} />
         </div>
         <div className="absolute inset-0 h-full w-full z-0">
             <Hyperspeed
@@ -230,3 +247,5 @@ export default function DashboardPage() {
     </Suspense>
   )
 }
+
+    
