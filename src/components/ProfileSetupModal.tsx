@@ -43,7 +43,7 @@ interface Tier {
     price: string;
     features: string[];
     priceId: string | null;
-    popular?: boolean;
+    generations: number;
 }
 
 const tiers: Tier[] = [
@@ -52,25 +52,28 @@ const tiers: Tier[] = [
         price: "Free",
         features: ["2 Generations per day", "Standard tone options", "Community support"],
         priceId: null,
+        generations: 2,
     },
     {
         title: "Job Seeker",
         price: "$5.99",
         features: ["10 Generations per day", "Standard tone options", "Email support"],
         priceId: process.env.NEXT_PUBLIC_STRIPE_JOB_SEEKER_PRICE_ID || 'price_1RvJpbRkulDjgBEWEyl0pYdE',
-        popular: true,
+        generations: 10,
     },
     {
         title: "Career Pro",
         price: "$9.99",
         features: ["30 Generations per day", "All tone options", "CV Analysis", "Priority support"],
         priceId: process.env.NEXT_PUBLIC_STRIPE_CAREER_PRO_PRICE_ID || 'price_1RvJqDRkulDjgBEWioi7QL9P',
+        generations: 30,
     },
     {
         title: "Executive",
         price: "$19.99",
         features: ["Unlimited Generations", "Premium tone options", "CV Analysis & Enhancement", "Priority support"],
         priceId: process.env.NEXT_PUBLIC_STRIPE_EXECUTIVE_PRICE_ID || 'price_1RvJqaRkulDjgBEWsVeQW4qi',
+        generations: Infinity,
     },
 ];
 
@@ -212,10 +215,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
         await setDoc(userRef, {
             uid: user.uid,
             email: user.email,
-            fullName: formData.fullName,
-            profileImage: formData.profileImage,
-            industries: formData.industries,
-            academicLevel: formData.academicLevel,
+            ...formData,
             subscriptionPlan: plan,
             onboardingComplete: onboardingStatus,
         }, { merge: true });
@@ -317,6 +317,15 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     }
   };
 
+  const getRecommendedPlan = (): string => {
+    const goal = parseInt(formData.dailyGoal, 10);
+    if (goal <= 2) return "Job Seeker";
+    if (goal <= 10) return "Job Seeker";
+    if (goal <= 20) return "Career Pro";
+    return "Executive";
+  };
+
+
   const StepIndicator: FC<{ current: number; total: number }> = ({ current, total }) => (
     <div className="flex justify-center space-x-2 my-4">
       {Array.from({ length: total }).map((_, index) => (
@@ -331,9 +340,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     </div>
   );
   
-  const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean }> = ({title, price, features, popular, priceId, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
-        <div className={cn("border rounded-lg p-4 flex flex-col h-full relative", popular ? "border-primary" : "border-gray-300", disabled && "opacity-50 bg-gray-50")}>
-            {popular && <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">Most Popular</div>}
+  const SubscriptionCard: FC<Tier & { onChoose: (tier: Tier) => void, isPreparing: boolean, isSelected: boolean, disabled: boolean, isRecommended: boolean }> = ({title, price, features, isRecommended, generations, onChoose, isPreparing, isSelected, disabled, ...tier}) => (
+        <div className={cn("border rounded-lg p-4 flex flex-col h-full relative", isRecommended ? "border-primary" : "border-gray-300", disabled && "opacity-50 bg-gray-50")}>
+            {isRecommended && <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">Recommended for you</div>}
             <h3 className="text-lg font-bold text-foreground mt-4">{title}</h3>
             <p className="text-2xl font-bold my-2 text-foreground">{price}<span className="text-sm font-normal text-muted-foreground">{price !== 'Free' ? '/month' : ''}</span></p>
             <ul className="space-y-2 text-muted-foreground text-sm flex-grow">
@@ -344,9 +353,9 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                     </li>
                 ))}
             </ul>
-            <Button className="w-full mt-4" variant={popular ? "default" : "outline"} onClick={() => onChoose({title, price, features, popular, priceId, ...tier})} disabled={isPreparing || disabled}>
+            <Button className="w-full mt-4" variant={isRecommended ? "default" : "outline"} onClick={() => onChoose({title, price, features, generations, ...tier})} disabled={isPreparing || disabled}>
                 {isSelected && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                { isSelected ? 'Preparing...' : (priceId === null ? 'Choose Basic' : 'Choose Plan')}
+                { isSelected ? 'Preparing...' : (tier.priceId === null ? 'Choose Basic' : 'Choose Plan')}
             </Button>
         </div>
   )
@@ -438,11 +447,26 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                         </SelectContent>
                     </Select>
                </div>
+                <div>
+                  <Label htmlFor="dailyGoal">How many cover letters do you aim to create daily?</Label>
+                   <Select name="dailyGoal" onValueChange={(value) => setFormData(p => ({...p, dailyGoal: value}))} value={formData.dailyGoal}>
+                        <SelectTrigger className="w-full mt-2" id="dailyGoal">
+                            <SelectValue placeholder="Select a daily goal..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="2">1-2</SelectItem>
+                            <SelectItem value="10">3-10</SelectItem>
+                            <SelectItem value="20">11-20</SelectItem>
+                            <SelectItem value="30">20+</SelectItem>
+                        </SelectContent>
+                    </Select>
+               </div>
             </div>
           </>
         );
        case 3:
          const paidTiers = tiers.filter(t => t.priceId !== null);
+         const recommendedPlan = getRecommendedPlan();
          return (
             <>
                 <DialogHeader>
@@ -459,6 +483,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                             isPreparing={isPreparingPayment !== null}
                             isSelected={isPreparingPayment === tier.priceId}
                             disabled={!!appliedCodePlan || isPreparingPayment !== null}
+                            isRecommended={tier.title === recommendedPlan}
                         />
                         ))}
                     </div>
@@ -546,7 +571,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
       <DialogContent 
         className={cn(
             "p-0 rounded-xl grid grid-cols-1 border-2 border-primary shadow-lg shadow-primary/20",
-            isPlanStep ? "md:max-w-4xl" : "md:max-w-lg md:grid-cols-3"
+            isPlanStep ? "md:max-w-4xl" : "md:max-w-3xl md:grid-cols-3"
         )}
         hideCloseButton={true} 
          onEscapeKeyDown={(e) => e.preventDefault()}
@@ -559,7 +584,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
                 <div />
             </div>
         )}
-        <div className={cn("p-8 flex flex-col h-full min-h-[500px]", isPlanStep ? "col-span-1" : "col-span-1 md:col-span-2")}>
+        <div className={cn("p-8 flex flex-col h-full min-h-[500px]", isPlanStep ? "col-span-1" : "md:col-span-2")}>
             <div className="flex-grow">
                  {renderStep()}
             </div>
@@ -587,5 +612,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
+
+    
 
     
