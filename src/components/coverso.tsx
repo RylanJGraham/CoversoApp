@@ -391,13 +391,13 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 <FileText className="h-8 w-8 text-primary-foreground" />
                                 <AnimatedCounter to={68} />
                             </p>
-                            <div className="mt-2 text-sm text-primary-foreground/80 flex items-center gap-2">
+                            <div className="mt-4 text-sm text-primary-foreground/80 flex items-center gap-2">
+                                <Clock className="h-5 w-5" />
+                                <p className="text-xl font-mono font-bold flex items-center gap-2">
+                                    <AnimatedCounter to={12240} />
+                                </p>
                                 <span>Minutes Saved</span>
                             </div>
-                             <p className="text-xl font-mono font-bold flex items-center gap-2">
-                                <Clock className="h-5 w-5 text-primary-foreground/80" />
-                                <AnimatedCounter to={12240} />
-                            </p>
                         </div>
                     </div>
                 </div>
