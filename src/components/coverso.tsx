@@ -34,6 +34,8 @@ import {
   Clock,
   Lock,
   Copy,
+  Star,
+  FileLock,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -615,10 +617,11 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                   </div>
                 )}
                 {appState === 'success' && aiResult && (
-                  <div className="grid grid-cols-12 gap-8 items-start">
-                    <div className="col-span-3 space-y-4 sticky top-24">
-                       <Card className="border-primary">
-                           <CardHeader>
+                  <>
+                    <div className="grid grid-cols-12 gap-8 items-start">
+                      <div className="col-span-3 space-y-4 sticky top-24">
+                        <Card className="border-primary">
+                            <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                 <Wand2 className="h-5 w-5" />
                                 Actions
@@ -641,7 +644,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                     <BrainCircuit className="w-4 h-4 mr-2" />
                                     AI Analysis
                                 </Button>
-                                 <Button 
+                                  <Button 
                                     variant={activeSubMenu === 'download' ? 'secondary' : 'outline'}
                                     onClick={() => setActiveSubMenu(activeSubMenu === 'download' ? null : 'download')}
                                     className={cn(activeSubMenu === 'download' && "bg-accent text-accent-foreground", "hover:bg-accent/80")}
@@ -693,7 +696,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         )}
                         
                         {activeSubMenu === 'download' && (
-                             <Card className="border-accent">
+                              <Card className="border-accent">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-base">
                                         <Download className="h-5 w-5" />
@@ -712,54 +715,59 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 </CardContent>
                             </Card>
                         )}
-
-                        {!user && (
-                            <Card className="border-primary">
-                                <CardHeader>
-                                    <CardTitle>Unlock More Features</CardTitle>
-                                    <CardDescription>Save this document and unlock premium features by creating an account.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex flex-col gap-2">
-                                     <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-                                        <li>Save and edit documents</li>
-                                        <li>Access generation history</li>
-                                        <li>Use premium tones & features</li>
-                                    </ul>
-                                </CardContent>
-                                <CardFooter>
-                                     <Button onClick={() => router.push('/login')} className="w-full">
-                                        <LogIn className="w-4 h-4 mr-2" />
-                                        Login or Sign Up to Save
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        )}
+                      </div>
+                      <div className="col-span-9">
+                        <Card className="w-full">
+                          <CardHeader className="bg-secondary/30 border-b p-4 flex-row items-center justify-between">
+                              <Input 
+                                  value={fileName}
+                                  onChange={(e) => setFileName(e.target.value)}
+                                  placeholder="Enter document name..."
+                                  className="font-semibold text-lg max-w-md"
+                              />
+                              <Button onClick={() => handleSave()} disabled={isSaving || !user}>
+                                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                                  Save to Dashboard
+                              </Button>
+                          </CardHeader>
+                          <CardContent className="p-0">
+                            <Textarea
+                                value={generatedCoverLetter}
+                                onChange={(e) => setGeneratedCoverLetter(e.target.value)}
+                                placeholder="Your generated cover letter will appear here..."
+                                className="w-full resize-none min-h-[70vh] border-0 focus-visible:ring-0 rounded-none"
+                              />
+                          </CardContent>
+                        </Card>
+                      </div>
                     </div>
-                     <div className="col-span-9">
-                      <Card className="w-full">
-                        <CardHeader className="bg-secondary/30 border-b p-4 flex-row items-center justify-between">
-                            <Input 
-                                value={fileName}
-                                onChange={(e) => setFileName(e.target.value)}
-                                placeholder="Enter document name..."
-                                className="font-semibold text-lg max-w-md"
-                            />
-                            <Button onClick={() => handleSave()} disabled={isSaving || !user}>
-                                {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                                Save to Dashboard
-                            </Button>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                           <Textarea
-                              value={generatedCoverLetter}
-                              onChange={(e) => setGeneratedCoverLetter(e.target.value)}
-                              placeholder="Your generated cover letter will appear here..."
-                              className="w-full resize-none min-h-[70vh] border-0 focus-visible:ring-0 rounded-none"
-                            />
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
+                    
+                    {!user && (
+                       <div className="mt-12 py-10 px-8 bg-primary/5 rounded-2xl border-2 border-dashed border-primary">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                            <div className="md:col-span-2">
+                                <h2 className="text-3xl font-bold text-black flex items-center gap-3">
+                                  <Star className="h-8 w-8 text-accent" />
+                                  Unlock the Full Power of Coverso
+                                </h2>
+                                <p className="text-lg text-gray-600 mt-2">
+                                  Create an account to save your generated documents, access premium AI features, and manage your job applications all in one place.
+                                </p>
+                            </div>
+                            <div className="flex flex-col gap-3 items-stretch md:items-end">
+                                <Button size="lg" onClick={() => router.push('/login')}>
+                                  <LogIn className="w-5 h-5 mr-2" />
+                                  Sign Up or Login to Save
+                                </Button>
+                                 <Button size="lg" variant="secondary" onClick={() => router.push('/pricing')}>
+                                   <DollarSign className="w-5 h-5 mr-2" />
+                                    View Pricing & Plans
+                                </Button>
+                            </div>
+                          </div>
+                       </div>
+                    )}
+                  </>
                 )}
             </div>
             )}
@@ -802,4 +810,3 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     </TooltipProvider>
   );
 }
-

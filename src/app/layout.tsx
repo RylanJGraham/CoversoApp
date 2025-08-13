@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'Coverso',
@@ -19,9 +20,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased bg-white">
-        {children}
+      <body className="font-body antialiased bg-white flex flex-col min-h-screen">
+        <div className="flex-grow">
+          {children}
+        </div>
         <Toaster />
+        <Footer />
       </body>
     </html>
   );
