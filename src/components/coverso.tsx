@@ -41,13 +41,14 @@ import AnimatedCounter from "./AnimatedCounter";
 import { Header } from "./Header";
 import { DashboardHeader } from "./DashboardHeader";
 import { getClientAuth, getClientFirestore } from "@/lib/firebase";
-import { addDoc, collection, doc, getDocs, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, serverTimestamp, query, where, getDoc } from "firebase/firestore";
 import type { User as FirebaseUser } from 'firebase/auth';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import UsageIndicator from "./UsageIndicator";
 import { PersonalInfoForm, type PersonalInfoHandle } from "./PersonalInfoForm";
 import { PortfolioVaultForm, type PortfolioVaultHandle } from "./PortfolioVaultForm";
+import { Input } from "./ui/input";
 
 
 interface UserProfile {
@@ -71,11 +72,14 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
 
   const [aiResult, setAiResult] = useState<GenerateCoverLetterOutput | null>(null);
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
+  const [fileName, setFileName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
 
   const [anonGenerations, setAnonGenerations] = useState(0);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const [showNameWarningDialog, setShowNameWarningDialog] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [userGenerations, setUserGenerations] = useState(0);
   
   const personalInfoRef = useRef<PersonalInfoHandle>(null);
@@ -127,6 +131,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     };
     setAiResult(sampleResult);
     setGeneratedCoverLetter(sampleResult.coverLetter);
+    setFileName(`Cover Letter for ${sampleResult.companyName}`);
     setAppState("success");
     setError(null);
   };
@@ -207,24 +212,9 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
 
       setAiResult(result);
       setGeneratedCoverLetter(result.coverLetter);
+      setFileName(`Cover Letter for ${result.companyName}`);
 
-      if (user) {
-        // Save to Firestore for logged-in users
-        const db = getClientFirestore();
-        const userDocRef = doc(db, "users", user.uid);
-        const documentsCollectionRef = collection(userDocRef, "documents");
-        await addDoc(documentsCollectionRef, {
-            coverLetter: result.coverLetter,
-            jobTitle: result.jobTitle,
-            companyName: result.companyName,
-            createdAt: serverTimestamp(),
-        });
-        setUserGenerations(prev => prev + 1); // Optimistically update count
-        toast({
-            title: "Cover Letter Generated!",
-            description: "Your new cover letter is ready and saved to your dashboard.",
-        });
-      } else {
+      if (!user) {
         // Handle anonymous users
         const newCount = anonGenerations + 1;
         localStorage.setItem('anonymousGenerations', newCount.toString());
@@ -233,6 +223,9 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             title: `Generation ${newCount} of 2 Used`,
             description: "Sign up to save your documents and get more generations.",
         });
+      } else {
+        // Increment user generation count for UI
+         setUserGenerations(prev => prev + 1);
       }
 
       setAppState("success");
@@ -255,20 +248,59 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${aiResult?.companyName || 'Company'}-${aiResult?.jobTitle || 'Cover-Letter'}.md`;
+    link.download = `${fileName || 'Cover-Letter'}.md`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  const handleSave = () => {
-    // This is where you'd implement saving logic, potentially with a dialog to name the file.
-    // For now, it just shows a toast.
-    toast({
-      title: "Document Saved!",
-      description: "Your changes have been saved to your dashboard."
-    })
+  const handleSave = async (forceUntitled = false) => {
+    if (!user || !aiResult) {
+      toast({ title: "Cannot Save", description: "You must be logged in to save documents.", variant: "destructive"});
+      return;
+    }
+    
+    if (!fileName && !forceUntitled) {
+      setShowNameWarningDialog(true);
+      return;
+    }
+    
+    setIsSaving(true);
+    let finalFileName = fileName;
+
+    try {
+        const db = getClientFirestore();
+        const userDocRef = doc(db, "users", user.uid);
+        const documentsCollectionRef = collection(userDocRef, "documents");
+        
+        if (!finalFileName) {
+            const untitledQuery = query(documentsCollectionRef, where("fileName", ">=", "Untitled"));
+            const untitledSnapshot = await getDocs(untitledQuery);
+            const count = untitledSnapshot.docs.filter(doc => doc.data().fileName.startsWith("Untitled")).length;
+            finalFileName = `Untitled ${count + 1}`;
+        }
+    
+        await addDoc(documentsCollectionRef, {
+            fileName: finalFileName,
+            coverLetter: generatedCoverLetter,
+            jobTitle: aiResult.jobTitle,
+            companyName: aiResult.companyName,
+            createdAt: serverTimestamp(),
+        });
+
+        toast({
+            title: "Document Saved!",
+            description: `"${finalFileName}" has been saved to your dashboard.`,
+        });
+
+    } catch (error) {
+        console.error("Error saving document: ", error);
+        toast({ title: "Save failed", description: "Could not save your document. Please try again.", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+      setShowNameWarningDialog(false);
+    }
   }
   
   const Step: FC<{
@@ -514,25 +546,29 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                 )}
                 {appState === 'success' && aiResult && (
                   <div className="grid grid-cols-12 gap-8 items-start">
-                    <div className="col-span-9">
-                      <Card className="w-full">
-                        <CardContent className="p-0">
-                           <Textarea
-                              value={generatedCoverLetter}
-                              onChange={(e) => setGeneratedCoverLetter(e.target.value)}
-                              placeholder="Your generated cover letter will appear here..."
-                              className="w-full resize-none min-h-[70vh] border-0 focus-visible:ring-0 rounded-t-lg"
-                            />
-                        </CardContent>
-                        <CardFooter className="bg-secondary/30 border-t p-2 flex justify-end">
-                            <Button onClick={handleSave}>
-                                <Save className="w-4 h-4 mr-2" />
-                                Save
-                            </Button>
-                        </CardFooter>
-                      </Card>
-                    </div>
                     <div className="col-span-3 space-y-4 sticky top-24">
+                       <Card>
+                           <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                <Wand2 className="h-5 w-5" />
+                                Actions
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-2">
+                                <Button variant="outline" onClick={handleDownload}>
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Download
+                                </Button>
+                                <Button variant="outline" onClick={() => toast({title: "Coming Soon!", description: "This feature is under development."})}>
+                                    <RefreshCw className="w-4 h-4 mr-2" />
+                                    Reprompt
+                                </Button>
+                                <Button variant="outline" onClick={() => toast({title: "Coming Soon!", description: "This feature is under development."})}>
+                                    <BrainCircuit className="w-4 h-4 mr-2" />
+                                    Document Analysis
+                                </Button>
+                            </CardContent>
+                        </Card>
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
@@ -562,24 +598,30 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 </div>
                             </CardContent>
                         </Card>
-                        <Card>
-                           <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                <Wand2 className="h-5 w-5" />
-                                Actions
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex flex-col gap-2">
-                                <Button variant="outline" onClick={handleDownload}>
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Download
-                                </Button>
-                                <Button variant="outline" onClick={() => toast({title: "Coming Soon!", description: "This feature is under development."})}>
-                                    <RefreshCw className="w-4 h-4 mr-2" />
-                                    Reprompt
-                                </Button>
-                            </CardContent>
-                        </Card>
+                    </div>
+                     <div className="col-span-9">
+                      <Card className="w-full">
+                        <CardHeader className="bg-secondary/30 border-b p-4 flex-row items-center justify-between">
+                            <Input 
+                                value={fileName}
+                                onChange={(e) => setFileName(e.target.value)}
+                                placeholder="Enter document name..."
+                                className="font-semibold text-lg max-w-md"
+                            />
+                            <Button onClick={() => handleSave()} disabled={isSaving}>
+                                {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                                Save
+                            </Button>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                           <Textarea
+                              value={generatedCoverLetter}
+                              onChange={(e) => setGeneratedCoverLetter(e.target.value)}
+                              placeholder="Your generated cover letter will appear here..."
+                              className="w-full resize-none min-h-[70vh] border-0 focus-visible:ring-0 rounded-none"
+                            />
+                        </CardContent>
+                      </Card>
                     </div>
                   </div>
                 )}
@@ -604,12 +646,23 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AlertDialog open={showNameWarningDialog} onOpenChange={setShowNameWarningDialog}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Save without a name?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Your document doesn't have a name. It will be saved as "Untitled". Are you sure you want to proceed?
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleSave(true)}>
+                Save as Untitled
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
     </TooltipProvider>
   );
 }
-
-
-    
-
-    

@@ -25,6 +25,7 @@ interface UserProfile {
 
 interface CoverLetterDoc {
     id: string;
+    fileName: string;
     coverLetter: string;
     jobTitle: string;
     companyName: string;
@@ -191,7 +192,7 @@ function DashboardContent() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <FileText className="w-5 h-5" />
-                                {doc.jobTitle || 'Cover Letter'}
+                                {doc.fileName || doc.jobTitle || 'Cover Letter'}
                             </CardTitle>
                             <CardDescription>For {doc.companyName || 'a company'}</CardDescription>
                         </CardHeader>
