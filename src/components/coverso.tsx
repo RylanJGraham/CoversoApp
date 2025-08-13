@@ -378,8 +378,8 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                      <div className="flex flex-col items-start justify-center">
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
-                         <div className="mt-6 bg-primary text-primary-foreground px-6 py-4 rounded-lg text-left inline-block shadow-lg">
-                            <p className="text-lg font-semibold">Cover Letters Drafted Today:</p>
+                        <div className="mt-6 bg-primary text-primary-foreground px-6 py-4 rounded-lg text-left inline-block shadow-lg">
+                            <p className="text-lg font-semibold">Applications Boosted Today:</p>
                              <div className="flex items-end gap-3 mt-1">
                                 <FileText className="h-8 w-8 text-primary-foreground" />
                                 <p className="text-4xl font-mono font-bold">
@@ -387,9 +387,9 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 </p>
                                 <span className="text-lg font-semibold mb-1">Cover Letters</span>
                              </div>
-                            <div className="mt-4 text-sm text-primary-foreground/80 flex items-end gap-3">
+                            <div className="flex items-end gap-3 mt-4">
                                <Clock className="h-8 w-8" />
-                                <p className="text-4xl font-mono font-bold flex items-end gap-3">
+                                <p className="text-4xl font-mono font-bold">
                                     <AnimatedCounter to={12240} />
                                 </p>
                                  <span className="text-lg font-semibold mb-1">Minutes Saved</span>
@@ -493,78 +493,93 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         </div>
                     </TiltedCard>
                     <Card className="w-full rounded-2xl p-4 space-y-6 flex flex-col">
-                      <CardHeader className="p-0">
-                        <CardTitle className="text-black">Customize Your Letter</CardTitle>
-                        <CardDescription className="text-gray-700">Guide the AI's writing style and include key information.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-0 flex-grow flex flex-col gap-4">
-                        <div className="space-y-3">
-                          <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
-                          <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-x-4 gap-y-2">
-                            {standardTones.map((t) => (
-                              <div key={t} className="flex items-center space-x-2">
-                                <RadioGroupItem value={t} id={`r-${t}`} />
-                                <Label htmlFor={`r-${t}`} className="text-gray-800 font-normal">{t}</Label>
-                              </div>
-                            ))}
-                            {premiumTones.map((t) => (
-                              <TooltipProvider key={t} delayDuration={100}>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className={cn("flex items-center space-x-2", !isPayingUser && "opacity-50 cursor-not-allowed")}>
-                                      <RadioGroupItem value={t} id={`r-${t}`} disabled={!isPayingUser} />
-                                      <Label htmlFor={`r-${t}`} className="font-normal flex items-center gap-1.5 text-gray-500">
-                                        {t} {!isPayingUser && <Lock className="h-3 w-3" />}
-                                      </Label>
+                        <CardHeader className="p-0">
+                            <CardTitle className="text-black">Customize Your Letter</CardTitle>
+                            <CardDescription className="text-gray-700">Guide the AI's writing style and include key information.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0 flex-grow flex flex-col gap-4">
+                             <div className="space-y-3">
+                                <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
+                                <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-2">
+                                {[...standardTones, ...premiumTones].map((t) => {
+                                    const isPremium = premiumTones.includes(t);
+                                    const isDisabled = isPremium && !isPayingUser;
+
+                                    const content = isDisabled ? (
+                                    <div className="flex items-center justify-center w-full h-full">
+                                        <Lock className="h-5 w-5 text-primary" />
                                     </div>
-                                  </TooltipTrigger>
-                                  {!isPayingUser && (
+                                    ) : (
+                                    t
+                                    );
+
+                                    const item = (
+                                    <div key={t} className="flex-1 min-w-[100px]">
+                                        <RadioGroupItem value={t} id={`r-${t}`} className="sr-only" disabled={isDisabled} />
+                                        <Label
+                                            htmlFor={`r-${t}`}
+                                            className={cn(
+                                            "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors",
+                                            "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+                                            isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
+                                            )}
+                                        >
+                                            {content}
+                                        </Label>
+                                    </div>
+                                    );
+                                    
+                                    if(isDisabled) {
+                                        return (
+                                            <TooltipProvider key={t} delayDuration={100}>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>{item}</TooltipTrigger>
+                                                    <TooltipContent><p>This is a premium feature. Upgrade your plan to use this tone.</p></TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        )
+                                    }
+                                    return item;
+                                })}
+                                </RadioGroup>
+                            </div>
+                            <div className="space-y-2">
+                            <TooltipProvider delayDuration={100}>
+                                <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-2">
+                                        <Label htmlFor="mustHaveInfo" className={cn("font-semibold", !isPayingUser && "text-gray-500")}>
+                                            Must-Have Information
+                                        </Label>
+                                        {!isPayingUser && <Lock className="h-3 w-3 text-gray-500" />}
+                                    </div>
+                                </TooltipTrigger>
+                                {!isPayingUser && (
                                     <TooltipContent>
-                                      <p>This is a premium feature. Upgrade your plan to use this tone.</p>
+                                        <p>This is a premium feature. Upgrade to tell the AI specific points to include.</p>
                                     </TooltipContent>
-                                  )}
+                                )}
                                 </Tooltip>
-                              </TooltipProvider>
-                            ))}
-                          </RadioGroup>
-                        </div>
-                        <div className="space-y-2">
-                           <TooltipProvider delayDuration={100}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center gap-2">
-                                    <Label htmlFor="mustHaveInfo" className={cn("font-semibold", !isPayingUser && "text-gray-500")}>
-                                        Must-Have Information
-                                    </Label>
-                                    {!isPayingUser && <Lock className="h-3 w-3 text-gray-500" />}
-                                </div>
-                              </TooltipTrigger>
-                              {!isPayingUser && (
-                                <TooltipContent>
-                                    <p>This is a premium feature. Upgrade to tell the AI specific points to include.</p>
-                                </TooltipContent>
-                              )}
-                            </Tooltip>
-                          </TooltipProvider>
-                          <Textarea
-                            id="mustHaveInfo"
-                            placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
-                            value={mustHaveInfo}
-                            onChange={(e) => setMustHaveInfo(e.target.value)}
-                            className="min-h-[100px]"
-                            disabled={!isPayingUser}
-                          />
-                        </div>
-                      </CardContent>
-                      <CardFooter className="p-0 mt-auto flex flex-col gap-2">
-                          <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
-                              {appState === 'loading' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Wand2 className="w-5 h-5 mr-2" />}
-                              {appState === 'loading' ? "Drafting..." : "Generate Cover Letter"}
-                          </Button>
-                          <Button type="button" size="lg" className="w-full" variant="secondary" onClick={handleGenerateSample}>
-                              Generate Sample (for testing)
-                          </Button>
-                      </CardFooter>
+                            </TooltipProvider>
+                            <Textarea
+                                id="mustHaveInfo"
+                                placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
+                                value={mustHaveInfo}
+                                onChange={(e) => setMustHaveInfo(e.target.value)}
+                                className="min-h-[100px]"
+                                disabled={!isPayingUser}
+                            />
+                            </div>
+                        </CardContent>
+                        <CardFooter className="p-0 mt-auto flex flex-col gap-2">
+                            <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
+                                {appState === 'loading' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Wand2 className="w-5 h-5 mr-2" />}
+                                {appState === 'loading' ? "Drafting..." : "Generate Cover Letter"}
+                            </Button>
+                            <Button type="button" size="lg" className="w-full" variant="secondary" onClick={handleGenerateSample}>
+                                Generate Sample (for testing)
+                            </Button>
+                        </CardFooter>
                     </Card>
                 </div>
             </div>
@@ -598,9 +613,9 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-2">
-                                <Button variant="outline" onClick={() => router.push('/dashboard')}>
+                                <Button variant="outline" onClick={() => user ? router.push('/dashboard') : setAppState('idle')}>
                                     <ArrowLeft className="w-4 h-4 mr-2" />
-                                    Return to Dashboard
+                                    {user ? "Return to Dashboard" : "Start Over"}
                                 </Button>
                                 <Button variant="outline" onClick={handleDownload}>
                                     <Download className="w-4 h-4 mr-2" />
@@ -641,6 +656,27 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 </div>
                             </CardContent>
                         </Card>
+                        {!user && (
+                            <Card className="border-primary">
+                                <CardHeader>
+                                    <CardTitle>Unlock More Features</CardTitle>
+                                    <CardDescription>Save this document and unlock premium features by creating an account.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex flex-col gap-2">
+                                     <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                                        <li>Save and edit documents</li>
+                                        <li>Access generation history</li>
+                                        <li>Use premium tones & features</li>
+                                    </ul>
+                                </CardContent>
+                                <CardFooter>
+                                     <Button onClick={() => router.push('/login')} className="w-full">
+                                        <LogIn className="w-4 h-4 mr-2" />
+                                        Login or Sign Up to Save
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        )}
                     </div>
                      <div className="col-span-9">
                       <Card className="w-full">
@@ -651,7 +687,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 placeholder="Enter document name..."
                                 className="font-semibold text-lg max-w-md"
                             />
-                            <Button onClick={() => handleSave()} disabled={isSaving}>
+                            <Button onClick={() => handleSave()} disabled={isSaving || !user}>
                                 {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                                 Save to Dashboard
                             </Button>
@@ -709,5 +745,3 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     </TooltipProvider>
   );
 }
-
-    
