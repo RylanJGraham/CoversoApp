@@ -5,7 +5,7 @@ import { useState, useRef, type ChangeEvent, type FC, useEffect, forwardRef, use
 import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -373,19 +373,17 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
                          <div className="mt-6 bg-primary text-primary-foreground p-4 rounded-lg text-left inline-block">
-                             <div className="flex items-center gap-3">
-                                <h3 className="text-lg font-semibold">Cover Letters Drafted Today</h3>
-                             </div>
                             <p className="text-4xl font-mono font-bold mt-1 flex items-center gap-3">
                                 <FileText className="h-8 w-8 text-primary-foreground" />
                                 <AnimatedCounter to={68} />
+                                <span className="text-lg font-semibold ml-2">Cover Letters Drafted Today</span>
                             </p>
                             <div className="mt-4 text-sm text-primary-foreground/80 flex items-center gap-2">
-                                <Clock className="h-5 w-5" />
-                                <p className="text-xl font-mono font-bold flex items-center gap-2">
+                                <p className="text-4xl font-mono font-bold flex items-center gap-3">
+                                    <Clock className="h-8 w-8" />
                                     <AnimatedCounter to={12240} />
+                                    <span className="text-lg font-semibold ml-2">Minutes Saved</span>
                                 </p>
-                                <span>Minutes Saved</span>
                             </div>
                         </div>
                     </div>
