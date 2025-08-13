@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { getClientAuth } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
 import { Coverso as CoversoForm } from '@/components/coverso';
@@ -12,16 +13,23 @@ import { onAuthStateChanged } from 'firebase/auth';
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const auth = getClientAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      setLoading(false);
+      if (user) {
+        // If user is authenticated, redirect to dashboard
+        router.push('/dashboard');
+      } else {
+        // If not authenticated, stop loading and show the landing page
+        setUser(null);
+        setLoading(false);
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   if (loading) {
      return (
@@ -45,8 +53,9 @@ export default function Home() {
      );
   }
 
-  // This is the public-facing page for all users.
+  // This is the public-facing page for unauthenticated users.
+  // Authenticated users are redirected in the useEffect.
   return (
-    <CoversoForm user={user} profile={null} />
+    <CoversoForm user={null} profile={null} />
   );
 }
