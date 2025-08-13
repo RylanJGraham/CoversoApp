@@ -33,6 +33,7 @@ import {
   ArrowLeft,
   Clock,
   Lock,
+  Copy,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -84,6 +85,8 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
   const [showNameWarningDialog, setShowNameWarningDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [userGenerations, setUserGenerations] = useState(0);
+  
+  const [activeSubMenu, setActiveSubMenu] = useState<"analysis" | "download" | null>(null);
   
   const personalInfoRef = useRef<PersonalInfoHandle>(null);
   const portfolioVaultRef = useRef<PortfolioVaultHandle>(null);
@@ -260,6 +263,15 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+  
+  const handleCopyToClipboard = () => {
+    if (!generatedCoverLetter) return;
+    navigator.clipboard.writeText(generatedCoverLetter).then(() => {
+        toast({ title: "Copied to clipboard!" });
+    }).catch(err => {
+        toast({ title: "Failed to copy", description: "Could not copy text to clipboard.", variant: "destructive" });
+    });
   };
 
   const handleSave = async (forceUntitled = false) => {
@@ -519,7 +531,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                         <Label
                                             htmlFor={`r-${t}`}
                                             className={cn(
-                                            "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors",
+                                            "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors h-12",
                                             "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
                                             isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
                                             )}
@@ -617,9 +629,13 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                     <ArrowLeft className="w-4 h-4 mr-2" />
                                     {user ? "Return to Dashboard" : "Start Over"}
                                 </Button>
-                                <Button variant="outline" onClick={handleDownload}>
+                                <Button variant={activeSubMenu === 'analysis' ? 'default' : 'outline'} onClick={() => setActiveSubMenu(activeSubMenu === 'analysis' ? null : 'analysis')}>
+                                    <BrainCircuit className="w-4 h-4 mr-2" />
+                                    AI Analysis
+                                </Button>
+                                 <Button variant={activeSubMenu === 'download' ? 'default' : 'outline'} onClick={() => setActiveSubMenu(activeSubMenu === 'download' ? null : 'download')}>
                                     <Download className="w-4 h-4 mr-2" />
-                                    Download
+                                    Download & Export
                                 </Button>
                                 <Button variant="outline" onClick={() => toast({title: "Coming Soon!", description: "This feature is under development."})}>
                                     <RefreshCw className="w-4 h-4 mr-2" />
@@ -627,35 +643,60 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 </Button>
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                <BrainCircuit className="h-5 w-5" />
-                                AI Analysis
-                                </CardTitle>
-                            </CardHeader>
-                             <CardContent className="space-y-3">
-                                <div>
-                                <h3 className="font-semibold text-gray-800">Job Title</h3>
-                                <p className="text-sm text-muted-foreground">{aiResult.jobTitle}</p>
-                                </div>
-                                <div>
-                                <h3 className="font-semibold text-gray-800">Company Name</h3>
-                                <p className="text-sm text-muted-foreground">{aiResult.companyName}</p>
-                                </div>
-                                <div>
-                                <h3 className="font-semibold flex items-center gap-2 text-gray-800">
-                                    <ListChecks className="h-5 w-5" />
-                                    Key Focus Points
-                                </h3>
-                                <ul className="list-disc pl-5 mt-1 space-y-1 text-sm text-muted-foreground">
-                                    {aiResult.keyFocusPoints.map((point, index) => (
-                                    <li key={index}>{point}</li>
-                                    ))}
-                                </ul>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        
+                        {activeSubMenu === 'analysis' && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2 text-base">
+                                    <BrainCircuit className="h-5 w-5" />
+                                    AI Analysis
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div>
+                                    <h3 className="font-semibold text-gray-800">Job Title</h3>
+                                    <p className="text-sm text-muted-foreground">{aiResult.jobTitle}</p>
+                                    </div>
+                                    <div>
+                                    <h3 className="font-semibold text-gray-800">Company Name</h3>
+                                    <p className="text-sm text-muted-foreground">{aiResult.companyName}</p>
+                                    </div>
+                                    <div>
+                                    <h3 className="font-semibold flex items-center gap-2 text-gray-800">
+                                        <ListChecks className="h-5 w-5" />
+                                        Key Focus Points
+                                    </h3>
+                                    <ul className="list-disc pl-5 mt-1 space-y-1 text-sm text-muted-foreground">
+                                        {aiResult.keyFocusPoints.map((point, index) => (
+                                        <li key={index}>{point}</li>
+                                        ))}
+                                    </ul>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                        
+                        {activeSubMenu === 'download' && (
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2 text-base">
+                                        <Download className="h-5 w-5" />
+                                        Download Options
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col gap-2">
+                                    <Button variant="secondary" className="justify-start gap-2" onClick={handleDownload}>
+                                        <FileText className="h-4 w-4" />
+                                        Download as Markdown (.md)
+                                    </Button>
+                                    <Button variant="secondary" className="justify-start gap-2" onClick={handleCopyToClipboard}>
+                                        <Copy className="h-4 w-4" />
+                                        Copy to Clipboard
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        )}
+
                         {!user && (
                             <Card className="border-primary">
                                 <CardHeader>
