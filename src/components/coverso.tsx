@@ -31,6 +31,7 @@ import {
   Save,
   RefreshCw,
   ArrowLeft,
+  Clock,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -42,7 +43,7 @@ import AnimatedCounter from "./AnimatedCounter";
 import { Header } from "./Header";
 import { DashboardHeader } from "./DashboardHeader";
 import { getClientAuth, getClientFirestore } from "@/lib/firebase";
-import { addDoc, collection, doc, getDocs, serverTimestamp, query, where, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, serverTimestamp, query, where, getDoc, setDoc } from "firebase/firestore";
 import type { User as FirebaseUser } from 'firebase/auth';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
@@ -225,8 +226,19 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             description: "Sign up to save your documents and get more generations.",
         });
       } else {
-        // Increment user generation count for UI
-         setUserGenerations(prev => prev + 1);
+        // This save happens automatically on generation
+        const db = getClientFirestore();
+        const userDocRef = doc(db, "users", user.uid);
+        const documentsCollectionRef = collection(userDocRef, "documents");
+        await addDoc(documentsCollectionRef, {
+            fileName: result.jobTitle,
+            coverLetter: result.coverLetter,
+            jobTitle: result.jobTitle,
+            companyName: result.companyName,
+            createdAt: serverTimestamp(),
+        });
+        
+        setUserGenerations(prev => prev + 1);
       }
 
       setAppState("success");
@@ -372,13 +384,17 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
                          <div className="mt-6 bg-primary text-primary-foreground p-4 rounded-lg text-left inline-block">
-                            <h3 className="text-lg font-semibold">Cover Letters Drafted Today</h3>
+                             <div className="flex items-center gap-3">
+                                 <FileText className="h-6 w-6 text-primary-foreground" />
+                                <h3 className="text-lg font-semibold">Cover Letters Drafted Today</h3>
+                             </div>
                             <p className="text-4xl font-mono font-bold mt-1">
-                            <AnimatedCounter to={100} />
+                            <AnimatedCounter to={68} />
                             </p>
                             <div className="mt-2 text-sm text-primary-foreground/80 flex items-center gap-2">
+                                <Clock className="h-5 w-5" />
                                 <p className="text-xl font-mono font-bold">
-                                    <AnimatedCounter to={18000} />
+                                    <AnimatedCounter to={12240} />
                                 </p>
                                 <span>Minutes Saved</span>
                             </div>

@@ -63,19 +63,19 @@ export const PersonalInfoForm = forwardRef<PersonalInfoHandle, PersonalInfoFormP
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="fullName" className="text-gray-800">Full Name*</Label>
-        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Rylan James Graham" required />
+        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" required />
       </div>
       <div className="space-y-2">
         <Label htmlFor="location" className="text-gray-800">Location*</Label>
-        <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="Barcelona, Spain" required />
+        <Input id="location" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} placeholder="City, Country" required />
       </div>
       <div className="space-y-2">
         <Label htmlFor="phone" className="text-gray-800">Phone Number</Label>
-        <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 635967609" />
+        <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+00 000000000" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="email" className="text-gray-800">Email</Label>
-        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rylangraham02@gmail.com" />
+        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" />
       </div>
       <div className="space-y-2 md:col-span-2">
         <Label htmlFor="linkedin" className="text-gray-800">LinkedIn Profile URL</Label>
