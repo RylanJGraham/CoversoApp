@@ -373,10 +373,11 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
                          <div className="mt-6 bg-primary text-primary-foreground p-4 rounded-lg text-left inline-block">
-                             <p className="text-lg font-semibold">Cover Letters Drafted Today</p>
+                             <p className="text-lg font-semibold">Applications Boosted Today:</p>
                             <p className="text-4xl font-mono font-bold mt-1 flex items-center gap-3">
                                 <FileText className="h-8 w-8 text-primary-foreground" />
                                 <AnimatedCounter to={68} />
+                                <span className="text-lg font-semibold ml-2">Cover Letters</span>
                             </p>
                             <div className="mt-4 text-sm text-primary-foreground/80 flex items-center gap-2">
                                 <p className="text-4xl font-mono font-bold flex items-center gap-3">
@@ -672,5 +673,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     </TooltipProvider>
   );
 }
+
+    
 
     
