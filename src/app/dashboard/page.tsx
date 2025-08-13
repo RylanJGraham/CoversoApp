@@ -6,9 +6,9 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getClientAuth, getClientFirestore } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, orderBy, query, Timestamp, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, orderBy, query, Timestamp, setDoc, deleteDoc } from 'firebase/firestore';
 import Hyperspeed from '@/components/hyperspeed';
-import { Loader2, FileText, Download, Edit, Save, X, Eye } from 'lucide-react';
+import { Loader2, FileText, Download, Eye, Save, X, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -23,6 +23,17 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea';
 
 interface UserProfile {
@@ -185,6 +196,23 @@ function DashboardContent() {
     setSelectedDoc(doc);
     setIsModalOpen(true);
   }
+  
+  const handleDeleteDoc = async (docId: string) => {
+    if(!user) return;
+    try {
+        const db = getClientFirestore();
+        const docRef = doc(db, 'users', user.uid, 'documents', docId);
+        await deleteDoc(docRef);
+        
+        setDocuments(documents.filter(d => d.id !== docId));
+        toast({ title: "Document Deleted Successfully" });
+
+    } catch (error) {
+        toast({ title: "Error", description: "Could not delete document.", variant: "destructive"});
+        console.error("Error deleting document:", error);
+    }
+  };
+
 
   const handleSaveDoc = async (updatedDoc: CoverLetterDoc) => {
     if (!user) return;
@@ -325,6 +353,28 @@ function DashboardContent() {
                                 Created on {doc.createdAt.toDate().toLocaleDateString()}
                             </p>
                             <div className="flex gap-2">
+                                 <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" size="icon">
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete your
+                                            document.
+                                        </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDeleteDoc(doc.id)}>
+                                            Continue
+                                        </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                                 <Button variant="outline" size="sm" onClick={() => handleDownloadDoc(doc)}>
                                     <Download className="w-4 h-4" />
                                 </Button>
