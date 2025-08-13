@@ -75,3 +75,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 12px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: hsl(var(--secondary));
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: hsl(var(--primary));
+        border-radius: 10px;
+        border: 3px solid hsl(var(--secondary));
+    }
+    .custom-scrollbar::-webkit-scrollbar-button {
+        display: none;
+    }
+}
+
+    

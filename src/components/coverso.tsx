@@ -393,7 +393,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
                          <div className="mt-6 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
-                            <p className="text-lg font-semibold">Cover Letters Drafted Today:</p>
+                            <p className="text-lg font-semibold">Applications Boosted Today:</p>
                              <div className="flex items-end gap-3 mt-1">
                                 <FileText className="h-8 w-8 text-primary-foreground" />
                                 <p className="text-4xl font-mono font-bold">
@@ -631,23 +631,29 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                  <Button 
                                     variant="secondary"
                                     onClick={() => user ? router.push('/dashboard') : setAppState('idle')}
-                                    className="bg-white text-primary hover:bg-white/90"
+                                    className="bg-white text-primary hover:bg-primary hover:text-primary-foreground"
                                 >
                                     <ArrowLeft className="w-4 h-4 mr-2" />
                                     {user ? "Return to Dashboard" : "Start Over"}
                                 </Button>
                                 <Button 
-                                    variant={activeSubMenu === 'analysis' ? 'default' : 'secondary'} 
+                                    variant="secondary" 
                                     onClick={() => setActiveSubMenu(activeSubMenu === 'analysis' ? null : 'analysis')}
-                                    className="bg-white text-primary hover:bg-white/90 data-[state=active]:bg-primary-gradient-end"
+                                    className={cn(
+                                        "bg-white text-primary hover:bg-accent hover:text-accent-foreground",
+                                        activeSubMenu === 'analysis' && "bg-accent text-accent-foreground"
+                                    )}
                                 >
                                     <BrainCircuit className="w-4 h-4 mr-2" />
                                     AI Analysis
                                 </Button>
                                   <Button 
-                                    variant={activeSubMenu === 'download' ? 'default' : 'secondary'}
+                                    variant="secondary"
                                     onClick={() => setActiveSubMenu(activeSubMenu === 'download' ? null : 'download')}
-                                     className="bg-white text-primary hover:bg-white/90"
+                                    className={cn(
+                                        "bg-white text-primary hover:bg-accent hover:text-accent-foreground",
+                                        activeSubMenu === 'download' && "bg-accent text-accent-foreground"
+                                    )}
                                 >
                                     <Download className="w-4 h-4 mr-2" />
                                     Download &amp; Export
@@ -655,7 +661,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 <Button 
                                     variant="secondary"
                                     onClick={() => toast({title: "Coming Soon!", description: "This feature is under development."})}
-                                    className="bg-white text-primary hover:bg-white/90"
+                                    className="bg-white text-primary hover:bg-primary hover:text-primary-foreground"
                                 >
                                     <RefreshCw className="w-4 h-4 mr-2" />
                                     Reprompt
@@ -664,7 +670,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         </Card>
                         
                         {activeSubMenu === 'analysis' && (
-                            <Card className="bg-gradient-to-br from-accent-gradient-start to-accent-gradient-end text-accent-foreground">
+                            <Card className="bg-gradient-to-br from-accent-gradient-start to-accent-gradient-end text-accent-foreground border-accent">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-base">
                                     <BrainCircuit className="h-5 w-5" />
@@ -696,7 +702,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         )}
                         
                         {activeSubMenu === 'download' && (
-                              <Card className="bg-gradient-to-br from-accent-gradient-start to-accent-gradient-end text-accent-foreground">
+                              <Card className="bg-gradient-to-br from-accent-gradient-start to-accent-gradient-end text-accent-foreground border-accent">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-base">
                                         <Download className="h-5 w-5" />
@@ -704,11 +710,11 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex flex-col gap-2">
-                                    <Button variant="secondary" className="justify-start gap-2 bg-white/20 hover:bg-white/30" onClick={handleDownload}>
+                                    <Button variant="secondary" className="justify-start gap-2 bg-white/20 hover:bg-white/30 text-accent-foreground" onClick={handleDownload}>
                                         <FileText className="h-4 w-4" />
                                         Download as Markdown (.md)
                                     </Button>
-                                    <Button variant="secondary" className="justify-start gap-2 bg-white/20 hover:bg-white/30" onClick={handleCopyToClipboard}>
+                                    <Button variant="secondary" className="justify-start gap-2 bg-white/20 hover:bg-white/30 text-accent-foreground" onClick={handleCopyToClipboard}>
                                         <Copy className="h-4 w-4" />
                                         Copy to Clipboard
                                     </Button>
@@ -717,7 +723,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         )}
                       </div>
                       <div className="col-span-9">
-                        <Card className="w-full">
+                        <Card className="w-full border-primary">
                           <CardHeader className="bg-secondary/30 border-b p-4 flex-row items-center justify-between">
                               <Input 
                                   value={fileName}
@@ -735,7 +741,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 value={generatedCoverLetter}
                                 onChange={(e) => setGeneratedCoverLetter(e.target.value)}
                                 placeholder="Your generated cover letter will appear here..."
-                                className="w-full resize-none min-h-[70vh] border-0 focus-visible:ring-0 rounded-none"
+                                className="w-full resize-none min-h-[70vh] border-0 focus-visible:ring-0 rounded-none custom-scrollbar"
                               />
                           </CardContent>
                         </Card>
@@ -810,3 +816,5 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     </TooltipProvider>
   );
 }
+
+    
