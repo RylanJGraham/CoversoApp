@@ -394,20 +394,20 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                      <div className="flex flex-col items-start justify-center">
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
-                         <div className="mt-6 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
-                            <p className="text-lg font-semibold">Cover Letters Drafted Today:</p>
-                             <div className="flex items-end gap-3 mt-1">
+                        <div className="mt-6 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
+                            <p className="text-lg font-semibold">Applications Boosted Today:</p>
+                            <div className="flex items-end gap-3 mt-1">
                                 <p className="text-4xl font-mono font-bold">
                                     <AnimatedCounter to={68} />
                                 </p>
                                 <span className="text-lg font-semibold mb-1">Cover Letters</span>
-                             </div>
+                            </div>
                             <div className="flex items-end gap-3 mt-4">
-                               <Clock className="h-8 w-8" />
+                                <Clock className="h-8 w-8" />
                                 <p className="text-4xl font-mono font-bold">
                                     <AnimatedCounter to={12240} />
                                 </p>
-                                 <span className="text-lg font-semibold mb-1">Minutes Saved</span>
+                                <span className="text-lg font-semibold mb-1">Minutes Saved</span>
                             </div>
                         </div>
                     </div>
@@ -618,7 +618,32 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                   </div>
                 )}
                 {appState === 'success' && aiResult && (
-                  <>
+                  <div className="space-y-8">
+                     {!user && (
+                       <div className="mb-8 py-10 px-8 bg-primary/5 rounded-2xl border-2 border-dashed border-primary">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                            <div className="md:col-span-2">
+                                <h2 className="text-3xl font-bold text-black flex items-center gap-3">
+                                  <Star className="h-8 w-8 text-accent" />
+                                  Unlock the Full Power of Coverso
+                                </h2>
+                                <p className="text-lg text-gray-600 mt-2">
+                                  Create an account to save your generated documents, access premium AI features, and manage your job applications all in one place.
+                                </p>
+                            </div>
+                            <div className="flex flex-col gap-3 items-stretch md:items-end">
+                                <Button size="lg" onClick={() => router.push('/login')}>
+                                  <LogIn className="w-5 h-5 mr-2" />
+                                  Sign Up or Login to Save
+                                </Button>
+                                 <Button size="lg" variant="secondary" onClick={() => router.push('/pricing')}>
+                                   <DollarSign className="w-5 h-5 mr-2" />
+                                    View Pricing &amp; Plans
+                                </Button>
+                            </div>
+                          </div>
+                       </div>
+                    )}
                     <div className="grid grid-cols-12 gap-8 items-start">
                       <div className="col-span-3 space-y-4 sticky top-24">
                         <Card className="border-primary bg-white">
@@ -669,9 +694,9 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         </Card>
                         
                         {activeSubMenu === 'analysis' && (
-                            <Card className="border-primary bg-white">
+                            <Card className="border-accent bg-white">
                                 <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-base text-primary">
+                                    <CardTitle className="flex items-center gap-2 text-base text-accent">
                                     <BrainCircuit className="h-5 w-5" />
                                     AI Analysis
                                     </CardTitle>
@@ -701,20 +726,20 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         )}
                         
                         {activeSubMenu === 'download' && (
-                              <Card className="border-primary bg-white">
+                              <Card className="border-accent bg-white">
                                 <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-base text-primary">
+                                    <CardTitle className="flex items-center gap-2 text-base text-accent">
                                         <Download className="h-5 w-5" />
                                         Download Options
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex flex-col gap-2">
                                     <Button variant="outline" className="justify-start gap-2" onClick={handleDownload}>
-                                        <FileText className="h-4 w-4" />
+                                        <FileText className="h-4 h-4" />
                                         Download as Markdown (.md)
                                     </Button>
                                     <Button variant="outline" className="justify-start gap-2" onClick={handleCopyToClipboard}>
-                                        <Copy className="h-4 w-4" />
+                                        <Copy className="h-4 h-4" />
                                         Copy to Clipboard
                                     </Button>
                                 </CardContent>
@@ -761,35 +786,17 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                               />
                           </CardContent>
                         </Card>
+                         <div className="mt-4 flex justify-end">
+                            <div className="bg-accent text-accent-foreground rounded-lg px-4 py-2 text-sm font-semibold shadow-md">
+                                {isPayingUser || (plan !== "Guest" && plan !== "Basic")
+                                    ? `Unlimited Generations (${plan} Plan)`
+                                    : `${current}/${max} Generations Used`
+                                }
+                            </div>
+                        </div>
                       </div>
                     </div>
-                    
-                    {!user && (
-                       <div className="mt-12 py-10 px-8 bg-primary/5 rounded-2xl border-2 border-dashed border-primary">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-                            <div className="md:col-span-2">
-                                <h2 className="text-3xl font-bold text-black flex items-center gap-3">
-                                  <Star className="h-8 w-8 text-accent" />
-                                  Unlock the Full Power of Coverso
-                                </h2>
-                                <p className="text-lg text-gray-600 mt-2">
-                                  Create an account to save your generated documents, access premium AI features, and manage your job applications all in one place.
-                                </p>
-                            </div>
-                            <div className="flex flex-col gap-3 items-stretch md:items-end">
-                                <Button size="lg" onClick={() => router.push('/login')}>
-                                  <LogIn className="w-5 h-5 mr-2" />
-                                  Sign Up or Login to Save
-                                </Button>
-                                 <Button size="lg" variant="secondary" onClick={() => router.push('/pricing')}>
-                                   <DollarSign className="w-5 h-5 mr-2" />
-                                    View Pricing &amp; Plans
-                                </Button>
-                            </div>
-                          </div>
-                       </div>
-                    )}
-                  </>
+                  </div>
                 )}
             </div>
             )}
