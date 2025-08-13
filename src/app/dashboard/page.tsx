@@ -35,6 +35,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea';
+import TiltedCard from '@/components/TiltedCard';
 
 interface UserProfile {
   fullName: string;
@@ -88,7 +89,7 @@ const DocumentViewModal: FC<{
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-2 border-b">
+        <DialogHeader className="p-4 pb-2 border-b bg-primary text-primary-foreground">
           <DialogTitle>{doc.fileName}</DialogTitle>
         </DialogHeader>
         <div className="flex-grow overflow-y-auto p-0">
@@ -98,8 +99,8 @@ const DocumentViewModal: FC<{
                 className="w-full h-full resize-none border-0 rounded-none focus-visible:ring-0"
            />
         </div>
-        <DialogFooter className="p-6 pt-2 border-t bg-secondary">
-          <Button variant="outline" onClick={handleDownload}>
+        <DialogFooter className="p-4 pt-2 border-t bg-secondary">
+          <Button variant="outline" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={handleDownload}>
             <Download className="w-4 h-4 mr-2" /> Download
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
@@ -107,8 +108,8 @@ const DocumentViewModal: FC<{
             Save Changes
           </Button>
         </DialogFooter>
-         <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="h-4 w-4" />
+         <DialogClose className="absolute right-4 top-3.5 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <X className="h-4 w-4 text-primary-foreground" />
             <span className="sr-only">Close</span>
         </DialogClose>
       </DialogContent>
@@ -334,56 +335,58 @@ function DashboardContent() {
         </div>
         
         {documents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {documents.map((doc) => (
-                    <Card key={doc.id} className="flex flex-col">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <FileText className="w-5 h-5" />
-                                {doc.fileName || doc.jobTitle || 'Cover Letter'}
-                            </CardTitle>
-                            <CardDescription>For {doc.companyName || 'a company'}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-grow p-4 bg-secondary/30 m-4 mt-0 rounded-lg overflow-hidden">
-                             <p className="text-sm text-muted-foreground line-clamp-6 whitespace-pre-line font-mono">{doc.coverLetter}</p>
-                        </CardContent>
-                        <CardFooter className="flex justify-between items-center">
-                            <p className="text-xs text-muted-foreground">
-                                Created on {doc.createdAt.toDate().toLocaleDateString()}
-                            </p>
-                            <div className="flex gap-2">
-                                 <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="destructive" size="icon">
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete your
-                                            document.
-                                        </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDeleteDoc(doc.id)}>
-                                            Continue
-                                        </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                                <Button variant="outline" size="sm" onClick={() => handleDownloadDoc(doc)}>
-                                    <Download className="w-4 h-4" />
-                                </Button>
-                                <Button variant="default" size="sm" onClick={() => handleViewDoc(doc)}>
-                                    <Eye className="w-4 h-4 mr-2" />
-                                    View
-                                </Button>
-                            </div>
-                        </CardFooter>
-                    </Card>
+                    <TiltedCard key={doc.id} containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+                        <div className="flex flex-col h-full border border-primary rounded-xl shadow-lg shadow-primary/20">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <FileText className="w-5 h-5" />
+                                    {doc.fileName || doc.jobTitle || 'Cover Letter'}
+                                </CardTitle>
+                                <CardDescription>For {doc.companyName || 'a company'}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-grow p-4 bg-secondary/30 m-4 mt-0 rounded-lg overflow-hidden border-2 border-accent">
+                                <p className="text-sm text-muted-foreground line-clamp-6 whitespace-pre-line font-mono">{doc.coverLetter}</p>
+                            </CardContent>
+                            <CardFooter className="flex justify-between items-center">
+                                <p className="text-xs text-muted-foreground">
+                                    Created on {doc.createdAt.toDate().toLocaleDateString()}
+                                </p>
+                                <div className="flex gap-2">
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" size="icon">
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete your
+                                                document.
+                                            </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteDoc(doc.id)}>
+                                                Continue
+                                            </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                    <Button variant="outline" size="icon" onClick={() => handleDownloadDoc(doc)}>
+                                        <Download className="w-4 h-4" />
+                                    </Button>
+                                    <Button variant="default" size="sm" onClick={() => handleViewDoc(doc)}>
+                                        <Eye className="w-4 h-4 mr-2" />
+                                        View
+                                    </Button>
+                                </div>
+                            </CardFooter>
+                        </div>
+                    </TiltedCard>
                 ))}
             </div>
         ) : (
@@ -433,5 +436,3 @@ export default function DashboardPage() {
     </Suspense>
   )
 }
-
-    

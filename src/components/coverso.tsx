@@ -30,6 +30,7 @@ import {
   LogIn,
   Save,
   RefreshCw,
+  ArrowLeft,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -555,6 +556,10 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-2">
+                                <Button variant="outline" onClick={() => router.push('/dashboard')}>
+                                    <ArrowLeft className="w-4 h-4 mr-2" />
+                                    Return to Dashboard
+                                </Button>
                                 <Button variant="outline" onClick={handleDownload}>
                                     <Download className="w-4 h-4 mr-2" />
                                     Download
