@@ -248,7 +248,6 @@ function DashboardContent() {
   if (loading) {
     return (
       <div className="w-full h-screen relative flex items-center justify-center">
-        <Loader2 className="h-16 w-16 animate-spin text-primary" />
         <Hyperspeed
           effectOptions={{
             colors: {
@@ -414,7 +413,6 @@ export default function DashboardPage() {
   return (
     <Suspense fallback={
       <div className="w-full h-screen relative flex items-center justify-center">
-        <Loader2 className="h-16 w-16 animate-spin text-primary" />
          <Hyperspeed
           effectOptions={{
             colors: {
