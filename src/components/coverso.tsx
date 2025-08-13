@@ -563,10 +563,6 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                     <RefreshCw className="w-4 h-4 mr-2" />
                                     Reprompt
                                 </Button>
-                                <Button variant="outline" onClick={() => toast({title: "Coming Soon!", description: "This feature is under development."})}>
-                                    <BrainCircuit className="w-4 h-4 mr-2" />
-                                    Document Analysis
-                                </Button>
                             </CardContent>
                         </Card>
                         <Card>
