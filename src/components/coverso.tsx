@@ -390,7 +390,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                      <div className="flex flex-col items-start justify-center">
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
-                        <div className="mt-6 bg-primary text-primary-foreground px-6 py-4 rounded-lg text-left inline-block shadow-lg">
+                        <div className="mt-6 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
                             <p className="text-lg font-semibold">Applications Boosted Today:</p>
                              <div className="flex items-end gap-3 mt-1">
                                 <FileText className="h-8 w-8 text-primary-foreground" />
@@ -532,7 +532,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                             htmlFor={`r-${t}`}
                                             className={cn(
                                             "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors h-12",
-                                            "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+                                            "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground text-black",
                                             isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
                                             )}
                                         >
@@ -617,7 +617,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                 {appState === 'success' && aiResult && (
                   <div className="grid grid-cols-12 gap-8 items-start">
                     <div className="col-span-3 space-y-4 sticky top-24">
-                       <Card>
+                       <Card className="border-primary">
                            <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                 <Wand2 className="h-5 w-5" />
@@ -625,19 +625,35 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-2">
-                                <Button variant="outline" onClick={() => user ? router.push('/dashboard') : setAppState('idle')}>
+                                <Button 
+                                    variant="outline"
+                                    onClick={() => user ? router.push('/dashboard') : setAppState('idle')}
+                                    className="hover:bg-accent/80"
+                                >
                                     <ArrowLeft className="w-4 h-4 mr-2" />
                                     {user ? "Return to Dashboard" : "Start Over"}
                                 </Button>
-                                <Button variant={activeSubMenu === 'analysis' ? 'default' : 'outline'} onClick={() => setActiveSubMenu(activeSubMenu === 'analysis' ? null : 'analysis')}>
+                                <Button 
+                                    variant={activeSubMenu === 'analysis' ? 'secondary' : 'outline'} 
+                                    onClick={() => setActiveSubMenu(activeSubMenu === 'analysis' ? null : 'analysis')}
+                                    className={cn(activeSubMenu === 'analysis' && "bg-accent text-accent-foreground", "hover:bg-accent/80")}
+                                >
                                     <BrainCircuit className="w-4 h-4 mr-2" />
                                     AI Analysis
                                 </Button>
-                                 <Button variant={activeSubMenu === 'download' ? 'default' : 'outline'} onClick={() => setActiveSubMenu(activeSubMenu === 'download' ? null : 'download')}>
+                                 <Button 
+                                    variant={activeSubMenu === 'download' ? 'secondary' : 'outline'}
+                                    onClick={() => setActiveSubMenu(activeSubMenu === 'download' ? null : 'download')}
+                                    className={cn(activeSubMenu === 'download' && "bg-accent text-accent-foreground", "hover:bg-accent/80")}
+                                >
                                     <Download className="w-4 h-4 mr-2" />
                                     Download & Export
                                 </Button>
-                                <Button variant="outline" onClick={() => toast({title: "Coming Soon!", description: "This feature is under development."})}>
+                                <Button 
+                                    variant="outline"
+                                    onClick={() => toast({title: "Coming Soon!", description: "This feature is under development."})}
+                                    className="hover:bg-accent/80"
+                                >
                                     <RefreshCw className="w-4 h-4 mr-2" />
                                     Reprompt
                                 </Button>
@@ -645,7 +661,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         </Card>
                         
                         {activeSubMenu === 'analysis' && (
-                            <Card>
+                            <Card className="border-accent">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-base">
                                     <BrainCircuit className="h-5 w-5" />
@@ -677,7 +693,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         )}
                         
                         {activeSubMenu === 'download' && (
-                             <Card>
+                             <Card className="border-accent">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-base">
                                         <Download className="h-5 w-5" />
@@ -786,3 +802,4 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     </TooltipProvider>
   );
 }
+
