@@ -5,7 +5,7 @@ import { useState, useRef, type ChangeEvent, type FC, useEffect, forwardRef, use
 import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -226,19 +226,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             description: "Sign up to save your documents and get more generations.",
         });
       } else {
-        // This save happens automatically on generation
-        const db = getClientFirestore();
-        const userDocRef = doc(db, "users", user.uid);
-        const documentsCollectionRef = collection(userDocRef, "documents");
-        await addDoc(documentsCollectionRef, {
-            fileName: result.jobTitle,
-            coverLetter: result.coverLetter,
-            jobTitle: result.jobTitle,
-            companyName: result.companyName,
-            createdAt: serverTimestamp(),
-        });
-        
-        setUserGenerations(prev => prev + 1);
+         setUserGenerations(prev => prev + 1);
       }
 
       setAppState("success");
@@ -306,6 +294,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             title: "Document Saved!",
             description: `"${finalFileName}" has been saved to your dashboard.`,
         });
+        router.push('/dashboard');
 
     } catch (error) {
         console.error("Error saving document: ", error);
@@ -443,9 +432,11 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             <div className="w-full space-y-8">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-                    <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter." tooltipContent="We use this information to populate the header of your cover letter.">
-                      <PersonalInfoForm ref={personalInfoRef} profile={profile} user={user} />
-                    </Step>
+                   <div className="relative z-10">
+                        <Step step={1} title="Personal Info Vault" description="Your personal details for the cover letter." tooltipContent="We use this information to populate the header of your cover letter.">
+                        <PersonalInfoForm ref={personalInfoRef} profile={profile} user={user} />
+                        </Step>
+                   </div>
                   
                     <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents." tooltipContent="Upload your CV (PDF, DOCX) and any other relevant files. You can also link to online portfolios or documents.">
                       <PortfolioVaultForm ref={portfolioVaultRef} />
@@ -627,7 +618,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                             />
                             <Button onClick={() => handleSave()} disabled={isSaving}>
                                 {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                                Save
+                                Save to Dashboard
                             </Button>
                         </CardHeader>
                         <CardContent className="p-0">
