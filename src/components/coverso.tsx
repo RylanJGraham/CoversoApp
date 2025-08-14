@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type FC, useEffect } from "react";
+import { useState, useRef, type FC, useEffect, forwardRef } from "react";
 import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
@@ -74,10 +74,10 @@ interface CustomizationFormHandle {
     jobDescription: string;
     tone: string;
     mustHaveInfo: string;
-  }
+  };
 }
 
-const CustomizationForm = ({ isPayingUser }: { isPayingUser: boolean }) => {
+const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: boolean }>(({ isPayingUser }, ref) => {
   const [jobDescription, setJobDescription] = useState("");
   const [tone, setTone] = useState("Professional");
   const [mustHaveInfo, setMustHaveInfo] = useState("");
@@ -97,138 +97,149 @@ const CustomizationForm = ({ isPayingUser }: { isPayingUser: boolean }) => {
     }
   };
 
-  return (
-    <>
-      <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-        <div className="w-full rounded-2xl p-4 h-full flex flex-col">
-            <CardHeader className="p-4">
-               <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground shrink-0">
-                    3
-                    </div>
-                    <div>
-                    <CardTitle className="text-black">Job Description</CardTitle>
-                    <CardDescription className="text-gray-700">Paste the full text of the job description below.</CardDescription>
-                    </div>
-                  </div>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10 relative z-10">
-                          <Info className="h-5 w-5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-primary text-primary-foreground">
-                        <p>Simply copy the entire job listing from the webpage and paste it here.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-            </CardHeader>
-            <CardContent className="p-4 pt-0 flex-grow relative">
-                <Textarea
-                    id="jobDescription"
-                    name="jobDescription"
-                    placeholder="Paste job description here..."
-                    value={jobDescription}
-                    onChange={(e) => setJobDescription(e.target.value)}
-                    required
-                    className="min-h-[150px] h-full"
-                />
-                <Button type="button" variant="default" size="icon" className="absolute bottom-6 right-6 h-8 w-8 bg-primary hover:bg-primary/90" onClick={handlePaste} aria-label="Paste job description">
-                  <ClipboardPaste className="h-4 w-4 text-primary-foreground" />
-                </Button>
-            </CardContent>
-        </div>
-      </TiltedCard>
-       <Card className="w-full rounded-2xl p-4 space-y-6 flex flex-col">
-          <CardHeader className="p-0">
-              <CardTitle className="text-black">Customize Your Letter</CardTitle>
-              <CardDescription className="text-gray-700">Guide the AI's writing style and include key information.</CardDescription>
-          </CardHeader>
-          <CardContent className="p-0 flex-grow flex flex-col gap-4">
-               <div className="space-y-3">
-                  <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
-                  <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-2">
-                  {[...standardTones, ...premiumTones].map((t) => {
-                      const isPremium = premiumTones.includes(t);
-                      const isDisabled = isPremium && !isPayingUser;
+  useImperativeHandle(ref, () => ({
+    getValues: () => ({
+      jobDescription,
+      tone,
+      mustHaveInfo,
+    }),
+  }));
 
-                      const item = (
-                      <div key={t} className="flex-1 min-w-[100px]">
-                          <RadioGroupItem value={t} id={`r-${t}`} className="sr-only" disabled={isDisabled} />
-                          <Label
-                              htmlFor={`r-${t}`}
-                              className={cn(
-                                  "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors h-12 text-black bg-white",
-                                  "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
-                                  isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
-                              )}
-                          >
-                            {isDisabled ? (
-                                <Lock className="h-5 w-5 text-primary" />
-                            ) : (
-                                t
-                            )}
-                          </Label>
-                      </div>
-                      );
-                      
-                      if(isDisabled) {
-                          return (
-                              <TooltipProvider key={t} delayDuration={100}>
-                                  <Tooltip>
-                                      <TooltipTrigger asChild>{item}</TooltipTrigger>
-                                      <TooltipContent><p>This is a premium feature. Upgrade your plan to use this tone.</p></TooltipContent>
-                                  </Tooltip>
-                              </TooltipProvider>
-                          )
-                      }
-                      return item;
-                  })}
-                  </RadioGroup>
-              </div>
-              <div className="space-y-2">
-              <TooltipProvider delayDuration={100}>
-                  <Tooltip>
-                  <TooltipTrigger asChild>
-                      <div className="flex items-center gap-2">
-                          <Label htmlFor="mustHaveInfo" className={cn("font-semibold", !isPayingUser && "text-gray-500")}>
-                              Must-Have Information
-                          </Label>
-                          {!isPayingUser && <Lock className="h-3 w-3 text-gray-500" />}
-                      </div>
-                  </TooltipTrigger>
-                  {!isPayingUser && (
-                      <TooltipContent>
-                          <p>This is a premium feature. Upgrade to tell the AI specific points to include.</p>
-                      </TooltipContent>
-                  )}
-                  </Tooltip>
-              </TooltipProvider>
-              <div className="relative">
-                  <Textarea
-                      id="mustHaveInfo"
-                      name="mustHaveInfo"
-                      placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
-                      value={mustHaveInfo}
-                      onChange={(e) => setMustHaveInfo(e.target.value)}
-                      className="min-h-[100px]"
-                      disabled={!isPayingUser}
-                  />
-                  {!isPayingUser && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-secondary/50 rounded-md cursor-not-allowed">
-                           <Lock className="h-6 w-6 text-primary" />
-                      </div>
-                  )}
-              </div>
-              </div>
-          </CardContent>
-      </Card>
-    </>
-  )
-}
+
+  return (
+     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch pb-12">
+        <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+            <div className="w-full rounded-2xl p-4 h-full flex flex-col">
+                <CardHeader className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground shrink-0">
+                        3
+                        </div>
+                        <div>
+                        <CardTitle className="text-black">Job Description</CardTitle>
+                        <CardDescription className="text-gray-700">Paste the full text of the job description below.</CardDescription>
+                        </div>
+                    </div>
+                    <TooltipProvider>
+                        <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10 relative z-10">
+                            <Info className="h-5 w-5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-primary text-primary-foreground">
+                            <p>Simply copy the entire job listing from the webpage and paste it here.</p>
+                        </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-4 pt-0 flex-grow relative">
+                    <Textarea
+                        id="jobDescription"
+                        name="jobDescription"
+                        placeholder="Paste job description here..."
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        required
+                        className="min-h-[150px] h-full"
+                    />
+                    <Button type="button" variant="default" size="icon" className="absolute bottom-6 right-6 h-8 w-8 bg-primary hover:bg-primary/90" onClick={handlePaste} aria-label="Paste job description">
+                    <ClipboardPaste className="h-4 w-4 text-primary-foreground" />
+                    </Button>
+                </CardContent>
+            </div>
+        </TiltedCard>
+        <Card className="w-full rounded-2xl p-4 space-y-6 flex flex-col">
+            <CardHeader className="p-0">
+                <CardTitle className="text-black">Customize Your Letter</CardTitle>
+                <CardDescription className="text-gray-700">Guide the AI's writing style and include key information.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0 flex-grow flex flex-col gap-4">
+                <div className="space-y-3">
+                    <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
+                    <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-2">
+                    {[...standardTones, ...premiumTones].map((t) => {
+                        const isPremium = premiumTones.includes(t);
+                        const isDisabled = isPremium && !isPayingUser;
+
+                        const item = (
+                        <div key={t} className="flex-1 min-w-[100px]">
+                            <RadioGroupItem value={t} id={`r-${t}`} className="sr-only" disabled={isDisabled} />
+                            <Label
+                                htmlFor={`r-${t}`}
+                                className={cn(
+                                    "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors h-12 text-black bg-white",
+                                    "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+                                    isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
+                                )}
+                            >
+                                {isDisabled ? (
+                                    <Lock className="h-5 w-5 text-primary" />
+                                ) : (
+                                    t
+                                )}
+                            </Label>
+                        </div>
+                        );
+                        
+                        if(isDisabled) {
+                            return (
+                                <TooltipProvider key={t} delayDuration={100}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>{item}</TooltipTrigger>
+                                        <TooltipContent><p>This is a premium feature. Upgrade your plan to use this tone.</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )
+                        }
+                        return item;
+                    })}
+                    </RadioGroup>
+                </div>
+                <div className="space-y-2">
+                <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2">
+                            <Label htmlFor="mustHaveInfo" className={cn("font-semibold", !isPayingUser && "text-gray-500")}>
+                                Must-Have Information
+                            </Label>
+                            {!isPayingUser && <Lock className="h-3 w-3 text-gray-500" />}
+                        </div>
+                    </TooltipTrigger>
+                    {!isPayingUser && (
+                        <TooltipContent>
+                            <p>This is a premium feature. Upgrade to tell the AI specific points to include.</p>
+                        </TooltipContent>
+                    )}
+                    </Tooltip>
+                </TooltipProvider>
+                <div className="relative">
+                    <Textarea
+                        id="mustHaveInfo"
+                        name="mustHaveInfo"
+                        placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
+                        value={mustHaveInfo}
+                        onChange={(e) => setMustHaveInfo(e.target.value)}
+                        className="min-h-[100px]"
+                        disabled={!isPayingUser}
+                    />
+                    {!isPayingUser && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-secondary/50 rounded-md cursor-not-allowed">
+                            <Lock className="h-6 w-6 text-primary" />
+                        </div>
+                    )}
+                </div>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+  );
+});
+
+CustomizationForm.displayName = 'CustomizationForm';
 
 type AppState = "idle" | "loading" | "success" | "error";
 
@@ -539,9 +550,8 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                 <div className="col-span-1 flex items-center justify-start p-8 text-left">
                      <div className="flex flex-col items-start justify-center">
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
-                        <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
+                        <p className="text-2xl font-light text-black mt-2">Helping to Accelerate Today</p>
                         <div className="mt-6 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
-                            <p className="text-lg font-semibold">Helping to Accelerate Today</p>
                             <div className="flex items-end gap-3 mt-4">
                                 <p className="text-4xl font-mono font-bold">
                                     <AnimatedCounter to={68} />
@@ -610,18 +620,20 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                       <PortfolioVaultForm ref={portfolioVaultRef} isPayingUser={isPayingUser} />
                     </Step>
                 </div>
+                
+                <CustomizationForm ref={customizationRef} isPayingUser={isPayingUser} />
 
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch pb-12">
-                   <CustomizationForm isPayingUser={isPayingUser} />
-                    <div className="flex flex-col gap-4">
-                        <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
-                            {appState === 'loading' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Wand2 className="w-5 h-5 mr-2" />}
-                            {appState === 'loading' ? "Drafting..." : "Generate Cover Letter"}
-                        </Button>
-                        <Button type="button" size="lg" className="w-full" variant="secondary" onClick={handleGenerateSample}>
-                            Generate Sample (for testing)
-                        </Button>
-                    </div>
+                <div className="w-full lg:w-1/2 flex flex-col gap-4">
+                    <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
+                        {appState === 'loading' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Wand2 className="w-5 h-5 mr-2" />}
+                        {appState === 'loading' ? "Drafting..." : "Generate Cover Letter"}
+                    </Button>
+                    <Button type="button" size="lg" className="w-full" variant="secondary" onClick={handleGenerateSample}>
+                        Generate Sample (for testing)
+                    </Button>
+                    <p className="text-center text-xs text-muted-foreground mt-2">
+                        We value your privacy. Your personal details and documents are not stored.
+                    </p>
                 </div>
             </div>
           )}
