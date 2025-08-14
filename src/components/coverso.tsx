@@ -513,9 +513,9 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     printElement.innerHTML = generatedCoverLetter.replace(/\n/g, '<br>');
     printElement.style.padding = '40px';
     printElement.style.fontFamily = 'Times New Roman, serif';
-    printElement.style.fontSize = '14px';
+    printElement.style.fontSize = '16px';
     printElement.style.lineHeight = '1.5';
-    printElement.style.width = '210mm'; // A4 width
+    printElement.style.width = '21cm'; // A4 width
     document.body.appendChild(printElement);
     
     try {
@@ -680,9 +680,9 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                      <div className="flex flex-col items-start justify-center">
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Helping to Accelerate Today</p>
-                        <div className="mt-6 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
+                        <div className="mt-4 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
                             <p className="text-lg font-semibold">Cover Letters Drafted Today:</p>
-                             <div className="flex items-end gap-3 mt-4">
+                             <div className="flex items-end gap-3 mt-1">
                                 <FileText className="h-8 w-8" />
                                 <p className="text-4xl font-mono font-bold">
                                     <AnimatedCounter to={68} />
@@ -762,7 +762,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                     <Button type="button" size="lg" className="w-full max-w-2xl h-14" variant="secondary" onClick={handleGenerateSample}>
                         Generate Sample (for testing)
                     </Button>
-                     <p className="text-center text-sm text-muted-foreground mt-2 max-w-3xl">
+                     <p className="text-center text-sm text-muted-foreground mt-2 max-w-3xl mb-16">
                         We are committed to your privacy. Your personal details and uploaded documents are processed securely and are never stored on our servers. All generation happens in memory, ensuring your data remains yours alone.
                     </p>
                 </div>
@@ -1043,3 +1043,5 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     </TooltipProvider>
   );
 }
+
+    
