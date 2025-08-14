@@ -249,7 +249,7 @@ function DashboardContent() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex-grow p-4 bg-white">
+                            <div className="flex-grow p-4 bg-white border-l-2 border-r-2 border-primary">
                                 <p className="text-xs text-gray-600 line-clamp-6 whitespace-pre-line font-mono">{doc.coverLetter}</p>
                             </div>
                             <div className="flex justify-between items-center bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground p-3">
