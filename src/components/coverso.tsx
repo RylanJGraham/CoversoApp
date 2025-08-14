@@ -93,7 +93,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
   const { toast } = useToast();
   
   const standardTones = ["Professional", "Enthusiastic", "Formal", "Creative"];
-  const premiumTones = ["Assertive", "Confident", "Personable", "Direct", "Urgent", "Data-driven", "Strategic", "Witty", "Humble", "Inspirational"];
+  const premiumTones = ["Assertive", "Confident", "Personable", "Direct", "Strategic", "Data-driven"];
 
 
   const handlePaste = async () => {
@@ -170,7 +170,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
             <CardContent className="p-0 flex-grow flex flex-col gap-4">
                 <div className="space-y-3">
                     <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
-                    <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-2">
+                    <RadioGroup value={tone} onValueChange={setTone} className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {[...standardTones, ...premiumTones].map((t) => {
                         const isPremium = premiumTones.includes(t);
                         const isDisabled = isPremium && !isPayingUser;
@@ -296,7 +296,7 @@ CustomizationForm.displayName = 'CustomizationForm';
 
 type AppState = "idle" | "loading" | "success" | "error";
 
-export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: { user: FirebaseUser | null, profile: UserProfile | null, isGeneratePage?: boolean, existingDoc?: GenerateCoverLetterOutput & {id: string} | null }) {
+export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: { user: FirebaseUser | null, profile: UserProfile | null, isGeneratePage?: boolean, existingDoc?: GenerateCoverLetterOutput & {id: string, fileName?: string} | null }) {
 
   const [aiResult, setAiResult] = useState<GenerateCoverLetterOutput | null>(null);
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
@@ -908,7 +908,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                       </div>
                       <div className="col-span-9">
                         <Card className="w-full border-primary overflow-hidden">
-                           <CardHeader className="bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end p-4 flex-row items-center justify-between">
+                           <div className="bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end p-4 flex flex-row items-center justify-between">
                               <Input 
                                   value={fileName}
                                   onChange={(e) => setFileName(e.target.value)}
@@ -936,8 +936,8 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                         )}
                                     </Tooltip>
                                 </TooltipProvider>
-                          </CardHeader>
-                          <div className="border-b border-primary/20 bg-gray-50 p-2 flex items-center gap-2">
+                          </div>
+                          <div className="border-b border-primary/20 bg-primary/10 p-2 flex items-center gap-2">
                             <Button variant="ghost" size="icon" className="h-8 w-8"><Bold className="w-4 h-4" /></Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8"><Italic className="w-4 h-4" /></Button>
                             <Separator orientation="vertical" className="h-6" />
@@ -964,14 +964,14 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                 </SelectContent>
                             </Select>
                           </div>
-                          <CardContent className="p-0" ref={letterContentRef}>
+                          <div className="p-0" ref={letterContentRef}>
                             <Textarea
                                 value={generatedCoverLetter}
                                 onChange={(e) => setGeneratedCoverLetter(e.target.value)}
                                 placeholder="Your generated cover letter will appear here..."
                                 className="w-full resize-none border-0 focus-visible:ring-0 rounded-none p-8"
                               />
-                          </CardContent>
+                          </div>
                         </Card>
                          <div className="mt-4 flex justify-end">
                             <div className="bg-accent text-accent-foreground rounded-lg px-4 py-2 text-sm font-semibold shadow-md">
@@ -1026,3 +1026,5 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     </TooltipProvider>
   );
 }
+
+    

@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import TiltedCard from '@/components/TiltedCard';
 import { Footer } from '@/components/Footer';
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface UserProfile {
   fullName: string;
@@ -133,16 +135,58 @@ function DashboardContent() {
     }
   };
 
-  const handleDownloadDoc = (docToDownload: CoverLetterDoc) => {
-    const blob = new Blob([docToDownload.coverLetter], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${docToDownload.fileName || 'Cover-Letter'}.md`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleDownloadDoc = async (docToDownload: CoverLetterDoc) => {
+     toast({ title: "Preparing PDF...", description: "This may take a moment." });
+
+    // Create a temporary element to render the markdown for PDF conversion
+    const content = document.createElement('div');
+    content.innerHTML = docToDownload.coverLetter.replace(/\n/g, '<br>');
+    content.style.padding = '20px';
+    content.style.fontFamily = 'Times New Roman, serif';
+    content.style.fontSize = '12px';
+    content.style.lineHeight = '1.5';
+    content.style.width = '210mm'; // A4 width
+    document.body.appendChild(content);
+
+    try {
+        const canvas = await html2canvas(content, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+        
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'px',
+            format: 'a4'
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        
+        let imgWidth = pdfWidth;
+        let imgHeight = imgWidth / ratio;
+        
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+        
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
+        }
+
+        pdf.save(`${docToDownload.fileName || 'Cover-Letter'}.pdf`);
+    } catch(e) {
+        console.error(e);
+        toast({ title: "PDF Creation Failed", description: "An error occurred while generating the PDF.", variant: "destructive" });
+    } finally {
+      document.body.removeChild(content);
+    }
   };
 
 
@@ -334,3 +378,5 @@ export default function DashboardPage() {
     </Suspense>
   )
 }
+
+    
