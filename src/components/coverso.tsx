@@ -169,8 +169,8 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
                             <Label
                                 htmlFor={`r-${t}`}
                                 className={cn(
-                                    "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors h-12 text-black bg-white",
-                                    "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+                                    "flex items-center justify-center p-2 rounded-lg border-2 cursor-pointer transition-colors h-12 text-black bg-white",
+                                    "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-primary",
                                     isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
                                 )}
                             >
@@ -242,7 +242,7 @@ CustomizationForm.displayName = 'CustomizationForm';
 
 type AppState = "idle" | "loading" | "success" | "error";
 
-export function Coverso({ user, profile, isGeneratePage = false }: { user: FirebaseUser | null, profile: UserProfile | null, isGeneratePage?: boolean }) {
+export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: { user: FirebaseUser | null, profile: UserProfile | null, isGeneratePage?: boolean, existingDoc?: GenerateCoverLetterOutput & {id: string} | null }) {
 
   const [aiResult, setAiResult] = useState<GenerateCoverLetterOutput | null>(null);
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
@@ -282,7 +282,13 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
         };
         fetchGenerations();
     }
-  }, [user]);
+    if (existingDoc) {
+        setAiResult(existingDoc);
+        setGeneratedCoverLetter(existingDoc.coverLetter);
+        setFileName(existingDoc.jobTitle);
+        setAppState("success");
+    }
+  }, [user, existingDoc]);
 
   const isPayingUser = !!profile?.subscriptionPlan && profile.subscriptionPlan !== 'Basic' && profile.subscriptionPlan !== 'Guest';
   
@@ -379,11 +385,10 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
         mustHaveInfo: isPayingUser ? customizationInfo.mustHaveInfo : '',
       });
 
-      setAiResult(result);
-      setGeneratedCoverLetter(result.coverLetter);
-      setFileName(`Cover Letter for ${result.companyName}`);
-
       if (!user) {
+        setAiResult(result);
+        setGeneratedCoverLetter(result.coverLetter);
+        setFileName(`Cover Letter for ${result.companyName}`);
         // Handle anonymous users
         const newCount = anonGenerations + 1;
         localStorage.setItem('anonymousGenerations', newCount.toString());
@@ -392,11 +397,25 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             title: `Generation ${newCount} of 2 Used`,
             description: "Sign up to save your documents and get more generations.",
         });
+        setAppState("success");
+
       } else {
+         const db = getClientFirestore();
+         const userDocRef = doc(db, "users", user.uid);
+         const documentsCollectionRef = collection(userDocRef, "documents");
+         
+         const newDocRef = await addDoc(documentsCollectionRef, {
+            fileName: `Cover Letter for ${result.companyName}`,
+            coverLetter: result.coverLetter,
+            jobTitle: result.jobTitle,
+            companyName: result.companyName,
+            keyFocusPoints: result.keyFocusPoints,
+            createdAt: serverTimestamp(),
+         });
          setUserGenerations(prev => prev + 1);
+         router.push(`/edit/${newDocRef.id}`);
       }
 
-      setAppState("success");
     } catch (err) {
       console.error(err);
       const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred.";
@@ -432,54 +451,39 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     });
   };
 
-  const handleSave = async (forceUntitled = false) => {
+  const handleSave = async () => {
     if (!user || !aiResult) {
-      // This case is handled by disabling the button and showing a tooltip,
-      // but we keep this check as a safeguard.
       toast({ title: "Cannot Save", description: "You must be logged in to save documents.", variant: "destructive"});
       return;
     }
     
-    if (!fileName && !forceUntitled) {
-      setShowNameWarningDialog(true);
-      return;
+    if (!(existingDoc?.id)) {
+        toast({title: "Error", description: "No document ID found to update.", variant: "destructive"});
+        return;
     }
     
     setIsSaving(true);
-    let finalFileName = fileName;
+    let finalFileName = fileName || aiResult.jobTitle;
 
     try {
         const db = getClientFirestore();
-        const userDocRef = doc(db, "users", user.uid);
-        const documentsCollectionRef = collection(userDocRef, "documents");
-        
-        if (!finalFileName) {
-            const untitledQuery = query(documentsCollectionRef, where("fileName", ">=", "Untitled"));
-            const untitledSnapshot = await getDocs(untitledQuery);
-            const count = untitledSnapshot.docs.filter(doc => doc.data().fileName.startsWith("Untitled")).length;
-            finalFileName = `Untitled ${count + 1}`;
-        }
+        const docRef = doc(db, "users", user.uid, 'documents', existingDoc.id);
     
-        await addDoc(documentsCollectionRef, {
+        await setDoc(docRef, {
             fileName: finalFileName,
             coverLetter: generatedCoverLetter,
-            jobTitle: aiResult.jobTitle,
-            companyName: aiResult.companyName,
-            createdAt: serverTimestamp(),
-        });
+        }, { merge: true });
 
         toast({
             title: "Document Saved!",
-            description: `"${finalFileName}" has been saved to your dashboard.`,
+            description: `"${finalFileName}" has been updated.`,
         });
-        router.push('/dashboard');
 
     } catch (error) {
         console.error("Error saving document: ", error);
         toast({ title: "Save failed", description: "Could not save your document. Please try again.", variant: "destructive" });
     } finally {
       setIsSaving(false);
-      setShowNameWarningDialog(false);
     }
   }
   
@@ -800,12 +804,12 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                         <TooltipTrigger asChild>
                                              <div tabIndex={user ? -1 : 0}>
                                                 <Button 
-                                                    onClick={() => handleSave()} 
+                                                    onClick={handleSave} 
                                                     disabled={!user || isSaving}
                                                     className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary"
                                                 >
                                                     {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                                                    Save to Dashboard
+                                                    Save Changes
                                                 </Button>
                                             </div>
                                         </TooltipTrigger>

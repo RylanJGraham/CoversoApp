@@ -8,21 +8,13 @@ import { getClientAuth, getClientFirestore } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, orderBy, query, Timestamp, setDoc, deleteDoc } from 'firebase/firestore';
 import Hyperspeed from '@/components/hyperspeed';
-import { Loader2, FileText, Download, Eye, Save, X, Trash2 } from 'lucide-react';
+import { Loader2, FileText, Download, Eye, Save, X, Trash2, PenLine } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
 import { useToast } from '@/hooks/use-toast';
 import UsageIndicator from '@/components/UsageIndicator';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +26,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Textarea } from '@/components/ui/textarea';
 import TiltedCard from '@/components/TiltedCard';
 import { Footer } from '@/components/Footer';
 
@@ -54,71 +45,6 @@ interface CoverLetterDoc {
     createdAt: Timestamp;
 }
 
-const DocumentViewModal: FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  doc: CoverLetterDoc | null;
-  onSave: (updatedDoc: CoverLetterDoc) => Promise<void>;
-}> = ({ isOpen, onClose, doc: initialDoc, onSave }) => {
-  const [doc, setDoc] = useState(initialDoc);
-  const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    setDoc(initialDoc);
-  }, [initialDoc]);
-
-  if (!doc) return null;
-  
-  const handleDownload = () => {
-    const blob = new Blob([doc.coverLetter], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${doc.fileName || 'Cover-Letter'}.md`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-  
-  const handleSave = async () => {
-    setIsSaving(true);
-    await onSave(doc);
-    setIsSaving(false);
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-4 pb-2 border-b bg-primary text-primary-foreground">
-          <DialogTitle>{doc.fileName}</DialogTitle>
-        </DialogHeader>
-        <div className="flex-grow overflow-y-auto p-0">
-           <Textarea 
-                value={doc.coverLetter}
-                onChange={(e) => setDoc({...doc, coverLetter: e.target.value})}
-                className="w-full h-full resize-none border-0 rounded-none focus-visible:ring-0"
-           />
-        </div>
-        <DialogFooter className="p-4 pt-2 border-t bg-secondary">
-          <Button variant="outline" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={handleDownload}>
-            <Download className="w-4 h-4 mr-2" /> Download
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            Save Changes
-          </Button>
-        </DialogFooter>
-         <DialogClose className="absolute right-4 top-3.5 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="h-4 w-4 text-primary-foreground" />
-            <span className="sr-only">Close</span>
-        </DialogClose>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-
 function DashboardContent() {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -126,9 +52,6 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<CoverLetterDoc | null>(null);
-
   const router = useRouter();
   const { toast } = useToast();
 
@@ -194,11 +117,6 @@ function DashboardContent() {
     }
   }
   
-  const handleViewDoc = (doc: CoverLetterDoc) => {
-    setSelectedDoc(doc);
-    setIsModalOpen(true);
-  }
-  
   const handleDeleteDoc = async (docId: string) => {
     if(!user) return;
     try {
@@ -215,25 +133,6 @@ function DashboardContent() {
     }
   };
 
-
-  const handleSaveDoc = async (updatedDoc: CoverLetterDoc) => {
-    if (!user) return;
-    try {
-        const db = getClientFirestore();
-        const docRef = doc(db, 'users', user.uid, 'documents', updatedDoc.id);
-        await setDoc(docRef, { ...updatedDoc, createdAt: updatedDoc.createdAt }, { merge: true });
-        
-        // Update local state
-        setDocuments(documents.map(d => d.id === updatedDoc.id ? updatedDoc : d));
-        toast({ title: "Document Updated Successfully" });
-        setIsModalOpen(false);
-
-    } catch (error) {
-        toast({ title: "Error", description: "Could not save changes.", variant: "destructive"});
-        console.error("Error saving document:", error);
-    }
-  }
-  
   const handleDownloadDoc = (docToDownload: CoverLetterDoc) => {
     const blob = new Blob([docToDownload.coverLetter], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -340,25 +239,25 @@ function DashboardContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {documents.map((doc) => (
                     <TiltedCard key={doc.id} containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                        <div className="flex flex-col h-full border border-primary rounded-xl shadow-lg shadow-primary/20">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                        <div className="flex flex-col h-full border border-primary rounded-xl shadow-lg shadow-primary/20 overflow-hidden">
+                            <CardHeader className="bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground p-4">
+                                <CardTitle className="flex items-center gap-2 text-lg">
                                     <FileText className="w-5 h-5" />
                                     {doc.fileName || doc.jobTitle || 'Cover Letter'}
                                 </CardTitle>
-                                <CardDescription>For {doc.companyName || 'a company'}</CardDescription>
+                                <CardDescription className="text-primary-foreground/80">For {doc.companyName || 'a company'}</CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow p-4 bg-secondary/30 m-4 mt-0 rounded-lg overflow-hidden border-2 border-accent">
                                 <p className="text-sm text-muted-foreground line-clamp-6 whitespace-pre-line font-mono">{doc.coverLetter}</p>
                             </CardContent>
-                            <CardFooter className="flex justify-between items-center">
-                                <p className="text-xs text-muted-foreground">
-                                    Created on {doc.createdAt.toDate().toLocaleDateString()}
+                            <CardFooter className="flex justify-between items-center bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground p-3">
+                                <p className="text-xs">
+                                    {doc.createdAt.toDate().toLocaleDateString()}
                                 </p>
                                 <div className="flex gap-2">
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button variant="destructive" size="icon">
+                                             <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/20 hover:text-white">
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
                                         </AlertDialogTrigger>
@@ -372,18 +271,18 @@ function DashboardContent() {
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDeleteDoc(doc.id)}>
+                                            <AlertDialogAction onClick={() => handleDeleteDoc(doc.id)} className="bg-destructive hover:bg-destructive/90">
                                                 Continue
                                             </AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
-                                    <Button variant="outline" size="icon" onClick={() => handleDownloadDoc(doc)}>
+                                    <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/20 hover:text-white" onClick={() => handleDownloadDoc(doc)}>
                                         <Download className="w-4 h-4" />
                                     </Button>
-                                    <Button variant="default" size="sm" onClick={() => handleViewDoc(doc)}>
-                                        <Eye className="w-4 h-4 mr-2" />
-                                        View
+                                    <Button variant="ghost" className="bg-white/90 text-primary hover:bg-white" size="sm" onClick={() => router.push(`/edit/${doc.id}`)}>
+                                        <PenLine className="w-4 h-4 mr-2" />
+                                        Edit
                                     </Button>
                                 </div>
                             </CardFooter>
@@ -402,13 +301,6 @@ function DashboardContent() {
             </div>
         )}
       </main>
-
-      <DocumentViewModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        doc={selectedDoc}
-        onSave={handleSaveDoc}
-      />
     </div>
     <Footer />
     </>
@@ -440,3 +332,5 @@ export default function DashboardPage() {
     </Suspense>
   )
 }
+
+    
