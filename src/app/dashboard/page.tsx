@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea';
 import TiltedCard from '@/components/TiltedCard';
+import { Footer } from '@/components/Footer';
 
 interface UserProfile {
   fullName: string;
@@ -296,6 +297,7 @@ function DashboardContent() {
   const { current, max, plan } = getUsage();
 
   return (
+    <>
     <div className="flex flex-col min-h-screen font-body bg-white text-black">
       <DashboardHeader />
        <header className="h-[300px] w-full relative">
@@ -408,6 +410,8 @@ function DashboardContent() {
         onSave={handleSaveDoc}
       />
     </div>
+    <Footer />
+    </>
   );
 }
 

@@ -9,6 +9,7 @@ import { getClientAuth, getClientFirestore } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
+import { Footer } from '@/components/Footer';
 
 interface UserProfile {
   fullName: string;
@@ -76,6 +77,9 @@ export default function GeneratePage() {
   }
   
   return (
-    <CoversoForm user={user} profile={profile} isGeneratePage={true}/>
+    <>
+        <CoversoForm user={user} profile={profile} isGeneratePage={true}/>
+        <Footer />
+    </>
   );
 }

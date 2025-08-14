@@ -396,13 +396,13 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         <p className="text-2xl font-light text-black mt-2">Speeding Up Your Application</p>
                         <div className="mt-6 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
                             <p className="text-lg font-semibold">Helping to Accelerate Today</p>
-                            <div className="flex items-end gap-3 mt-1">
+                            <div className="flex items-end gap-3 mt-4">
                                 <p className="text-4xl font-mono font-bold">
                                     <AnimatedCounter to={68} />
                                 </p>
                                 <span className="text-lg font-semibold mb-1">Cover Letters</span>
                             </div>
-                            <div className="flex items-end gap-3 mt-4">
+                            <div className="flex items-end gap-3 mt-1">
                                 <Clock className="h-8 w-8" />
                                 <p className="text-4xl font-mono font-bold">
                                     <AnimatedCounter to={12240} />
@@ -526,8 +526,8 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                         <Label
                                             htmlFor={`r-${t}`}
                                             className={cn(
-                                            "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors h-12",
-                                            "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground text-black",
+                                            "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors h-12 text-black",
+                                            "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
                                             isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
                                             )}
                                         >

@@ -6,6 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 export default function FAQPage() {
   return (
@@ -52,9 +53,7 @@ export default function FAQPage() {
           </Accordion>
         </section>
       </main>
-      <footer className="text-center py-8 bg-gray-100 mt-auto">
-        <p>&copy; {new Date().getFullYear()} Coverso. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   )
 }

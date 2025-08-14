@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, User as UserIcon, CreditCard, FileText, Shield } from 'lucide-react';
+import { Footer } from '@/components/Footer';
 
 interface UserProfile {
   fullName: string;
@@ -89,9 +90,9 @@ const ProfilePage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <DashboardHeader />
-      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="space-y-10">
           
           {/* Profile Section */}
@@ -193,6 +194,7 @@ const ProfilePage: FC = () => {
 
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 
 import Image from 'next/image';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 
 export default function AboutPage() {
   return (
@@ -40,9 +41,7 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
-      <footer className="text-center py-8 bg-gray-100 mt-auto">
-        <p>&copy; {new Date().getFullYear()} Coverso. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

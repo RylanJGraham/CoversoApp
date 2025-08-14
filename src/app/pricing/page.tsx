@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import TiltedCard from '@/components/TiltedCard';
 import { Badge } from '@/components/ui/badge';
+import { Footer } from '@/components/Footer';
 
 
 interface Tier {
@@ -168,9 +169,9 @@ export default function PricingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 flex flex-col">
             <DashboardHeader />
-            <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 flex-grow">
                 <div className="text-center">
                     <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
                         Find the perfect plan
@@ -264,7 +265,7 @@ export default function PricingPage() {
                     )}
                 </DialogContent>
             </Dialog>
+            <Footer />
         </div>
     );
 }
-

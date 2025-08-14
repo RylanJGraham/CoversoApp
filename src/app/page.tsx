@@ -9,6 +9,7 @@ import { Coverso as CoversoForm } from '@/components/coverso';
 import Hyperspeed from '@/components/hyperspeed';
 import { Loader2 } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
+import { Footer } from '@/components/Footer';
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -55,6 +56,9 @@ export default function Home() {
   // This is the public-facing page for unauthenticated users.
   // Authenticated users are redirected in the useEffect.
   return (
-    <CoversoForm user={null} profile={null} />
+    <>
+        <CoversoForm user={null} profile={null} />
+        <Footer />
+    </>
   );
 }
