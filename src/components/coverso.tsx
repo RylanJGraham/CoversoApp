@@ -119,7 +119,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
 
 
   return (
-     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch pb-12">
+     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
             <div className="w-full rounded-2xl p-4 h-full flex flex-col">
                 <CardHeader className="p-4">
@@ -147,7 +147,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
                     </TooltipProvider>
                     </div>
                 </CardHeader>
-                <CardContent className="p-4 pt-0 flex-grow relative">
+                <CardContent className="p-4 pt-0 flex-grow flex flex-col relative">
                     <Textarea
                         id="jobDescription"
                         name="jobDescription"
@@ -155,7 +155,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
                         value={jobDescription}
                         onChange={(e) => setJobDescription(e.target.value)}
                         required
-                        className="min-h-[150px] h-full"
+                        className="min-h-[150px] flex-grow resize-none"
                     />
                     <Button type="button" variant="default" size="icon" className="absolute bottom-6 right-6 h-8 w-8 bg-primary hover:bg-primary/90" onClick={handlePaste} aria-label="Paste job description">
                     <ClipboardPaste className="h-4 w-4 text-primary-foreground" />
@@ -171,7 +171,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
             <CardContent className="p-0 flex-grow flex flex-col gap-4">
                 <div className="space-y-3">
                     <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
-                    <RadioGroup value={tone} onValueChange={setTone} className="grid grid-cols-4 gap-2">
+                     <RadioGroup value={tone} onValueChange={setTone} className="grid grid-cols-4 gap-2">
                     {[...standardTones, ...premiumTones].map((t) => {
                         const isPremium = premiumTones.includes(t);
                         const isDisabled = isPremium && !isPayingUser;
