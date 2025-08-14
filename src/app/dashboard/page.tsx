@@ -144,7 +144,7 @@ function DashboardContent() {
     printElement.innerHTML = docToDownload.coverLetter.replace(/\n/g, '<br>');
     printElement.style.padding = '40px';
     printElement.style.fontFamily = 'Times New Roman, serif';
-    printElement.style.fontSize = '12px';
+    printElement.style.fontSize = '18px';
     printElement.style.lineHeight = '1.5';
     printElement.style.width = '210mm'; // A4 width
     document.body.appendChild(printElement);
@@ -379,5 +379,7 @@ export default function DashboardPage() {
     </Suspense>
   )
 }
+
+    
 
     

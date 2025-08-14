@@ -512,7 +512,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     printElement.innerHTML = generatedCoverLetter.replace(/\n/g, '<br>');
     printElement.style.padding = '40px';
     printElement.style.fontFamily = 'Times New Roman, serif';
-    printElement.style.fontSize = '12px';
+    printElement.style.fontSize = '18px';
     printElement.style.lineHeight = '1.5';
     printElement.style.width = '210mm'; // A4 width
     document.body.appendChild(printElement);
@@ -954,15 +954,15 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                             <Button variant="ghost" size="icon" className="h-8 w-8"><Bold className="w-4 h-4" /></Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8"><Italic className="w-4 h-4" /></Button>
                             <Separator orientation="vertical" className="h-6" />
-                             <Select defaultValue="12px">
+                             <Select defaultValue="12pt">
                                 <SelectTrigger className="w-[100px] h-8 text-xs">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="10px">10px</SelectItem>
-                                    <SelectItem value="11px">11px</SelectItem>
-                                    <SelectItem value="12px">12px</SelectItem>
-                                    <SelectItem value="14px">14px</SelectItem>
+                                    <SelectItem value="10pt">10pt</SelectItem>
+                                    <SelectItem value="11pt">11pt</SelectItem>
+                                    <SelectItem value="12pt">12pt</SelectItem>
+                                    <SelectItem value="14pt">14pt</SelectItem>
                                 </SelectContent>
                             </Select>
                             <Select defaultValue="Inter">
@@ -1039,5 +1039,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     </TooltipProvider>
   );
 }
+
+    
 
     
