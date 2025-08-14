@@ -19,8 +19,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User as UserIcon, UploadCloud, Briefcase, Star, CheckCircle, ArrowRight, ArrowLeft, Loader2, X, CreditCard, Ticket, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from 'firebase/auth';
-import { getClientFirestore } from '@/lib/firebase';
+import { getClientFirestore, getClientStorage } from '@/lib/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { useToast } from '@/hooks/use-toast';
 import { createSubscriptionFlow } from '@/ai/flows/stripe-checkout';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
@@ -166,6 +167,7 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   const [isPreparingPayment, setIsPreparingPayment] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     fullName: user?.displayName || '',
@@ -205,10 +207,10 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      setProfileImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setFormData(prev => ({...prev, profileImage: reader.result as string}))
       };
       reader.readAsDataURL(file);
     }
@@ -234,11 +236,21 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
     try {
         const db = getClientFirestore();
         const userRef = doc(db, "users", user.uid);
+        let profileImageUrl = formData.profileImage;
+
+        if (profileImageFile) {
+            const storage = getClientStorage();
+            const fileExtension = profileImageFile.name.split('.').pop();
+            const storageRef = ref(storage, `profilePics/${user.uid}/${user.uid}.${fileExtension}`);
+            const uploadTask = await uploadBytesResumable(storageRef, profileImageFile);
+            profileImageUrl = await getDownloadURL(uploadTask.ref);
+        }
         
         await setDoc(userRef, {
+            ...formData,
             uid: user.uid,
             email: user.email,
-            ...formData,
+            profileImage: profileImageUrl,
             subscriptionPlan: plan,
             onboardingComplete: onboardingStatus,
         }, { merge: true });
@@ -645,5 +657,3 @@ const ProfileSetupModal: FC<ProfileSetupModalProps> = ({ isOpen, onClose, user }
 };
 
 export default ProfileSetupModal;
-
-    

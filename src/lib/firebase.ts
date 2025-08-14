@@ -4,6 +4,7 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,6 +18,7 @@ const firebaseConfig = {
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
+let storage: FirebaseStorage;
 
 // This function ensures that we are only running this on the client
 function getClientApp(): FirebaseApp {
@@ -52,5 +54,12 @@ function getClientFirestore(): Firestore {
   return db;
 }
 
+function getClientStorage(): FirebaseStorage {
+    if(!storage) {
+        storage = getStorage(getClientApp());
+    }
+    return storage;
+}
 
-export { getClientApp, getClientAuth, getClientFirestore };
+
+export { getClientApp, getClientAuth, getClientFirestore, getClientStorage };
