@@ -77,7 +77,7 @@ export const PortfolioVaultForm = forwardRef<PortfolioVaultHandle, PortfolioVaul
   useImperativeHandle(ref, () => ({
     getValues: () => ({
       files,
-      portfolioUrls: isPayingUser ? portfolioUrls : [],
+      portfolioUrls: isPayingUser ? portfolioUrls.filter(url => url.trim() !== '') : [],
     }),
   }));
 
@@ -108,16 +108,15 @@ export const PortfolioVaultForm = forwardRef<PortfolioVaultHandle, PortfolioVaul
       </div>
       {files.length > 0 && (
         <div className="space-y-2">
-            <Label className="text-gray-800">Uploaded Files:</Label>
             <ul className="space-y-2">
             {files.map((file, index) => (
-                <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-secondary">
+                <li key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-2 text-sm rounded-md bg-accent text-accent-foreground">
                 <div className="flex items-center gap-2 truncate">
                     <FileText className="w-4 h-4 shrink-0" />
                     <span className="truncate">{file.name}</span>
-                    {(file.name.toLowerCase().includes('cv') || file.name.toLowerCase().includes('resume')) && <Badge variant="outline">CV</Badge>}
+                    {(file.name.toLowerCase().includes('cv') || file.name.toLowerCase().includes('resume')) && <Badge variant="outline" className="bg-white text-accent border-accent-foreground">CV</Badge>}
                 </div>
-                <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
+                <Button variant="ghost" size="icon" className="w-6 h-6 shrink-0 text-accent-foreground/80 hover:text-accent-foreground hover:bg-white/20" onClick={() => handleRemoveFile(index)} aria-label={`Remove ${file.name}`}>
                     <Trash2 className="w-4 h-4" />
                 </Button>
                 </li>

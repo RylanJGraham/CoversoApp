@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type ChangeEvent, type FC, useEffect, forwardRef, useImperativeHandle } from "react";
+import { useState, useRef, type FC, useEffect } from "react";
 import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,7 @@ import UsageIndicator from "./UsageIndicator";
 import { PersonalInfoForm, type PersonalInfoHandle } from "./PersonalInfoForm";
 import { PortfolioVaultForm, type PortfolioVaultHandle } from "./PortfolioVaultForm";
 import { Input } from "./ui/input";
+import { Footer } from "./Footer";
 
 
 interface UserProfile {
@@ -68,13 +69,170 @@ interface UserProfile {
   [key:string]: any;
 }
 
+interface CustomizationFormHandle {
+  getValues: () => {
+    jobDescription: string;
+    tone: string;
+    mustHaveInfo: string;
+  }
+}
+
+const CustomizationForm = ({ isPayingUser }: { isPayingUser: boolean }) => {
+  const [jobDescription, setJobDescription] = useState("");
+  const [tone, setTone] = useState("Professional");
+  const [mustHaveInfo, setMustHaveInfo] = useState("");
+  const { toast } = useToast();
+  
+  const standardTones = ["Professional", "Enthusiastic", "Formal", "Creative"];
+  const premiumTones = ["Assertive", "Confident", "Personable", "Direct", "Urgent", "Data-driven", "Strategic", "Witty", "Humble", "Inspirational"];
+
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setJobDescription(text);
+      toast({ title: "Pasted from clipboard!" });
+    } catch (err) {
+      console.error('Failed to read clipboard contents: ', err);
+      toast({ title: "Failed to paste", description: "Could not read from clipboard. Please paste manually.", variant: "destructive" });
+    }
+  };
+
+  return (
+    <>
+      <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+        <div className="w-full rounded-2xl p-4 h-full flex flex-col">
+            <CardHeader className="p-4">
+               <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground shrink-0">
+                    3
+                    </div>
+                    <div>
+                    <CardTitle className="text-black">Job Description</CardTitle>
+                    <CardDescription className="text-gray-700">Paste the full text of the job description below.</CardDescription>
+                    </div>
+                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10 relative z-10">
+                          <Info className="h-5 w-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-primary text-primary-foreground">
+                        <p>Simply copy the entire job listing from the webpage and paste it here.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 flex-grow relative">
+                <Textarea
+                    id="jobDescription"
+                    name="jobDescription"
+                    placeholder="Paste job description here..."
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    required
+                    className="min-h-[150px] h-full"
+                />
+                <Button type="button" variant="default" size="icon" className="absolute bottom-6 right-6 h-8 w-8 bg-primary hover:bg-primary/90" onClick={handlePaste} aria-label="Paste job description">
+                  <ClipboardPaste className="h-4 w-4 text-primary-foreground" />
+                </Button>
+            </CardContent>
+        </div>
+      </TiltedCard>
+       <Card className="w-full rounded-2xl p-4 space-y-6 flex flex-col">
+          <CardHeader className="p-0">
+              <CardTitle className="text-black">Customize Your Letter</CardTitle>
+              <CardDescription className="text-gray-700">Guide the AI's writing style and include key information.</CardDescription>
+          </CardHeader>
+          <CardContent className="p-0 flex-grow flex flex-col gap-4">
+               <div className="space-y-3">
+                  <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
+                  <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-2">
+                  {[...standardTones, ...premiumTones].map((t) => {
+                      const isPremium = premiumTones.includes(t);
+                      const isDisabled = isPremium && !isPayingUser;
+
+                      const item = (
+                      <div key={t} className="flex-1 min-w-[100px]">
+                          <RadioGroupItem value={t} id={`r-${t}`} className="sr-only" disabled={isDisabled} />
+                          <Label
+                              htmlFor={`r-${t}`}
+                              className={cn(
+                                  "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors h-12 text-black bg-white",
+                                  "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+                                  isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
+                              )}
+                          >
+                            {isDisabled ? (
+                                <Lock className="h-5 w-5 text-primary" />
+                            ) : (
+                                t
+                            )}
+                          </Label>
+                      </div>
+                      );
+                      
+                      if(isDisabled) {
+                          return (
+                              <TooltipProvider key={t} delayDuration={100}>
+                                  <Tooltip>
+                                      <TooltipTrigger asChild>{item}</TooltipTrigger>
+                                      <TooltipContent><p>This is a premium feature. Upgrade your plan to use this tone.</p></TooltipContent>
+                                  </Tooltip>
+                              </TooltipProvider>
+                          )
+                      }
+                      return item;
+                  })}
+                  </RadioGroup>
+              </div>
+              <div className="space-y-2">
+              <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                  <TooltipTrigger asChild>
+                      <div className="flex items-center gap-2">
+                          <Label htmlFor="mustHaveInfo" className={cn("font-semibold", !isPayingUser && "text-gray-500")}>
+                              Must-Have Information
+                          </Label>
+                          {!isPayingUser && <Lock className="h-3 w-3 text-gray-500" />}
+                      </div>
+                  </TooltipTrigger>
+                  {!isPayingUser && (
+                      <TooltipContent>
+                          <p>This is a premium feature. Upgrade to tell the AI specific points to include.</p>
+                      </TooltipContent>
+                  )}
+                  </Tooltip>
+              </TooltipProvider>
+              <div className="relative">
+                  <Textarea
+                      id="mustHaveInfo"
+                      name="mustHaveInfo"
+                      placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
+                      value={mustHaveInfo}
+                      onChange={(e) => setMustHaveInfo(e.target.value)}
+                      className="min-h-[100px]"
+                      disabled={!isPayingUser}
+                  />
+                  {!isPayingUser && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-secondary/50 rounded-md cursor-not-allowed">
+                           <Lock className="h-6 w-6 text-primary" />
+                      </div>
+                  )}
+              </div>
+              </div>
+          </CardContent>
+      </Card>
+    </>
+  )
+}
 
 type AppState = "idle" | "loading" | "success" | "error";
 
 export function Coverso({ user, profile, isGeneratePage = false }: { user: FirebaseUser | null, profile: UserProfile | null, isGeneratePage?: boolean }) {
-  const [jobDescription, setJobDescription] = useState("");
-  const [tone, setTone] = useState("Professional");
-  const [mustHaveInfo, setMustHaveInfo] = useState("");
 
   const [aiResult, setAiResult] = useState<GenerateCoverLetterOutput | null>(null);
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
@@ -92,6 +250,8 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
   
   const personalInfoRef = useRef<PersonalInfoHandle>(null);
   const portfolioVaultRef = useRef<PortfolioVaultHandle>(null);
+  const customizationRef = useRef<CustomizationFormHandle>(null);
+
   const { toast } = useToast();
   const router = useRouter();
 
@@ -116,21 +276,6 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
 
   const isPayingUser = !!profile?.subscriptionPlan && profile.subscriptionPlan !== 'Basic' && profile.subscriptionPlan !== 'Guest';
   
-  const standardTones = ["Professional", "Enthusiastic", "Formal", "Creative"];
-  const premiumTones = ["Assertive", "Confident", "Personable", "Direct", "Urgent", "Data-driven", "Strategic", "Witty", "Humble", "Inspirational"];
-
-
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      setJobDescription(text);
-      toast({ title: "Pasted from clipboard!" });
-    } catch (err) {
-      console.error('Failed to read clipboard contents: ', err);
-      toast({ title: "Failed to paste", description: "Could not read from clipboard. Please paste manually.", variant: "destructive" });
-    }
-  };
-
   const handleGenerateSample = () => {
     const sampleResult: GenerateCoverLetterOutput = {
       coverLetter: `[Your Name]\n[Your Address] | [Your Email] | [Your Phone]\n\n[Date]\n\nHiring Manager\n[Company Name]\n[Company Address]\n\nDear Hiring Manager,\n\nI am writing to express my keen interest in the [Job Title] position at [Company Name], which I discovered on [Platform]. Having followed [Company Name]'s impressive work in the tech industry for some time, I am confident that my skills in software development and my passion for innovation align perfectly with your team's goals.\n\nIn my previous role at [Previous Company], I was instrumental in developing and launching a new feature that increased user engagement by 25%. My experience with React, Node.js, and cloud services has prepared me to tackle the challenges of this role and contribute meaningfully to your projects from day one.\n\nI am particularly drawn to this opportunity because of [Company Name]'s commitment to [a specific company value or project]. I am eager to bring my problem-solving abilities and collaborative spirit to your dynamic team.\n\nThank you for considering my application. I have attached my resume for your review and look forward to the possibility of discussing how I can contribute to [Company Name]'s continued success.\n\nSincerely,\n[Your Name]`,
@@ -171,8 +316,10 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
 
     const personalInfo = personalInfoRef.current?.getValues();
     const portfolioInfo = portfolioVaultRef.current?.getValues();
+    const customizationInfo = customizationRef.current?.getValues();
 
-    if (!personalInfo || !portfolioInfo) {
+
+    if (!personalInfo || !portfolioInfo || !customizationInfo) {
       toast({ title: "Form Error", description: "Could not read form data.", variant: "destructive" });
       return;
     }
@@ -185,7 +332,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
       toast({ title: "Missing Personal Info", description: "Please provide your full name and location.", variant: "destructive" });
       return;
     }
-    if (!jobDescription) {
+    if (!customizationInfo.jobDescription) {
       toast({ title: "No Job Description", description: "Please paste the job description.", variant: "destructive" });
       return;
     }
@@ -215,12 +362,11 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
 
       const result = await generateCoverLetter({
         ...personalInfo,
+        ...customizationInfo,
         cvDataUri,
-        jobDescription,
         supportingDocs,
         portfolioUrls: finalPortfolioUrls,
-        tone,
-        mustHaveInfo: isPayingUser ? mustHaveInfo : '',
+        mustHaveInfo: isPayingUser ? customizationInfo.mustHaveInfo : '',
       });
 
       setAiResult(result);
@@ -466,135 +612,16 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                 </div>
 
                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch pb-12">
-                    <TiltedCard containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                        <div className="w-full rounded-2xl p-4 h-full flex flex-col">
-                            <CardHeader className="p-4">
-                               <div className="flex items-start justify-between gap-4">
-                                  <div className="flex items-start gap-4">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground shrink-0">
-                                    3
-                                    </div>
-                                    <div>
-                                    <CardTitle className="text-black">Job Description</CardTitle>
-                                    <CardDescription className="text-gray-700">Paste the full text of the job description below.</CardDescription>
-                                    </div>
-                                  </div>
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary/70 hover:text-primary hover:bg-primary/10 relative z-10">
-                                          <Info className="h-5 w-5" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent className="bg-primary text-primary-foreground">
-                                        <p>Simply copy the entire job listing from the webpage and paste it here.</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-4 pt-0 flex-grow relative">
-                                <Textarea
-                                    placeholder="Paste job description here..."
-                                    value={jobDescription}
-                                    onChange={(e) => setJobDescription(e.target.value)}
-                                    required
-                                    className="min-h-[150px] h-full"
-                                />
-                                <Button type="button" variant="default" size="icon" className="absolute bottom-6 right-6 h-8 w-8 bg-primary hover:bg-primary/90" onClick={handlePaste} aria-label="Paste job description">
-                                  <ClipboardPaste className="h-4 w-4 text-primary-foreground" />
-                                </Button>
-                            </CardContent>
-                        </div>
-                    </TiltedCard>
-                    <Card className="w-full rounded-2xl p-4 space-y-6 flex flex-col">
-                        <CardHeader className="p-0">
-                            <CardTitle className="text-black">Customize Your Letter</CardTitle>
-                            <CardDescription className="text-gray-700">Guide the AI's writing style and include key information.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-0 flex-grow flex flex-col gap-4">
-                             <div className="space-y-3">
-                                <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
-                                <RadioGroup value={tone} onValueChange={setTone} className="flex flex-wrap gap-2">
-                                {[...standardTones, ...premiumTones].map((t) => {
-                                    const isPremium = premiumTones.includes(t);
-                                    const isDisabled = isPremium && !isPayingUser;
-
-                                    const item = (
-                                    <div key={t} className="flex-1 min-w-[100px]">
-                                        <RadioGroupItem value={t} id={`r-${t}`} className="sr-only" disabled={isDisabled} />
-                                        <Label
-                                            htmlFor={`r-${t}`}
-                                            className={cn(
-                                            "flex items-center justify-center p-2 rounded-lg border-2 border-primary cursor-pointer transition-colors h-12 text-black",
-                                            "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
-                                            isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
-                                            )}
-                                        >
-                                            {isDisabled ? <Lock className="h-5 w-5 text-primary" /> : t}
-                                        </Label>
-                                    </div>
-                                    );
-                                    
-                                    if(isDisabled) {
-                                        return (
-                                            <TooltipProvider key={t} delayDuration={100}>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>{item}</TooltipTrigger>
-                                                    <TooltipContent><p>This is a premium feature. Upgrade your plan to use this tone.</p></TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        )
-                                    }
-                                    return item;
-                                })}
-                                </RadioGroup>
-                            </div>
-                            <div className="space-y-2">
-                            <TooltipProvider delayDuration={100}>
-                                <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <div className="flex items-center gap-2">
-                                        <Label htmlFor="mustHaveInfo" className={cn("font-semibold", !isPayingUser && "text-gray-500")}>
-                                            Must-Have Information
-                                        </Label>
-                                        {!isPayingUser && <Lock className="h-3 w-3 text-gray-500" />}
-                                    </div>
-                                </TooltipTrigger>
-                                {!isPayingUser && (
-                                    <TooltipContent>
-                                        <p>This is a premium feature. Upgrade to tell the AI specific points to include.</p>
-                                    </TooltipContent>
-                                )}
-                                </Tooltip>
-                            </TooltipProvider>
-                            <div className="relative">
-                                <Textarea
-                                    id="mustHaveInfo"
-                                    placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
-                                    value={mustHaveInfo}
-                                    onChange={(e) => setMustHaveInfo(e.target.value)}
-                                    className="min-h-[100px]"
-                                    disabled={!isPayingUser}
-                                />
-                                {!isPayingUser && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-secondary/50 rounded-md cursor-not-allowed">
-                                         <Lock className="h-6 w-6 text-primary" />
-                                    </div>
-                                )}
-                            </div>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="p-0 mt-auto flex flex-col gap-2">
-                            <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
-                                {appState === 'loading' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Wand2 className="w-5 h-5 mr-2" />}
-                                {appState === 'loading' ? "Drafting..." : "Generate Cover Letter"}
-                            </Button>
-                            <Button type="button" size="lg" className="w-full" variant="secondary" onClick={handleGenerateSample}>
-                                Generate Sample (for testing)
-                            </Button>
-                        </CardFooter>
-                    </Card>
+                   <CustomizationForm isPayingUser={isPayingUser} />
+                    <div className="flex flex-col gap-4">
+                        <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
+                            {appState === 'loading' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Wand2 className="w-5 h-5 mr-2" />}
+                            {appState === 'loading' ? "Drafting..." : "Generate Cover Letter"}
+                        </Button>
+                        <Button type="button" size="lg" className="w-full" variant="secondary" onClick={handleGenerateSample}>
+                            Generate Sample (for testing)
+                        </Button>
+                    </div>
                 </div>
             </div>
           )}
@@ -836,6 +863,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Footer />
     </div>
     </TooltipProvider>
   );
