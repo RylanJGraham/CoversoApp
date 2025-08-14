@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useRef, type FC, useEffect, forwardRef, useImperativeHandle } from "react";
@@ -170,7 +171,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
             <CardContent className="p-0 flex-grow flex flex-col gap-4">
                 <div className="space-y-3">
                     <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
-                    <RadioGroup value={tone} onValueChange={setTone} className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <RadioGroup value={tone} onValueChange={setTone} className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {[...standardTones, ...premiumTones].map((t) => {
                         const isPremium = premiumTones.includes(t);
                         const isDisabled = isPremium && !isPayingUser;
@@ -240,7 +241,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
                         />
                          <div className="flex justify-between text-xs text-muted-foreground mt-2">
                             <span>1 page</span>
-                            <span>{pageLength[0]} pages</span>
+                            <span>{pageLength[0]} {pageLength[0] === 1 ? 'page' : 'pages'}</span>
                             <span>2.5 pages</span>
                         </div>
                          {!isPayingUser && (
@@ -499,49 +500,61 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
   };
   
    const handleDownloadPdf = async () => {
-    const content = letterContentRef.current;
-    if (!content) {
+    const contentToRender = letterContentRef.current;
+    if (!contentToRender) {
         toast({ title: "Error", description: "Could not find content to download.", variant: "destructive" });
         return;
     }
     toast({ title: "Preparing PDF...", description: "This may take a moment." });
+
+    // Create a temporary element to render the markdown for PDF conversion
+    const printElement = document.createElement('div');
+    printElement.innerHTML = generatedCoverLetter.replace(/\n/g, '<br>');
+    printElement.style.padding = '40px';
+    printElement.style.fontFamily = 'Times New Roman, serif';
+    printElement.style.fontSize = '12px';
+    printElement.style.lineHeight = '1.5';
+    printElement.style.width = '210mm'; // A4 width
+    document.body.appendChild(printElement);
     
     try {
-        const canvas = await html2canvas(content, { scale: 2 });
+        const canvas = await html2canvas(printElement, { scale: 2 });
         const imgData = canvas.toDataURL('image/png');
         
         const pdf = new jsPDF({
             orientation: 'p',
-            unit: 'px',
+            unit: 'mm',
             format: 'a4'
         });
 
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / canvasHeight;
+        const imgWidth = canvas.width / 2;
+        const imgHeight = canvas.height / 2;
+        const ratio = imgWidth / imgHeight;
         
-        let imgWidth = pdfWidth - 20;
-        let imgHeight = imgWidth / ratio;
+        let finalImgWidth = pdfWidth - 20; // with margin
+        let finalImgHeight = finalImgWidth / ratio;
         
-        let heightLeft = imgHeight;
-        let position = 10;
+        let heightLeft = finalImgHeight;
+        let position = 10; // top margin
         
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
+        pdf.addImage(imgData, 'PNG', 10, position, finalImgWidth, finalImgHeight);
+        heightLeft -= (pdfHeight - 20);
         
         while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
+            position = heightLeft - finalImgHeight;
             pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pdfHeight;
+            pdf.addImage(imgData, 'PNG', 10, position, finalImgWidth, finalImgHeight);
+            heightLeft -= (pdfHeight - 20);
         }
 
         pdf.save(`${fileName || 'Cover-Letter'}.pdf`);
     } catch(e) {
         console.error(e);
         toast({ title: "PDF Creation Failed", description: "An error occurred while generating the PDF.", variant: "destructive" });
+    } finally {
+      document.body.removeChild(printElement);
     }
   };
 

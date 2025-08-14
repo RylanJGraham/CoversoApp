@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, Suspense, FC } from 'react';
@@ -139,45 +140,45 @@ function DashboardContent() {
      toast({ title: "Preparing PDF...", description: "This may take a moment." });
 
     // Create a temporary element to render the markdown for PDF conversion
-    const content = document.createElement('div');
-    content.innerHTML = docToDownload.coverLetter.replace(/\n/g, '<br>');
-    content.style.padding = '20px';
-    content.style.fontFamily = 'Times New Roman, serif';
-    content.style.fontSize = '12px';
-    content.style.lineHeight = '1.5';
-    content.style.width = '210mm'; // A4 width
-    document.body.appendChild(content);
+    const printElement = document.createElement('div');
+    printElement.innerHTML = docToDownload.coverLetter.replace(/\n/g, '<br>');
+    printElement.style.padding = '40px';
+    printElement.style.fontFamily = 'Times New Roman, serif';
+    printElement.style.fontSize = '12px';
+    printElement.style.lineHeight = '1.5';
+    printElement.style.width = '210mm'; // A4 width
+    document.body.appendChild(printElement);
 
     try {
-        const canvas = await html2canvas(content, { scale: 2 });
+        const canvas = await html2canvas(printElement, { scale: 2 });
         const imgData = canvas.toDataURL('image/png');
         
         const pdf = new jsPDF({
             orientation: 'p',
-            unit: 'px',
+            unit: 'mm',
             format: 'a4'
         });
 
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / canvasHeight;
+        const imgWidth = canvas.width / 2;
+        const imgHeight = canvas.height / 2;
+        const ratio = imgWidth / imgHeight;
         
-        let imgWidth = pdfWidth;
-        let imgHeight = imgWidth / ratio;
+        let finalImgWidth = pdfWidth - 20; // with margin
+        let finalImgHeight = finalImgWidth / ratio;
         
-        let heightLeft = imgHeight;
-        let position = 0;
+        let heightLeft = finalImgHeight;
+        let position = 10; // top margin
         
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
+        pdf.addImage(imgData, 'PNG', 10, position, finalImgWidth, finalImgHeight);
+        heightLeft -= (pdfHeight - 20);
         
         while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
+            position = heightLeft - finalImgHeight;
             pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pdfHeight;
+            pdf.addImage(imgData, 'PNG', 10, position, finalImgWidth, finalImgHeight);
+            heightLeft -= (pdfHeight - 20);
         }
 
         pdf.save(`${docToDownload.fileName || 'Cover-Letter'}.pdf`);
@@ -185,7 +186,7 @@ function DashboardContent() {
         console.error(e);
         toast({ title: "PDF Creation Failed", description: "An error occurred while generating the PDF.", variant: "destructive" });
     } finally {
-      document.body.removeChild(content);
+      document.body.removeChild(printElement);
     }
   };
 
