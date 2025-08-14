@@ -94,7 +94,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
   const { toast } = useToast();
   
   const standardTones = ["Professional", "Enthusiastic", "Formal", "Creative"];
-  const premiumTones = ["Assertive", "Confident", "Personable", "Direct", "Strategic", "Data-driven"];
+  const premiumTones = ["Assertive", "Confident", "Personable", "Direct"];
 
 
   const handlePaste = async () => {
@@ -171,7 +171,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
             <CardContent className="p-0 flex-grow flex flex-col gap-4">
                 <div className="space-y-3">
                     <Label className="text-gray-800 font-semibold">Choose a Tone</Label>
-                    <RadioGroup value={tone} onValueChange={setTone} className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <RadioGroup value={tone} onValueChange={setTone} className="grid grid-cols-4 gap-2">
                     {[...standardTones, ...premiumTones].map((t) => {
                         const isPremium = premiumTones.includes(t);
                         const isDisabled = isPremium && !isPayingUser;
@@ -754,7 +754,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                 
                 <CustomizationForm ref={customizationRef} isPayingUser={isPayingUser} />
 
-                <div className="w-full flex flex-col gap-4 items-center mb-16">
+                <div className="w-full flex flex-col gap-4 items-center">
                     <Button type="submit" size="lg" className="w-full max-w-2xl h-16 text-xl" disabled={appState === 'loading'}>
                         {appState === 'loading' ? <Loader2 className="w-6 h-6 mr-3 animate-spin" /> : <Wand2 className="w-6 h-6 mr-3" />}
                         {appState === 'loading' ? "Drafting..." : "Accelerate Your Job Application Now"}
