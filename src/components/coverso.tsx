@@ -55,7 +55,6 @@ import UsageIndicator from "./UsageIndicator";
 import { PersonalInfoForm, type PersonalInfoHandle } from "./PersonalInfoForm";
 import { PortfolioVaultForm, type PortfolioVaultHandle } from "./PortfolioVaultForm";
 import { Input } from "./ui/input";
-import { Footer } from "./Footer";
 
 
 interface UserProfile {
@@ -552,6 +551,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         <Image src="/Coverso.png" alt="Coverso Logo" width={400} height={100} />
                         <p className="text-2xl font-light text-black mt-2">Helping to Accelerate Today</p>
                         <div className="mt-6 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
+                            <p className="text-lg font-semibold">Cover Letters Drafted Today:</p>
                             <div className="flex items-end gap-3 mt-4">
                                 <p className="text-4xl font-mono font-bold">
                                     <AnimatedCounter to={68} />
@@ -623,12 +623,12 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                 
                 <CustomizationForm ref={customizationRef} isPayingUser={isPayingUser} />
 
-                <div className="w-full lg:w-1/2 flex flex-col gap-4">
-                    <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
+                <div className="w-full flex flex-col gap-4 items-center">
+                    <Button type="submit" size="lg" className="w-full max-w-lg" disabled={appState === 'loading'}>
                         {appState === 'loading' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Wand2 className="w-5 h-5 mr-2" />}
                         {appState === 'loading' ? "Drafting..." : "Accelerate Your Job Application Now"}
                     </Button>
-                    <Button type="button" size="lg" className="w-full" variant="secondary" onClick={handleGenerateSample}>
+                    <Button type="button" size="lg" className="w-full max-w-lg" variant="secondary" onClick={handleGenerateSample}>
                         Generate Sample (for testing)
                     </Button>
                     <p className="text-center text-xs text-muted-foreground mt-2">
