@@ -238,8 +238,8 @@ function DashboardContent() {
         {documents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {documents.map((doc) => (
-                    <TiltedCard key={doc.id} containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                        <div className="flex flex-col h-full bg-white rounded-xl shadow-lg overflow-hidden">
+                   <TiltedCard key={doc.id} containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
+                        <div className="flex flex-col h-full bg-secondary rounded-xl shadow-lg overflow-hidden">
                              <div className="bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground p-4">
                                 <h3 className="flex items-center gap-2 text-lg font-semibold">
                                     <FileText className="w-5 h-5" />
@@ -247,8 +247,10 @@ function DashboardContent() {
                                 </h3>
                                 <p className="text-primary-foreground/80 text-sm">For {doc.companyName || 'a company'}</p>
                             </div>
-                            <div className="flex-grow p-4 bg-secondary/30 m-4 mt-0 rounded-lg overflow-hidden border-2 border-accent">
-                                <p className="text-sm text-muted-foreground line-clamp-6 whitespace-pre-line font-mono">{doc.coverLetter}</p>
+                            <div className="flex-grow p-4">
+                               <div className="p-4 bg-white rounded-lg overflow-hidden border-2 border-accent h-48">
+                                    <p className="text-sm text-muted-foreground line-clamp-6 whitespace-pre-line font-mono">{doc.coverLetter}</p>
+                                </div>
                             </div>
                             <div className="flex justify-between items-center bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground p-3">
                                 <p className="text-xs">
@@ -332,3 +334,5 @@ export default function DashboardPage() {
     </Suspense>
   )
 }
+
+    
