@@ -239,9 +239,10 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
                             onValueChange={setPageLength}
                             disabled={!isPayingUser}
                         />
-                         <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                         <div className="flex justify-between text-xs text-muted-foreground mt-2 px-1">
                             <span>1 page</span>
-                            <span>{pageLength[0]} {pageLength[0] === 1 ? 'page' : 'pages'}</span>
+                            <span>1.5 pages</span>
+                            <span>2 pages</span>
                             <span>2.5 pages</span>
                         </div>
                          {!isPayingUser && (
@@ -512,7 +513,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     printElement.innerHTML = generatedCoverLetter.replace(/\n/g, '<br>');
     printElement.style.padding = '40px';
     printElement.style.fontFamily = 'Times New Roman, serif';
-    printElement.style.fontSize = '18px';
+    printElement.style.fontSize = '14px';
     printElement.style.lineHeight = '1.5';
     printElement.style.width = '210mm'; // A4 width
     document.body.appendChild(printElement);
@@ -681,7 +682,8 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                         <p className="text-2xl font-light text-black mt-2">Helping to Accelerate Today</p>
                         <div className="mt-6 bg-primary text-primary-foreground px-8 py-4 rounded-lg text-left inline-block shadow-lg">
                             <p className="text-lg font-semibold">Cover Letters Drafted Today:</p>
-                            <div className="flex items-end gap-3 mt-4">
+                             <div className="flex items-end gap-3 mt-4">
+                                <FileText className="h-8 w-8" />
                                 <p className="text-4xl font-mono font-bold">
                                     <AnimatedCounter to={68} />
                                 </p>
@@ -752,16 +754,16 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                 
                 <CustomizationForm ref={customizationRef} isPayingUser={isPayingUser} />
 
-                <div className="w-full flex flex-col gap-4 items-center">
-                    <Button type="submit" size="lg" className="w-full max-w-lg" disabled={appState === 'loading'}>
-                        {appState === 'loading' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Wand2 className="w-5 h-5 mr-2" />}
+                <div className="w-full flex flex-col gap-4 items-center mb-16">
+                    <Button type="submit" size="lg" className="w-full max-w-2xl h-16 text-xl" disabled={appState === 'loading'}>
+                        {appState === 'loading' ? <Loader2 className="w-6 h-6 mr-3 animate-spin" /> : <Wand2 className="w-6 h-6 mr-3" />}
                         {appState === 'loading' ? "Drafting..." : "Accelerate Your Job Application Now"}
                     </Button>
-                    <Button type="button" size="lg" className="w-full max-w-lg" variant="secondary" onClick={handleGenerateSample}>
+                    <Button type="button" size="lg" className="w-full max-w-2xl h-14" variant="secondary" onClick={handleGenerateSample}>
                         Generate Sample (for testing)
                     </Button>
-                    <p className="text-center text-xs text-muted-foreground mt-2">
-                        We value your privacy. Your personal details and documents are not stored.
+                     <p className="text-center text-sm text-muted-foreground mt-2 max-w-3xl">
+                        We are committed to your privacy. Your personal details and uploaded documents are processed securely and are never stored on our servers. All generation happens in memory, ensuring your data remains yours alone.
                     </p>
                 </div>
             </div>
@@ -920,7 +922,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                         )}
                       </div>
                       <div className="col-span-9">
-                        <Card className="w-full border-primary overflow-hidden">
+                        <Card className="w-full border-primary overflow-hidden shadow-2xl shadow-primary/20">
                            <div className="bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end p-4 flex flex-row items-center justify-between">
                               <Input 
                                   value={fileName}
@@ -950,7 +952,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                     </Tooltip>
                                 </TooltipProvider>
                           </div>
-                          <div className="border-b border-primary/20 bg-primary/10 p-2 flex items-center gap-2">
+                          <div className="bg-primary/10 p-2 flex items-center gap-2">
                             <Button variant="ghost" size="icon" className="h-8 w-8"><Bold className="w-4 h-4" /></Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8"><Italic className="w-4 h-4" /></Button>
                             <Separator orientation="vertical" className="h-6" />
@@ -977,14 +979,16 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                 </SelectContent>
                             </Select>
                           </div>
-                          <div className="p-0" ref={letterContentRef}>
-                            <Textarea
-                                value={generatedCoverLetter}
-                                onChange={(e) => setGeneratedCoverLetter(e.target.value)}
-                                placeholder="Your generated cover letter will appear here..."
-                                className="w-full resize-none border-0 focus-visible:ring-0 rounded-none p-8 text-[12px]"
-                              />
-                          </div>
+                            <div className="bg-gray-100 p-8" ref={letterContentRef}>
+                                <div className="bg-white p-12 shadow-lg min-h-[29.7cm] w-[21cm] mx-auto">
+                                      <Textarea
+                                          value={generatedCoverLetter}
+                                          onChange={(e) => setGeneratedCoverLetter(e.target.value)}
+                                          placeholder="Your generated cover letter will appear here..."
+                                          className="w-full resize-none border-0 focus-visible:ring-0 p-0 text-[12pt] leading-relaxed font-serif"
+                                      />
+                                </div>
+                            </div>
                         </Card>
                          <div className="mt-4 flex justify-end">
                             <div className="bg-accent text-accent-foreground rounded-lg px-4 py-2 text-sm font-semibold shadow-md">
@@ -1039,7 +1043,3 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     </TooltipProvider>
   );
 }
-
-    
-
-    
