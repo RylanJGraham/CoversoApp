@@ -239,8 +239,8 @@ function DashboardContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {documents.map((doc) => (
                     <TiltedCard key={doc.id} containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                        <div className="flex flex-col h-full border border-primary rounded-xl shadow-lg shadow-primary/20 overflow-hidden bg-white">
-                            <div className="bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground p-4">
+                        <div className="flex flex-col h-full bg-white rounded-xl shadow-lg overflow-hidden">
+                             <div className="bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground p-4">
                                 <h3 className="flex items-center gap-2 text-lg font-semibold">
                                     <FileText className="w-5 h-5" />
                                     {doc.fileName || doc.jobTitle || 'Cover Letter'}

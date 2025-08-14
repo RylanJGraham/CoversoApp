@@ -561,7 +561,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     <div className="flex flex-col min-h-screen font-body bg-white">
        { user ? <DashboardHeader /> : <Header /> }
       
-      { appState !== "success" && !isGeneratePage && (
+      { appState !== "success" && isGeneratePage !== true && (
          <header className="h-[400px] w-full relative bg-white">
             <div className="absolute inset-0 z-10 grid grid-cols-1 md:grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="col-span-1 flex items-center justify-start p-8 text-left">
@@ -867,7 +867,8 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                 value={generatedCoverLetter}
                                 onChange={(e) => setGeneratedCoverLetter(e.target.value)}
                                 placeholder="Your generated cover letter will appear here..."
-                                className="w-full resize-none min-h-[70vh] border-0 focus-visible:ring-0 rounded-none custom-scrollbar"
+                                className="w-full resize-none border-0 focus-visible:ring-0 rounded-none"
+                                rows={generatedCoverLetter.split('\n').length}
                               />
                           </CardContent>
                         </Card>
