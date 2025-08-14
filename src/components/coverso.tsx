@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type FC, useEffect, forwardRef } from "react";
+import { useState, useRef, type FC, useEffect, forwardRef, useImperativeHandle } from "react";
 import Image from 'next/image';
 import { generateCoverLetter, type GenerateCoverLetterOutput } from "@/ai/flows/cover-letter-generator";
 import { Button } from "@/components/ui/button";
@@ -875,7 +875,6 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <Footer />
     </div>
     </TooltipProvider>
   );
