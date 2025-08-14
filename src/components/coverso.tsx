@@ -231,17 +231,17 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
                     <div className="relative">
                         <Slider
                             id="pageLength"
-                            min={0.5}
-                            max={2}
+                            min={1}
+                            max={2.5}
                             step={0.5}
                             value={pageLength}
                             onValueChange={setPageLength}
                             disabled={!isPayingUser}
                         />
                          <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                            <span>0.5 pages</span>
+                            <span>1 page</span>
                             <span>{pageLength[0]} pages</span>
-                            <span>2 pages</span>
+                            <span>2.5 pages</span>
                         </div>
                          {!isPayingUser && (
                             <div className="absolute inset-0 flex items-center justify-center bg-secondary/50 rounded-md cursor-not-allowed -mt-4">
