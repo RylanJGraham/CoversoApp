@@ -36,6 +36,9 @@ import {
   Copy,
   Star,
   FileLock,
+  Bold,
+  Italic,
+  CaseSensitive,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -55,6 +58,8 @@ import UsageIndicator from "./UsageIndicator";
 import { PersonalInfoForm, type PersonalInfoHandle } from "./PersonalInfoForm";
 import { PortfolioVaultForm, type PortfolioVaultHandle } from "./PortfolioVaultForm";
 import { Input } from "./ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Separator } from "./ui/separator";
 
 
 interface UserProfile {
@@ -451,7 +456,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     });
   };
 
-  const handleSave = async () => {
+  const handleSave = async (forceSave = false) => {
     if (!user || !aiResult) {
       toast({ title: "Cannot Save", description: "You must be logged in to save documents.", variant: "destructive"});
       return;
@@ -464,6 +469,15 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     
     setIsSaving(true);
     let finalFileName = fileName || aiResult.jobTitle;
+
+    if (!finalFileName && !forceSave) {
+        setShowNameWarningDialog(true);
+        setIsSaving(false);
+        return;
+    }
+    if (!finalFileName && forceSave) {
+        finalFileName = "Untitled";
+    }
 
     try {
         const db = getClientFirestore();
@@ -547,7 +561,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     <div className="flex flex-col min-h-screen font-body bg-white">
        { user ? <DashboardHeader /> : <Header /> }
       
-      { !isGeneratePage && (
+      { appState !== "success" && !isGeneratePage && (
          <header className="h-[400px] w-full relative bg-white">
             <div className="absolute inset-0 z-10 grid grid-cols-1 md:grid-cols-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="col-span-1 flex items-center justify-start p-8 text-left">
@@ -804,7 +818,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                         <TooltipTrigger asChild>
                                              <div tabIndex={user ? -1 : 0}>
                                                 <Button 
-                                                    onClick={handleSave} 
+                                                    onClick={() => handleSave()}
                                                     disabled={!user || isSaving}
                                                     className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary"
                                                 >
@@ -821,6 +835,33 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                     </Tooltip>
                                 </TooltipProvider>
                           </CardHeader>
+                          <div className="border-b border-primary/20 bg-gray-50 p-2 flex items-center gap-2">
+                            <Button variant="ghost" size="icon" className="h-8 w-8"><Bold className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8"><Italic className="w-4 h-4" /></Button>
+                            <Separator orientation="vertical" className="h-6" />
+                             <Select defaultValue="12pt">
+                                <SelectTrigger className="w-[100px] h-8 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="10pt">10pt</SelectItem>
+                                    <SelectItem value="11pt">11pt</SelectItem>
+                                    <SelectItem value="12pt">12pt</SelectItem>
+                                    <SelectItem value="14pt">14pt</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Select defaultValue="Inter">
+                                <SelectTrigger className="w-[140px] h-8 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Inter">Inter</SelectItem>
+                                    <SelectItem value="Arial">Arial</SelectItem>
+                                    <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                                    <SelectItem value="Georgia">Georgia</SelectItem>
+                                </SelectContent>
+                            </Select>
+                          </div>
                           <CardContent className="p-0">
                             <Textarea
                                 value={generatedCoverLetter}
@@ -883,5 +924,3 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     </TooltipProvider>
   );
 }
-
-    
