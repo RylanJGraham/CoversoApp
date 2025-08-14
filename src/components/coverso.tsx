@@ -60,6 +60,9 @@ import { PortfolioVaultForm, type PortfolioVaultHandle } from "./PortfolioVaultF
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Separator } from "./ui/separator";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { Slider } from "./ui/slider";
 
 
 interface UserProfile {
@@ -78,6 +81,7 @@ interface CustomizationFormHandle {
     jobDescription: string;
     tone: string;
     mustHaveInfo: string;
+    pageLength: number;
   };
 }
 
@@ -85,10 +89,12 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
   const [jobDescription, setJobDescription] = useState("");
   const [tone, setTone] = useState("Professional");
   const [mustHaveInfo, setMustHaveInfo] = useState("");
+  const [pageLength, setPageLength] = useState([1]);
   const { toast } = useToast();
   
   const standardTones = ["Professional", "Enthusiastic", "Formal", "Creative"];
   const premiumTones = ["Assertive", "Confident", "Personable", "Direct", "Urgent", "Data-driven", "Strategic", "Witty", "Humble", "Inspirational"];
+
 
   const handlePaste = async () => {
     try {
@@ -106,6 +112,7 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
       jobDescription,
       tone,
       mustHaveInfo,
+      pageLength: pageLength[0],
     }),
   }));
 
@@ -169,14 +176,15 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
                         const isDisabled = isPremium && !isPayingUser;
 
                         const item = (
-                        <div key={t} className="flex-1 min-w-[100px]">
+                         <div key={t} className="flex-1 min-w-[100px]">
                             <RadioGroupItem value={t} id={`r-${t}`} className="sr-only" disabled={isDisabled} />
                             <Label
                                 htmlFor={`r-${t}`}
                                 className={cn(
                                     "flex items-center justify-center p-2 rounded-lg border-2 cursor-pointer transition-colors h-12 text-black bg-white",
-                                    "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-primary",
-                                    isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
+                                    "border-primary",
+                                    tone === t ? "bg-primary text-primary-foreground" : "hover:bg-primary/10",
+                                    isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed text-gray-500" : ""
                                 )}
                             >
                                 {isDisabled ? (
@@ -202,6 +210,47 @@ const CustomizationForm = forwardRef<CustomizationFormHandle, { isPayingUser: bo
                     })}
                     </RadioGroup>
                 </div>
+                 <div className="space-y-4 pt-2">
+                    <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="flex items-center gap-2">
+                                <Label htmlFor="pageLength" className={cn("font-semibold", !isPayingUser && "text-gray-500")}>
+                                    Cover Letter Length
+                                </Label>
+                                {!isPayingUser && <Lock className="h-3 w-3 text-gray-500" />}
+                            </div>
+                        </TooltipTrigger>
+                        {!isPayingUser && (
+                            <TooltipContent>
+                                <p>This is a premium feature. Upgrade to control the cover letter length.</p>
+                            </TooltipContent>
+                        )}
+                        </Tooltip>
+                    </TooltipProvider>
+                    <div className="relative">
+                        <Slider
+                            id="pageLength"
+                            min={0.5}
+                            max={2}
+                            step={0.5}
+                            value={pageLength}
+                            onValueChange={setPageLength}
+                            disabled={!isPayingUser}
+                        />
+                         <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                            <span>0.5 pages</span>
+                            <span>{pageLength[0]} pages</span>
+                            <span>2 pages</span>
+                        </div>
+                         {!isPayingUser && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-secondary/50 rounded-md cursor-not-allowed -mt-4">
+                                <Lock className="h-6 w-6 text-primary" />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 <div className="space-y-2">
                 <TooltipProvider delayDuration={100}>
                     <Tooltip>
@@ -266,6 +315,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
   const personalInfoRef = useRef<PersonalInfoHandle>(null);
   const portfolioVaultRef = useRef<PortfolioVaultHandle>(null);
   const customizationRef = useRef<CustomizationFormHandle>(null);
+  const letterContentRef = useRef<HTMLDivElement>(null);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -384,6 +434,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
       const result = await generateCoverLetter({
         ...personalInfo,
         ...customizationInfo,
+        pageLength: isPayingUser ? customizationInfo.pageLength : 1,
         cvDataUri,
         supportingDocs,
         portfolioUrls: finalPortfolioUrls,
@@ -447,6 +498,53 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
     URL.revokeObjectURL(url);
   };
   
+   const handleDownloadPdf = async () => {
+    const content = letterContentRef.current;
+    if (!content) {
+        toast({ title: "Error", description: "Could not find content to download.", variant: "destructive" });
+        return;
+    }
+    toast({ title: "Preparing PDF...", description: "This may take a moment." });
+    
+    try {
+        const canvas = await html2canvas(content, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+        
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'px',
+            format: 'a4'
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        
+        let imgWidth = pdfWidth - 20;
+        let imgHeight = imgWidth / ratio;
+        
+        let heightLeft = imgHeight;
+        let position = 10;
+        
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+        
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
+        }
+
+        pdf.save(`${fileName || 'Cover-Letter'}.pdf`);
+    } catch(e) {
+        console.error(e);
+        toast({ title: "PDF Creation Failed", description: "An error occurred while generating the PDF.", variant: "destructive" });
+    }
+  };
+
   const handleCopyToClipboard = () => {
     if (!generatedCoverLetter) return;
     navigator.clipboard.writeText(generatedCoverLetter).then(() => {
@@ -792,6 +890,10 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex flex-col gap-2">
+                                    <Button variant="outline" className="justify-start gap-2" onClick={handleDownloadPdf}>
+                                        <FileText className="h-4 h-4" />
+                                        Download as PDF (.pdf)
+                                    </Button>
                                     <Button variant="outline" className="justify-start gap-2" onClick={handleDownload}>
                                         <FileText className="h-4 h-4" />
                                         Download as Markdown (.md)
@@ -862,12 +964,12 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                 </SelectContent>
                             </Select>
                           </div>
-                          <CardContent className="p-0">
+                          <CardContent className="p-0" ref={letterContentRef}>
                             <Textarea
                                 value={generatedCoverLetter}
                                 onChange={(e) => setGeneratedCoverLetter(e.target.value)}
                                 placeholder="Your generated cover letter will appear here..."
-                                className="w-full resize-none border-0 focus-visible:ring-0 rounded-none"
+                                className="w-full resize-none border-0 focus-visible:ring-0 rounded-none p-8"
                               />
                           </CardContent>
                         </Card>

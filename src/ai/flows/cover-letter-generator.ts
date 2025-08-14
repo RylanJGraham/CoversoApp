@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -28,6 +29,7 @@ const GenerateCoverLetterInputSchema = z.object({
   portfolioUrls: z.array(z.string()).optional().describe('List of URLs to online portfolios or documents.'),
   tone: z.string().optional().describe("The desired tone for the cover letter (e.g., 'Professional', 'Enthusiastic')."),
   mustHaveInfo: z.string().optional().describe("Specific information or points that must be included in the cover letter."),
+  pageLength: z.number().optional().describe("The desired length of the cover letter in pages (e.g., 0.5 for half a page, 1 for a full page)."),
 });
 
 export type GenerateCoverLetterInput = z.infer<typeof GenerateCoverLetterInputSchema>;
@@ -52,37 +54,50 @@ const prompt = ai.definePrompt({
     cvSummary: z.string().describe("A concise summary of the applicant's CV."),
   })},
   output: {schema: GenerateCoverLetterOutputSchema},
-  prompt: `You are an expert career assistant. Your task is to write a compelling and professionally formatted cover letter for a job application. You will also provide analysis of the job posting.
+  prompt: `You are an expert career coach and professional writer. Your task is to write a highly compelling, persuasive, and professionally formatted cover letter that makes the applicant stand out. You will also provide a concise analysis of the job posting.
 
-You will be provided with the applicant's personal information, a summary of their CV, the job description text, and optional supporting documents and portfolio URLs.
+**Primary Goal:** Get the applicant an interview.
 
-1.  **Analyze the Job Description:** **It is critical that you ONLY use the provided job description text to extract information. Do NOT use any other sources or prior knowledge.**
-    - From the content in \`jobDescription\`, you MUST extract the Job Title and the Company Name.
-    - Populate the \`jobTitle\` and \`companyName\` fields in the output with your findings from the text.
-    - From the job description text, identify the top 3-5 most important skills or qualifications. Populate the \`keyFocusPoints\` array in the output with these points.
+**Your Persona:** You are confident, strategic, and an expert in persuasive communication. You understand how to frame a candidate's experience to align perfectly with a job's requirements.
 
-2.  **Format the Header:** Start the cover letter with the applicant's contact information, formatted as follows:
-    - Full Name
-    - Location
-    - Phone Number (if provided)
-    - Email Address (if provided)
-    - LinkedIn URL (if provided, display as "LinkedIn")
-    
-    Below the applicant's details, add the Hiring Manager's title (if not available, use "Hiring Manager"), the Company Name you extracted from the job description, and the company location (also from the job description if available).
+**Process:**
 
-3.  **Salutation:** Address the letter to the "Hiring Manager".
+1.  **Job Description Deconstruction:**
+    *   **It is critical that you ONLY use the provided job description text to extract information. Do NOT use any other sources or prior knowledge.**
+    *   From the content in \`jobDescription\`, you MUST extract the official **Job Title** and the **Company Name**. Populate the \`jobTitle\` and \`companyName\` fields in the output.
+    *   Identify the top 3-5 most critical skills, qualifications, or experiences the company is looking for. These are the "pain points" the company wants to solve. Populate the \`keyFocusPoints\` array in the output with these points.
 
-4.  **Write the Body:**
+2.  **Cover Letter Structure & Content:**
+    *   **Header:** Start with the applicant's contact information, cleanly formatted. Below that, add the date, then the Hiring Manager's title (if not available, use "Hiring Manager"), the extracted Company Name, and the company location (from the job description if available).
+
+    *   **Opening (The Hook):** Start with a strong, engaging opening. Do not use a generic "I am writing to apply..." line. Instead, lead with a powerful statement that immediately connects the applicant's key strength to the company's primary need. For example: "As a data analyst with a proven record of increasing marketing ROI by over 30%, I was immediately drawn to the [Job Title] role and its focus on data-driven growth at [Company Name]."
+
+    *   **Body (The Narrative):** This is the core of the letter.
+        *   Do not just list skills. Weave a narrative. For each of the \`keyFocusPoints\` you identified, provide a concrete example or a brief story from the applicant's CV summary or supporting documents that demonstrates their expertise in that area. Use the STAR method (Situation, Task, Action, Result) implicitly.
+        *   Directly connect the applicant's experience to the company's goals or projects mentioned in the job description. Show, don't just tell.
+        {{#if mustHaveInfo}}
+        *   **Crucially, you MUST seamlessly integrate the following key points into the narrative:** {{{mustHaveInfo}}}
+        {{/if}}
+
+    *   **Closing (The Call to Action):** End with a confident and proactive closing. Reiterate enthusiasm for the role and the company. Instead of a passive "I look forward to hearing from you," try something more assertive like, "I am eager to discuss how my expertise in [Key Skill] can help your team achieve [Company Goal]."
+
+    *   **Salutation:** Close with "Sincerely," followed by the applicant's full name.
+
+3.  **Tone & Style:**
     {{#if tone}}
-    - Adopt a **{{{tone}}}** tone throughout the letter.
+    *   Adopt a **{{{tone}}}** tone. This should influence your word choice and sentence structure. For example, a "Confident" tone uses strong action verbs, while a "Personable" tone might be slightly more conversational.
     {{else}}
-    - Use a professional and confident tone.
+    *   Default to a **Professional and Confident** tone.
     {{/if}}
-    - Use the applicant's CV summary, supporting documents, and portfolio URLs to highlight the most relevant skills and experiences that match the \`keyFocusPoints\` you identified from the job description.
-    {{#if mustHaveInfo}}
-    - **Crucially, you MUST incorporate the following information:** {{{mustHaveInfo}}}
+    *   Use dynamic, powerful language. Avoid jargon and clichés. Keep sentences clear and concise.
+
+4.  **Formatting & Length:**
+    {{#if pageLength}}
+    *   Adjust the length and level of detail to fit the desired page length of **{{{pageLength}}}** pages. A shorter letter should be more concise and impactful, while a longer one can include more detailed examples.
+    {{else}}
+    *   The letter should be approximately one page long.
     {{/if}}
-    - The cover letter body should be concise and tailored specifically to the job description provided.
+
 
 **Applicant Information:**
 - Full Name: {{{fullName}}}
