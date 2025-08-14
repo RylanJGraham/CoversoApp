@@ -239,27 +239,27 @@ function DashboardContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {documents.map((doc) => (
                    <TiltedCard key={doc.id} containerHeight="auto" scaleOnHover={1.02} rotateAmplitude={2}>
-                        <div className="flex flex-col h-full bg-secondary rounded-xl shadow-lg overflow-hidden">
+                        <div className="flex flex-col h-full rounded-xl shadow-lg overflow-hidden bg-white">
                              <div className="bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground p-4">
-                                <h3 className="flex items-center gap-2 text-lg font-semibold">
-                                    <FileText className="w-5 h-5" />
-                                    {doc.fileName || doc.jobTitle || 'Cover Letter'}
-                                </h3>
-                                <p className="text-primary-foreground/80 text-sm">For {doc.companyName || 'a company'}</p>
-                            </div>
-                            <div className="flex-grow p-4">
-                               <div className="p-4 bg-white rounded-lg overflow-hidden border-2 border-accent h-48">
-                                    <p className="text-sm text-muted-foreground line-clamp-6 whitespace-pre-line font-mono">{doc.coverLetter}</p>
+                                <div className="flex items-center gap-3">
+                                    <FileText className="w-5 h-5 shrink-0" />
+                                    <div className="truncate">
+                                        <h3 className="font-semibold truncate">{doc.fileName || doc.jobTitle || 'Cover Letter'}</h3>
+                                        <p className="text-primary-foreground/80 text-sm truncate">For {doc.companyName || 'a company'}</p>
+                                    </div>
                                 </div>
+                            </div>
+                            <div className="flex-grow p-4 bg-white">
+                                <p className="text-xs text-gray-600 line-clamp-6 whitespace-pre-line font-mono">{doc.coverLetter}</p>
                             </div>
                             <div className="flex justify-between items-center bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground p-3">
                                 <p className="text-xs">
-                                    {doc.createdAt.toDate().toLocaleDateString()}
+                                    Created: {doc.createdAt.toDate().toLocaleDateString()}
                                 </p>
-                                <div className="flex gap-2">
+                                <div className="flex gap-1">
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                             <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/20 hover:text-white">
+                                             <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/20 hover:text-white h-8 w-8">
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
                                         </AlertDialogTrigger>
@@ -279,10 +279,10 @@ function DashboardContent() {
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
-                                    <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/20 hover:text-white" onClick={() => handleDownloadDoc(doc)}>
+                                    <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/20 hover:text-white h-8 w-8" onClick={() => handleDownloadDoc(doc)}>
                                         <Download className="w-4 h-4" />
                                     </Button>
-                                    <Button variant="ghost" className="bg-white/90 text-primary hover:bg-white" size="sm" onClick={() => router.push(`/edit/${doc.id}`)}>
+                                    <Button variant="ghost" className="bg-white/90 text-primary hover:bg-white h-8 px-3" size="sm" onClick={() => router.push(`/edit/${doc.id}`)}>
                                         <PenLine className="w-4 h-4 mr-2" />
                                         Edit
                                     </Button>
@@ -334,5 +334,3 @@ export default function DashboardPage() {
     </Suspense>
   )
 }
-
-    
