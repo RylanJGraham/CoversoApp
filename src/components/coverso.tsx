@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type FC, useEffect, forwardRef, useImperativeHandle } from "react";
@@ -113,7 +114,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     }
   }, [user]);
 
-  const isPayingUser = profile?.subscriptionPlan && profile.subscriptionPlan !== 'Basic';
+  const isPayingUser = !!profile?.subscriptionPlan && profile.subscriptionPlan !== 'Basic' && profile.subscriptionPlan !== 'Guest';
   
   const standardTones = ["Professional", "Enthusiastic", "Formal", "Creative"];
   const premiumTones = ["Assertive", "Confident", "Personable", "Direct", "Urgent", "Data-driven", "Strategic", "Witty", "Humble", "Inspirational"];
@@ -460,7 +461,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                    </div>
                   
                     <Step step={2} title="Portfolio Vault" description="Upload your CV and supporting documents." tooltipContent="Upload your CV (PDF, DOCX) and any other relevant files. You can also link to online portfolios or documents.">
-                      <PortfolioVaultForm ref={portfolioVaultRef} />
+                      <PortfolioVaultForm ref={portfolioVaultRef} isPayingUser={isPayingUser} />
                     </Step>
                 </div>
 
@@ -519,14 +520,6 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                     const isPremium = premiumTones.includes(t);
                                     const isDisabled = isPremium && !isPayingUser;
 
-                                    const content = isDisabled ? (
-                                    <div className="flex items-center justify-center w-full h-full">
-                                        <Lock className="h-5 w-5 text-primary" />
-                                    </div>
-                                    ) : (
-                                    t
-                                    );
-
                                     const item = (
                                     <div key={t} className="flex-1 min-w-[100px]">
                                         <RadioGroupItem value={t} id={`r-${t}`} className="sr-only" disabled={isDisabled} />
@@ -538,7 +531,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                             isDisabled ? "bg-secondary/50 border-primary/30 cursor-not-allowed" : "hover:bg-primary/10"
                                             )}
                                         >
-                                            {content}
+                                            {isDisabled ? <Lock className="h-5 w-5 text-primary" /> : t}
                                         </Label>
                                     </div>
                                     );
@@ -575,14 +568,21 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                                 )}
                                 </Tooltip>
                             </TooltipProvider>
-                            <Textarea
-                                id="mustHaveInfo"
-                                placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
-                                value={mustHaveInfo}
-                                onChange={(e) => setMustHaveInfo(e.target.value)}
-                                className="min-h-[100px]"
-                                disabled={!isPayingUser}
-                            />
+                            <div className="relative">
+                                <Textarea
+                                    id="mustHaveInfo"
+                                    placeholder="e.g., 'Mention my 5 years of experience with React' or 'Highlight my passion for sustainable tech'."
+                                    value={mustHaveInfo}
+                                    onChange={(e) => setMustHaveInfo(e.target.value)}
+                                    className="min-h-[100px]"
+                                    disabled={!isPayingUser}
+                                />
+                                {!isPayingUser && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-secondary/50 rounded-md cursor-not-allowed">
+                                         <Lock className="h-6 w-6 text-primary" />
+                                    </div>
+                                )}
+                            </div>
                             </div>
                         </CardContent>
                         <CardFooter className="p-0 mt-auto flex flex-col gap-2">
@@ -646,7 +646,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                        </div>
                     )}
                     <div className="grid grid-cols-12 gap-8 items-start">
-                      <div className="col-span-3 space-y-4 sticky top-24">
+                      <div className="col-span-3 sticky top-24">
                         <Card className="border-primary bg-white">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-primary">
@@ -695,7 +695,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         </Card>
                         
                         {activeSubMenu === 'analysis' && (
-                            <Card className="border-accent bg-white">
+                            <Card className="border-accent bg-white mt-4">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-base text-accent">
                                     <BrainCircuit className="h-5 w-5" />
@@ -727,7 +727,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                         )}
                         
                         {activeSubMenu === 'download' && (
-                              <Card className="border-accent bg-white">
+                              <Card className="border-accent bg-white mt-4">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-base text-accent">
                                         <Download className="h-5 w-5" />
