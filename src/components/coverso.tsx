@@ -626,7 +626,7 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
                 <div className="w-full lg:w-1/2 flex flex-col gap-4">
                     <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={appState === 'loading'}>
                         {appState === 'loading' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Wand2 className="w-5 h-5 mr-2" />}
-                        {appState === 'loading' ? "Drafting..." : "Generate Cover Letter"}
+                        {appState === 'loading' ? "Drafting..." : "Accelerate Your Job Application Now"}
                     </Button>
                     <Button type="button" size="lg" className="w-full" variant="secondary" onClick={handleGenerateSample}>
                         Generate Sample (for testing)
@@ -879,3 +879,5 @@ export function Coverso({ user, profile, isGeneratePage = false }: { user: Fireb
     </TooltipProvider>
   );
 }
+
+    
