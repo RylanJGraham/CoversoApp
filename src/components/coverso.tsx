@@ -954,15 +954,15 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                             <Button variant="ghost" size="icon" className="h-8 w-8"><Bold className="w-4 h-4" /></Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8"><Italic className="w-4 h-4" /></Button>
                             <Separator orientation="vertical" className="h-6" />
-                             <Select defaultValue="12pt">
+                             <Select defaultValue="12px">
                                 <SelectTrigger className="w-[100px] h-8 text-xs">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="10pt">10pt</SelectItem>
-                                    <SelectItem value="11pt">11pt</SelectItem>
-                                    <SelectItem value="12pt">12pt</SelectItem>
-                                    <SelectItem value="14pt">14pt</SelectItem>
+                                    <SelectItem value="10px">10px</SelectItem>
+                                    <SelectItem value="11px">11px</SelectItem>
+                                    <SelectItem value="12px">12px</SelectItem>
+                                    <SelectItem value="14px">14px</SelectItem>
                                 </SelectContent>
                             </Select>
                             <Select defaultValue="Inter">
@@ -982,7 +982,7 @@ export function Coverso({ user, profile, isGeneratePage = false, existingDoc }: 
                                 value={generatedCoverLetter}
                                 onChange={(e) => setGeneratedCoverLetter(e.target.value)}
                                 placeholder="Your generated cover letter will appear here..."
-                                className="w-full resize-none border-0 focus-visible:ring-0 rounded-none p-8"
+                                className="w-full resize-none border-0 focus-visible:ring-0 rounded-none p-8 text-[12px]"
                               />
                           </div>
                         </Card>
